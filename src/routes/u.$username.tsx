@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Trophy, Calendar, MessageCircle as MsgIcon, GitFork } from "lucide-react";
 import { toast } from "sonner";
@@ -30,7 +30,7 @@ interface FeedLesson {
 function ProfilePage() {
   const { username } = Route.useParams();
   const { user } = useAuth();
-  const navigate = useNavigate();
+  
   const [profile, setProfile] = useState<ProfileFull | null>(null);
   const [lessons, setLessons] = useState<FeedLesson[]>([]);
   const [following, setFollowing] = useState(false);
@@ -113,8 +113,10 @@ function ProfilePage() {
               <Button onClick={toggleFollow} variant={following ? "outline" : "default"} size="sm">
                 {following ? "Following" : "Follow"}
               </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate({ to: "/messages", search: { to: profile.id } })}>
-                <MsgIcon className="h-4 w-4 mr-1.5" /> Message
+              <Button asChild variant="outline" size="sm">
+                <Link to="/messages/$username" params={{ username: profile.username }}>
+                  <MsgIcon className="h-4 w-4 mr-1.5" /> Message
+                </Link>
               </Button>
             </>
           ) : null}
