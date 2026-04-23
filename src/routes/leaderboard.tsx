@@ -41,9 +41,9 @@ function LeaderboardPage() {
           {rows.map((r, i) => (
             <Link key={r.id} to="/u/$username" params={{ username: r.username }} className="flex items-center gap-3 p-3 hover:bg-accent transition-colors">
               <div className="w-8 text-center font-mono text-sm">
-                {i === 0 ? <Crown className="h-5 w-5 text-yellow-500 mx-auto" /> :
-                 i === 1 ? <Medal className="h-5 w-5 text-gray-400 mx-auto" /> :
-                 i === 2 ? <Medal className="h-5 w-5 text-amber-700 mx-auto" /> :
+                {i === 0 ? <Crown className="h-5 w-5 text-warning mx-auto" /> :
+                 i === 1 ? <Medal className="h-5 w-5 text-muted-foreground mx-auto" /> :
+                 i === 2 ? <Medal className="h-5 w-5 text-warning/70 mx-auto" /> :
                  <span className="text-muted-foreground">{i + 1}</span>}
               </div>
               <UserAvatar name={r.display_name ?? r.username} url={r.avatar_url} size="sm" />

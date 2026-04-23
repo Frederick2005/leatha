@@ -62,10 +62,10 @@ function ProfilePage() {
     if (!profile) return;
     if (tab === "followers") {
       void supabase.from("follows").select("profile:profiles!follows_follower_id_fkey(*)").eq("followee_id", profile.id)
-        .then(({ data }) => setFollowers(((data ?? []) as { profile: ProfileFull }[]).map((r) => r.profile)));
+        .then(({ data }) => setFollowers(((data ?? []) as unknown as { profile: ProfileFull }[]).map((r) => r.profile).filter(Boolean)));
     } else if (tab === "following") {
       void supabase.from("follows").select("profile:profiles!follows_followee_id_fkey(*)").eq("follower_id", profile.id)
-        .then(({ data }) => setFollowingList(((data ?? []) as { profile: ProfileFull }[]).map((r) => r.profile)));
+        .then(({ data }) => setFollowingList(((data ?? []) as unknown as { profile: ProfileFull }[]).map((r) => r.profile).filter(Boolean)));
     }
   }, [tab, profile]);
 
