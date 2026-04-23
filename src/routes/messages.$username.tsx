@@ -7,8 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import { Send, ArrowLeft, Ban, ShieldOff } from "lucide-react";
+import { Send, ArrowLeft, Ban, ShieldOff, Paperclip, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DmAttachment, type AttachmentMeta } from "@/components/dm-attachment";
+
+const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 MB
+const MAX_FILES = 5;
 
 export const Route = createFileRoute("/messages/$username")({
   component: ThreadPage,
@@ -21,6 +25,7 @@ interface DM {
   recipient_id: string;
   created_at: string;
   read_at: string | null;
+  attachments: AttachmentMeta[];
 }
 
 interface OtherProfile {
@@ -41,7 +46,10 @@ function ThreadPage() {
   const [sending, setSending] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [blockedByOther, setBlockedByOther] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -78,7 +86,7 @@ function ThreadPage() {
           ),
       ]);
       if (cancelled) return;
-      setMessages((msgs ?? []) as DM[]);
+      setMessages((msgs ?? []) as unknown as DM[]);
 
       // blocks RLS only returns my own rows; we'll detect mine vs theirs heuristically
       const myBlocks = (blocks ?? []) as { blocker_id: string; blocked_id: string }[];
@@ -136,16 +144,77 @@ function ThreadPage() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
   }, [messages.length]);
 
+  const addFiles = (files: FileList | null) => {
+    if (!files) return;
+    const incoming = Array.from(files);
+    const next = [...pendingFiles];
+    for (const f of incoming) {
+      if (next.length >= MAX_FILES) {
+        toast.error(`Max ${MAX_FILES} files per message`);
+        break;
+      }
+      if (f.size > MAX_FILE_BYTES) {
+        toast.error(`${f.name} exceeds 20 MB`);
+        continue;
+      }
+      next.push(f);
+    }
+    setPendingFiles(next);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removePending = (idx: number) => {
+    setPendingFiles((prev) => prev.filter((_, i) => i !== idx));
+  };
+
   const send = async () => {
-    if (!user || !other || !body.trim() || sending) return;
-    setSending(true);
+    if (!user || !other || sending) return;
     const text = body.trim().slice(0, 4000);
-    const { error } = await supabase
-      .from("direct_messages")
-      .insert({ sender_id: user.id, recipient_id: other.id, body: text });
+    if (!text && pendingFiles.length === 0) return;
+    setSending(true);
+
+    let uploaded: AttachmentMeta[] = [];
+    if (pendingFiles.length) {
+      setUploading(true);
+      try {
+        uploaded = await Promise.all(
+          pendingFiles.map(async (file) => {
+            const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+            const path = `${user.id}/${other.id}/${crypto.randomUUID()}-${safeName}`;
+            const { error: upErr } = await supabase.storage
+              .from("dm-attachments")
+              .upload(path, file, { contentType: file.type, upsert: false });
+            if (upErr) throw upErr;
+            return {
+              path,
+              name: file.name,
+              size: file.size,
+              type: file.type || "application/octet-stream",
+            };
+          }),
+        );
+      } catch (e) {
+        setUploading(false);
+        setSending(false);
+        toast.error(e instanceof Error ? e.message : "Upload failed");
+        return;
+      }
+      setUploading(false);
+    }
+
+    const { error } = await supabase.from("direct_messages").insert({
+      sender_id: user.id,
+      recipient_id: other.id,
+      body: text,
+      attachments: uploaded as unknown as never,
+    });
     setSending(false);
-    if (error) toast.error(error.message);
-    else setBody("");
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setBody("");
+      setPendingFiles([]);
+    }
   };
 
   const toggleBlock = async () => {
@@ -212,18 +281,26 @@ function ThreadPage() {
         )}
         {messages.map((m) => {
           const mine = m.sender_id === user.id;
+          const atts = Array.isArray(m.attachments) ? m.attachments : [];
           return (
             <div key={m.id} className={cn("flex", mine ? "justify-end" : "justify-start")}>
               <div
                 className={cn(
-                  "max-w-[80%] px-3 py-2 rounded-2xl text-sm break-words whitespace-pre-wrap",
+                  "max-w-[80%] px-3 py-2 rounded-2xl text-sm break-words whitespace-pre-wrap space-y-2",
                   mine
                     ? "bg-primary text-primary-foreground rounded-br-sm"
                     : "bg-surface border border-border rounded-bl-sm",
                 )}
               >
-                <div>{m.body}</div>
-                <div className={cn("text-[10px] mt-1 opacity-70", mine ? "text-right" : "text-left")}>
+                {atts.length > 0 && (
+                  <div className="space-y-2">
+                    {atts.map((a, i) => (
+                      <DmAttachment key={i} att={a} mine={mine} />
+                    ))}
+                  </div>
+                )}
+                {m.body && <div>{m.body}</div>}
+                <div className={cn("text-[10px] opacity-70", mine ? "text-right" : "text-left")}>
                   {formatDistanceToNow(new Date(m.created_at), { addSuffix: true })}
                   {mine && m.read_at && " · read"}
                 </div>
@@ -241,24 +318,68 @@ function ThreadPage() {
         ) : blockedByOther ? (
           <div className="text-sm text-muted-foreground text-center">You can't message this user.</div>
         ) : (
-          <div className="flex items-end gap-2">
-            <Textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  void send();
-                }
-              }}
-              placeholder={`Message @${other.username}…`}
-              rows={1}
-              maxLength={4000}
-              className="resize-none min-h-[44px] max-h-32"
-            />
-            <Button onClick={send} disabled={!body.trim() || sending} size="icon">
-              <Send className="h-4 w-4" />
-            </Button>
+          <div className="space-y-2">
+            {pendingFiles.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {pendingFiles.map((f, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-2 pl-2 pr-1 py-1 rounded-md bg-accent text-xs max-w-[220px]"
+                  >
+                    <span className="truncate">{f.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removePending(i)}
+                      className="p-0.5 rounded hover:bg-destructive/20 hover:text-destructive shrink-0"
+                      aria-label="Remove file"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex items-end gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                hidden
+                onChange={(e) => addFiles(e.target.files)}
+                accept="image/*,application/pdf,video/*,audio/*,.doc,.docx,.txt,.zip,.csv,.xlsx,.pptx"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={sending || pendingFiles.length >= MAX_FILES}
+                aria-label="Attach file"
+              >
+                <Paperclip className="h-4 w-4" />
+              </Button>
+              <Textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    void send();
+                  }
+                }}
+                placeholder={`Message @${other.username}…`}
+                rows={1}
+                maxLength={4000}
+                className="resize-none min-h-[44px] max-h-32"
+              />
+              <Button
+                onClick={send}
+                disabled={(!body.trim() && pendingFiles.length === 0) || sending}
+                size="icon"
+              >
+                {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              </Button>
+            </div>
           </div>
         )}
       </div>
