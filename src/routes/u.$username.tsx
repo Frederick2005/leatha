@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Trophy, Calendar, MessageCircle as MsgIcon, GitFork } from "lucide-react";
 import { toast } from "sonner";
@@ -30,7 +30,7 @@ interface FeedLesson {
 function ProfilePage() {
   const { username } = Route.useParams();
   const { user } = useAuth();
-  const navigate = useNavigate();
+  
   const [profile, setProfile] = useState<ProfileFull | null>(null);
   const [lessons, setLessons] = useState<FeedLesson[]>([]);
   const [following, setFollowing] = useState(false);
