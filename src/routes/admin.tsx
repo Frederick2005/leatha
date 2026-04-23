@@ -447,5 +447,3 @@ function LessonsTab() {
     </div>
   );
 }
-
-void redirect;
