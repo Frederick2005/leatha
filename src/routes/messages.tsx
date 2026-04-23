@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useLocation, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useLocation } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
@@ -182,5 +182,3 @@ function MessagesLayout() {
   );
 }
 
-// Redirect bare /messages on desktop is fine; on mobile users see the list.
-export { redirect };
