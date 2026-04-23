@@ -77,7 +77,7 @@ function ExplorePage() {
 
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate({ to: "/explore", search: (prev) => ({ ...prev, q: input || undefined }) });
+    navigate({ to: "/explore", search: (prev: { q?: string; tag?: string }) => ({ ...prev, q: input || undefined }) });
   };
 
   return (
