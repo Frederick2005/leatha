@@ -11,11 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as MessagesUsernameRouteImport } from './routes/messages.$username'
 import { Route as LessonsNewRouteImport } from './routes/lessons.new'
 import { Route as LessonsLessonIdRouteImport } from './routes/lessons.$lessonId'
 import { Route as LessonsLessonIdEditRouteImport } from './routes/lessons.$lessonId.edit'
@@ -31,6 +35,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
@@ -41,9 +50,19 @@ const ExploreRoute = ExploreRouteImport.update({
   path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -55,6 +74,11 @@ const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
   getParentRoute: () => rootRouteImport,
+} as any)
+const MessagesUsernameRoute = MessagesUsernameRouteImport.update({
+  id: '/$username',
+  path: '/$username',
+  getParentRoute: () => MessagesRoute,
 } as any)
 const LessonsNewRoute = LessonsNewRouteImport.update({
   id: '/lessons/new',
@@ -79,26 +103,34 @@ const LessonsLessonIdDiffRoute = LessonsLessonIdDiffRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/chat': typeof ChatRoute
   '/explore': typeof ExploreRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/messages': typeof MessagesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
+  '/messages/$username': typeof MessagesUsernameRoute
   '/u/$username': typeof UUsernameRoute
   '/lessons/$lessonId/diff': typeof LessonsLessonIdDiffRoute
   '/lessons/$lessonId/edit': typeof LessonsLessonIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/chat': typeof ChatRoute
   '/explore': typeof ExploreRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/messages': typeof MessagesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
+  '/messages/$username': typeof MessagesUsernameRoute
   '/u/$username': typeof UUsernameRoute
   '/lessons/$lessonId/diff': typeof LessonsLessonIdDiffRoute
   '/lessons/$lessonId/edit': typeof LessonsLessonIdEditRoute
@@ -106,13 +138,17 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/chat': typeof ChatRoute
   '/explore': typeof ExploreRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/messages': typeof MessagesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
+  '/messages/$username': typeof MessagesUsernameRoute
   '/u/$username': typeof UUsernameRoute
   '/lessons/$lessonId/diff': typeof LessonsLessonIdDiffRoute
   '/lessons/$lessonId/edit': typeof LessonsLessonIdEditRoute
@@ -121,39 +157,51 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
+    | '/chat'
     | '/explore'
     | '/leaderboard'
+    | '/messages'
     | '/reset-password'
     | '/settings'
     | '/lessons/$lessonId'
     | '/lessons/new'
+    | '/messages/$username'
     | '/u/$username'
     | '/lessons/$lessonId/diff'
     | '/lessons/$lessonId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/auth'
+    | '/chat'
     | '/explore'
     | '/leaderboard'
+    | '/messages'
     | '/reset-password'
     | '/settings'
     | '/lessons/$lessonId'
     | '/lessons/new'
+    | '/messages/$username'
     | '/u/$username'
     | '/lessons/$lessonId/diff'
     | '/lessons/$lessonId/edit'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/auth'
+    | '/chat'
     | '/explore'
     | '/leaderboard'
+    | '/messages'
     | '/reset-password'
     | '/settings'
     | '/lessons/$lessonId'
     | '/lessons/new'
+    | '/messages/$username'
     | '/u/$username'
     | '/lessons/$lessonId/diff'
     | '/lessons/$lessonId/edit'
@@ -161,9 +209,12 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
+  ChatRoute: typeof ChatRoute
   ExploreRoute: typeof ExploreRoute
   LeaderboardRoute: typeof LeaderboardRoute
+  MessagesRoute: typeof MessagesRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
   LessonsLessonIdRoute: typeof LessonsLessonIdRouteWithChildren
@@ -187,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/leaderboard': {
       id: '/leaderboard'
       path: '/leaderboard'
@@ -201,11 +259,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -221,6 +293,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/u/$username'
       preLoaderRoute: typeof UUsernameRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/messages/$username': {
+      id: '/messages/$username'
+      path: '/$username'
+      fullPath: '/messages/$username'
+      preLoaderRoute: typeof MessagesUsernameRouteImport
+      parentRoute: typeof MessagesRoute
     }
     '/lessons/new': {
       id: '/lessons/new'
@@ -253,6 +332,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface MessagesRouteChildren {
+  MessagesUsernameRoute: typeof MessagesUsernameRoute
+}
+
+const MessagesRouteChildren: MessagesRouteChildren = {
+  MessagesUsernameRoute: MessagesUsernameRoute,
+}
+
+const MessagesRouteWithChildren = MessagesRoute._addFileChildren(
+  MessagesRouteChildren,
+)
+
 interface LessonsLessonIdRouteChildren {
   LessonsLessonIdDiffRoute: typeof LessonsLessonIdDiffRoute
   LessonsLessonIdEditRoute: typeof LessonsLessonIdEditRoute
@@ -269,9 +360,12 @@ const LessonsLessonIdRouteWithChildren = LessonsLessonIdRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
+  ChatRoute: ChatRoute,
   ExploreRoute: ExploreRoute,
   LeaderboardRoute: LeaderboardRoute,
+  MessagesRoute: MessagesRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,
   LessonsLessonIdRoute: LessonsLessonIdRouteWithChildren,
@@ -281,3 +375,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
