@@ -100,6 +100,7 @@ export type Database = {
       }
       direct_messages: {
         Row: {
+          attachments: Json
           body: string
           created_at: string
           id: string
@@ -108,7 +109,8 @@ export type Database = {
           sender_id: string
         }
         Insert: {
-          body: string
+          attachments?: Json
+          body?: string
           created_at?: string
           id?: string
           read_at?: string | null
@@ -116,6 +118,7 @@ export type Database = {
           sender_id: string
         }
         Update: {
+          attachments?: Json
           body?: string
           created_at?: string
           id?: string
