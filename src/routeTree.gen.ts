@@ -9,38 +9,205 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as LessonsNewRouteImport } from './routes/lessons.new'
+import { Route as LessonsLessonIdRouteImport } from './routes/lessons.$lessonId'
+import { Route as LessonsLessonIdEditRouteImport } from './routes/lessons.$lessonId.edit'
+import { Route as LessonsLessonIdDiffRouteImport } from './routes/lessons.$lessonId.diff'
 
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExploreRoute = ExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UUsernameRoute = UUsernameRouteImport.update({
+  id: '/u/$username',
+  path: '/u/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LessonsNewRoute = LessonsNewRouteImport.update({
+  id: '/lessons/new',
+  path: '/lessons/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LessonsLessonIdRoute = LessonsLessonIdRouteImport.update({
+  id: '/lessons/$lessonId',
+  path: '/lessons/$lessonId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LessonsLessonIdEditRoute = LessonsLessonIdEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => LessonsLessonIdRoute,
+} as any)
+const LessonsLessonIdDiffRoute = LessonsLessonIdDiffRouteImport.update({
+  id: '/diff',
+  path: '/diff',
+  getParentRoute: () => LessonsLessonIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/explore': typeof ExploreRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRoute
+  '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
+  '/lessons/new': typeof LessonsNewRoute
+  '/u/$username': typeof UUsernameRoute
+  '/lessons/$lessonId/diff': typeof LessonsLessonIdDiffRoute
+  '/lessons/$lessonId/edit': typeof LessonsLessonIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/explore': typeof ExploreRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRoute
+  '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
+  '/lessons/new': typeof LessonsNewRoute
+  '/u/$username': typeof UUsernameRoute
+  '/lessons/$lessonId/diff': typeof LessonsLessonIdDiffRoute
+  '/lessons/$lessonId/edit': typeof LessonsLessonIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/explore': typeof ExploreRoute
+  '/leaderboard': typeof LeaderboardRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/settings': typeof SettingsRoute
+  '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
+  '/lessons/new': typeof LessonsNewRoute
+  '/u/$username': typeof UUsernameRoute
+  '/lessons/$lessonId/diff': typeof LessonsLessonIdDiffRoute
+  '/lessons/$lessonId/edit': typeof LessonsLessonIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/explore'
+    | '/leaderboard'
+    | '/reset-password'
+    | '/settings'
+    | '/lessons/$lessonId'
+    | '/lessons/new'
+    | '/u/$username'
+    | '/lessons/$lessonId/diff'
+    | '/lessons/$lessonId/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/explore'
+    | '/leaderboard'
+    | '/reset-password'
+    | '/settings'
+    | '/lessons/$lessonId'
+    | '/lessons/new'
+    | '/u/$username'
+    | '/lessons/$lessonId/diff'
+    | '/lessons/$lessonId/edit'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/explore'
+    | '/leaderboard'
+    | '/reset-password'
+    | '/settings'
+    | '/lessons/$lessonId'
+    | '/lessons/new'
+    | '/u/$username'
+    | '/lessons/$lessonId/diff'
+    | '/lessons/$lessonId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  ExploreRoute: typeof ExploreRoute
+  LeaderboardRoute: typeof LeaderboardRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  SettingsRoute: typeof SettingsRoute
+  LessonsLessonIdRoute: typeof LessonsLessonIdRouteWithChildren
+  LessonsNewRoute: typeof LessonsNewRoute
+  UUsernameRoute: typeof UUsernameRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explore': {
+      id: '/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof ExploreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,21 +215,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/u/$username': {
+      id: '/u/$username'
+      path: '/u/$username'
+      fullPath: '/u/$username'
+      preLoaderRoute: typeof UUsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lessons/new': {
+      id: '/lessons/new'
+      path: '/lessons/new'
+      fullPath: '/lessons/new'
+      preLoaderRoute: typeof LessonsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lessons/$lessonId': {
+      id: '/lessons/$lessonId'
+      path: '/lessons/$lessonId'
+      fullPath: '/lessons/$lessonId'
+      preLoaderRoute: typeof LessonsLessonIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lessons/$lessonId/edit': {
+      id: '/lessons/$lessonId/edit'
+      path: '/edit'
+      fullPath: '/lessons/$lessonId/edit'
+      preLoaderRoute: typeof LessonsLessonIdEditRouteImport
+      parentRoute: typeof LessonsLessonIdRoute
+    }
+    '/lessons/$lessonId/diff': {
+      id: '/lessons/$lessonId/diff'
+      path: '/diff'
+      fullPath: '/lessons/$lessonId/diff'
+      preLoaderRoute: typeof LessonsLessonIdDiffRouteImport
+      parentRoute: typeof LessonsLessonIdRoute
+    }
   }
 }
 
+interface LessonsLessonIdRouteChildren {
+  LessonsLessonIdDiffRoute: typeof LessonsLessonIdDiffRoute
+  LessonsLessonIdEditRoute: typeof LessonsLessonIdEditRoute
+}
+
+const LessonsLessonIdRouteChildren: LessonsLessonIdRouteChildren = {
+  LessonsLessonIdDiffRoute: LessonsLessonIdDiffRoute,
+  LessonsLessonIdEditRoute: LessonsLessonIdEditRoute,
+}
+
+const LessonsLessonIdRouteWithChildren = LessonsLessonIdRoute._addFileChildren(
+  LessonsLessonIdRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  ExploreRoute: ExploreRoute,
+  LeaderboardRoute: LeaderboardRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  SettingsRoute: SettingsRoute,
+  LessonsLessonIdRoute: LessonsLessonIdRouteWithChildren,
+  LessonsNewRoute: LessonsNewRoute,
+  UUsernameRoute: UUsernameRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
