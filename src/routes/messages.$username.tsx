@@ -86,7 +86,7 @@ function ThreadPage() {
           ),
       ]);
       if (cancelled) return;
-      setMessages((msgs ?? []) as DM[]);
+      setMessages((msgs ?? []) as unknown as DM[]);
 
       // blocks RLS only returns my own rows; we'll detect mine vs theirs heuristically
       const myBlocks = (blocks ?? []) as { blocker_id: string; blocked_id: string }[];
@@ -206,7 +206,7 @@ function ThreadPage() {
       sender_id: user.id,
       recipient_id: other.id,
       body: text,
-      attachments: uploaded,
+      attachments: uploaded as unknown as never,
     });
     setSending(false);
     if (error) {
