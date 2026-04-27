@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s) =>
+    z.object({ redirect: z.string().optional() }).parse(s),
   component: AuthPage,
 });
 
@@ -28,6 +30,8 @@ const loginSchema = z.object({
 function AuthPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const search = Route.useSearch();
+  const dest = search.redirect && search.redirect.startsWith("/") && !search.redirect.startsWith("/auth") ? search.redirect : "/feed";
   const [tab, setTab] = useState<"login" | "signup">("login");
   const [busy, setBusy] = useState(false);
 
@@ -44,8 +48,8 @@ function AuthPage() {
   const [forgotEmail, setForgotEmail] = useState("");
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/" });
-  }, [user, loading, navigate]);
+    if (!loading && user) navigate({ to: dest, replace: true });
+  }, [user, loading, navigate, dest]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
