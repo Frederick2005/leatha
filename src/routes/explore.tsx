@@ -4,7 +4,7 @@ import { Search, X } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
-import { LessonFeedCard } from "./index";
+import { LessonFeedCard } from "@/components/lesson-feed-card";
 
 const searchSchema = z.object({
   q: z.string().optional(),
