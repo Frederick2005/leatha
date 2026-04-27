@@ -60,7 +60,7 @@ function AuthPage() {
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Welcome back");
-    navigate({ to: "/" });
+    navigate({ to: dest, replace: true });
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -72,21 +72,21 @@ function AuthPage() {
       email: suEmail,
       password: suPwd,
       options: {
-        emailRedirectTo: `${window.location.origin}/`,
+        emailRedirectTo: `${window.location.origin}/feed`,
         data: { username: suUsername, display_name: suUsername },
       },
     });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Account created — you're in!");
-    navigate({ to: "/" });
+    navigate({ to: dest, replace: true });
   };
 
   const handleGoogle = async () => {
     setBusy(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/` },
+      options: { redirectTo: `${window.location.origin}${dest}` },
     });
     if (error) { setBusy(false); toast.error(error.message); }
   };
