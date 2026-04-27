@@ -200,6 +200,7 @@ export type Database = {
       }
       lessons: {
         Row: {
+          attachments: Json
           author_id: string
           comment_count: number
           content: string
@@ -218,6 +219,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          attachments?: Json
           author_id: string
           comment_count?: number
           content?: string
@@ -236,6 +238,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          attachments?: Json
           author_id?: string
           comment_count?: number
           content?: string

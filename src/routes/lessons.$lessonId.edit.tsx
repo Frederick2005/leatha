@@ -10,9 +10,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Markdown } from "@/components/markdown";
+import { LessonAttachmentUploader } from "@/components/lesson-attachment-uploader";
+import type { LessonAttachmentMeta } from "@/components/lesson-attachment";
+import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/lessons/$lessonId/edit")({
-  component: EditLessonPage,
+  component: () => (<RequireAuth><EditLessonPage /></RequireAuth>),
 });
 
 function EditLessonPage() {
@@ -24,6 +27,7 @@ function EditLessonPage() {
   const [content, setContent] = useState("");
   const [tagsInput, setTagsInput] = useState("");
   const [language, setLanguage] = useState("");
+  const [attachments, setAttachments] = useState<LessonAttachmentMeta[]>([]);
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
   const [allowed, setAllowed] = useState(false);
@@ -39,6 +43,7 @@ function EditLessonPage() {
       setContent(data.content);
       setTagsInput((data.tags ?? []).join(", "));
       setLanguage(data.language ?? "");
+      setAttachments(Array.isArray(data.attachments) ? (data.attachments as unknown as LessonAttachmentMeta[]) : []);
       setAllowed(true);
       setReady(true);
     });
@@ -55,6 +60,7 @@ function EditLessonPage() {
       content,
       tags,
       language: language.trim() || null,
+      attachments: attachments as never,
     }).eq("id", lessonId);
     setBusy(false);
     if (error) { toast.error(error.message); return; }
@@ -104,6 +110,11 @@ function EditLessonPage() {
               </div>
             </TabsContent>
           </Tabs>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Attachments</Label>
+          <LessonAttachmentUploader userId={user!.id} attachments={attachments} onChange={setAttachments} />
         </div>
 
         <div className="flex justify-end gap-2 pt-2">

@@ -17,11 +17,11 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 
 const navItems = [
-  { to: "/" as const, label: "Feed", icon: Home },
-  { to: "/explore" as const, label: "Explore", icon: BookOpen },
-  { to: "/chat" as const, label: "Chat", icon: MessageSquare },
+  { to: "/feed" as const, label: "Feed", icon: Home, auth: true },
+  { to: "/explore" as const, label: "Explore", icon: BookOpen, auth: true },
+  { to: "/chat" as const, label: "Chat", icon: MessageSquare, auth: true },
   { to: "/messages" as const, label: "Messages", icon: MessagesSquare, auth: true },
-  { to: "/leaderboard" as const, label: "Leaderboard", icon: Trophy },
+  { to: "/leaderboard" as const, label: "Leaderboard", icon: Trophy, auth: true },
 ];
 
 export function AppShell() {
@@ -34,7 +34,12 @@ export function AppShell() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate({ to: "/" });
+    // Replace history so back-button cannot return to a protected page
+    navigate({ to: "/", replace: true });
+    // Hard-clear forward history by replacing current entry again
+    if (typeof window !== "undefined") {
+      window.history.replaceState(null, "", "/");
+    }
   };
 
   return (
