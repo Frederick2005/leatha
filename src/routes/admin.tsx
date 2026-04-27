@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { Shield, Trash2, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
+import { RequireAuth } from "@/components/require-auth";
 
 type ReportTargetType = Database["public"]["Enums"]["report_target_type"];
 type ReportStatus = Database["public"]["Enums"]["report_status"];
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [{ title: "Moderation — SkillChain" }],
   }),
-  component: AdminPage,
+  component: () => (<RequireAuth><AdminPage /></RequireAuth>),
 });
 
 interface ReportRow {

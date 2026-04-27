@@ -10,12 +10,13 @@ import { formatDistanceToNow } from "date-fns";
 import { Send, ArrowLeft, Ban, ShieldOff, Paperclip, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DmAttachment, type AttachmentMeta } from "@/components/dm-attachment";
+import { RequireAuth } from "@/components/require-auth";
 
 const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 MB
 const MAX_FILES = 5;
 
 export const Route = createFileRoute("/messages/$username")({
-  component: ThreadPage,
+  component: () => (<RequireAuth><ThreadPage /></RequireAuth>),
 });
 
 interface DM {
