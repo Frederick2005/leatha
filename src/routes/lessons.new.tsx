@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Markdown } from "@/components/markdown";
+import { LessonAttachmentUploader } from "@/components/lesson-attachment-uploader";
+import type { LessonAttachmentMeta } from "@/components/lesson-attachment";
 import { slugify } from "@/lib/utils";
 
 export const Route = createFileRoute("/lessons/new")({
@@ -27,6 +29,7 @@ function NewLessonPage() {
   const [content, setContent] = useState("");
   const [tagsInput, setTagsInput] = useState("");
   const [language, setLanguage] = useState("");
+  const [attachments, setAttachments] = useState<LessonAttachmentMeta[]>([]);
   const [busy, setBusy] = useState(false);
   const [parentTitle, setParentTitle] = useState<string | null>(null);
 
@@ -36,7 +39,7 @@ function NewLessonPage() {
 
   useEffect(() => {
     if (!fork) return;
-    void supabase.from("lessons").select("title, summary, content, tags, language").eq("id", fork).maybeSingle()
+    void supabase.from("lessons").select("title, summary, content, tags, language, attachments").eq("id", fork).maybeSingle()
       .then(({ data }) => {
         if (!data) return;
         setTitle(`${data.title} (fork)`);
@@ -45,6 +48,7 @@ function NewLessonPage() {
         setTagsInput((data.tags ?? []).join(", "));
         setLanguage(data.language ?? "");
         setParentTitle(data.title);
+        // Don't copy attachments on fork — fork starts clean (user uploads their own)
       });
   }, [fork]);
 
@@ -66,6 +70,7 @@ function NewLessonPage() {
       language: language.trim() || null,
       parent_lesson_id: fork ?? null,
       is_published: true,
+      attachments: attachments as never,
     }).select("id").single();
     setBusy(false);
     if (error) { toast.error(error.message); return; }
@@ -128,6 +133,11 @@ function NewLessonPage() {
               </div>
             </TabsContent>
           </Tabs>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Attachments (optional)</Label>
+          <LessonAttachmentUploader userId={user.id} attachments={attachments} onChange={setAttachments} />
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
