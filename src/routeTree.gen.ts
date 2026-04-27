@@ -13,6 +13,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as FeedRouteImport } from './routes/feed'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -43,6 +44,11 @@ const MessagesRoute = MessagesRouteImport.update({
 const LeaderboardRoute = LeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedRoute = FeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExploreRoute = ExploreRouteImport.update({
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/explore': typeof ExploreRoute
+  '/feed': typeof FeedRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
@@ -124,6 +131,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/explore': typeof ExploreRoute
+  '/feed': typeof FeedRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/explore': typeof ExploreRoute
+  '/feed': typeof FeedRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
@@ -161,6 +170,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/chat'
     | '/explore'
+    | '/feed'
     | '/leaderboard'
     | '/messages'
     | '/reset-password'
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/chat'
     | '/explore'
+    | '/feed'
     | '/leaderboard'
     | '/messages'
     | '/reset-password'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/chat'
     | '/explore'
+    | '/feed'
     | '/leaderboard'
     | '/messages'
     | '/reset-password'
@@ -213,6 +225,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ChatRoute: typeof ChatRoute
   ExploreRoute: typeof ExploreRoute
+  FeedRoute: typeof FeedRoute
   LeaderboardRoute: typeof LeaderboardRoute
   MessagesRoute: typeof MessagesRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: '/leaderboard'
       fullPath: '/leaderboard'
       preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feed': {
+      id: '/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof FeedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/explore': {
@@ -364,6 +384,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ChatRoute: ChatRoute,
   ExploreRoute: ExploreRoute,
+  FeedRoute: FeedRoute,
   LeaderboardRoute: LeaderboardRoute,
   MessagesRoute: MessagesRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,

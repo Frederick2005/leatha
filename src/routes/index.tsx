@@ -1,184 +1,186 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { GitFork, Heart, MessageCircle, Sparkles, TrendingUp, Users } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { GitFork, GitBranch, Heart, MessageCircle, Sparkles, Trophy, Users, Zap, BookOpen, Paperclip } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
-import { UserAvatar } from "@/components/user-avatar";
-import { timeAgo } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/")({
-  component: FeedPage,
+  head: () => ({
+    meta: [
+      { title: "SkillChain — Fork knowledge. Build skills together." },
+      { name: "description", content: "A social platform where lessons are written, forked, and remixed by a community of learners and teachers. Sign in to start your chain." },
+      { property: "og:title", content: "SkillChain — Fork knowledge. Build skills together." },
+      { property: "og:description", content: "Write a lesson. Fork another. Watch ideas branch and grow." },
+    ],
+  }),
+  component: LandingPage,
 });
 
-interface FeedLesson {
-  id: string;
-  title: string;
-  slug: string;
-  summary: string | null;
-  tags: string[];
-  fork_count: number;
-  like_count: number;
-  comment_count: number;
-  created_at: string;
-  parent_lesson_id: string | null;
-  author: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null;
-}
-
-function FeedPage() {
-  const { user, profile } = useAuth();
-  const [tab, setTab] = useState<"trending" | "following" | "new">(user ? "following" : "trending");
-  const [lessons, setLessons] = useState<FeedLesson[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      setLoading(true);
-      let query = supabase
-        .from("lessons")
-        .select(`id, title, slug, summary, tags, fork_count, like_count, comment_count, created_at, parent_lesson_id,
-                 author:profiles!lessons_author_id_fkey(id, username, display_name, avatar_url)`)
-        .eq("is_published", true)
-        .limit(30);
-
-      if (tab === "trending") {
-        // simple algorithm: order by like_count + fork_count*2 desc, then recency
-        query = query.order("like_count", { ascending: false }).order("fork_count", { ascending: false }).order("created_at", { ascending: false });
-      } else if (tab === "new") {
-        query = query.order("created_at", { ascending: false });
-      } else if (tab === "following" && user) {
-        const { data: followingData } = await supabase.from("follows").select("followee_id").eq("follower_id", user.id);
-        const ids = (followingData ?? []).map((f) => f.followee_id);
-        if (ids.length === 0) {
-          if (!cancelled) { setLessons([]); setLoading(false); }
-          return;
-        }
-        query = query.in("author_id", ids).order("created_at", { ascending: false });
-      }
-
-      const { data, error } = await query;
-      if (!cancelled) {
-        if (error) console.error(error);
-        setLessons((data as unknown as FeedLesson[]) ?? []);
-        setLoading(false);
-      }
-    }
-    void load();
-    return () => { cancelled = true; };
-  }, [tab, user]);
+function LandingPage() {
+  const { user, loading } = useAuth();
+  const isSignedIn = !loading && !!user;
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-      {!user && <HeroBanner />}
-
-      {user && (
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-display font-semibold">Welcome back, {profile?.username}</h1>
-            <p className="text-sm text-muted-foreground">{profile?.points ?? 0} points · {profile?.lesson_count ?? 0} lessons · {profile?.follower_count ?? 0} followers</p>
+    <div className="min-h-screen">
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-background pointer-events-none" />
+        <div className="relative max-w-5xl mx-auto px-4 py-16 sm:py-24 text-center">
+          <div className="inline-flex items-center gap-2 text-xs font-mono text-primary uppercase tracking-wider mb-5 px-3 py-1 rounded-full bg-primary-muted border border-primary/20">
+            <GitFork className="h-3 w-3" /> Open social learning
           </div>
-          <Button asChild><Link to="/lessons/new">New lesson</Link></Button>
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-bold tracking-tight">
+            Fork knowledge.
+            <br />
+            <span className="bg-gradient-to-br from-primary to-primary-glow bg-clip-text text-transparent">Build skills together.</span>
+          </h1>
+          <p className="text-muted-foreground mt-6 max-w-2xl mx-auto text-lg">
+            SkillChain is the social platform where lessons live, evolve, and remix.
+            Publish a tutorial, fork someone else's, and watch ideas branch into entire chains of learning.
+          </p>
+          <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
+            {isSignedIn ? (
+              <>
+                <Button asChild size="lg" className="gap-2">
+                  <Link to="/feed"><Sparkles className="h-4 w-4" /> Go to your feed</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link to="/lessons/new">Write a lesson</Link>
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button asChild size="lg" className="gap-2">
+                  <Link to="/auth">Get started — it's free</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link to="/auth">Sign in</Link>
+                </Button>
+              </>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground mt-6 font-mono">
+            Sign in to explore lessons, follow authors, and join the conversation.
+          </p>
         </div>
-      )}
+      </section>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
-        <TabsList>
-          {user && <TabsTrigger value="following"><Users className="h-3.5 w-3.5 mr-1.5" /> Following</TabsTrigger>}
-          <TabsTrigger value="trending"><TrendingUp className="h-3.5 w-3.5 mr-1.5" /> Trending</TabsTrigger>
-          <TabsTrigger value="new"><Sparkles className="h-3.5 w-3.5 mr-1.5" /> New</TabsTrigger>
-        </TabsList>
-        <TabsContent value={tab} className="space-y-3 mt-4">
-          {loading ? (
-            <div className="space-y-3">{[1,2,3].map((i) => <div key={i} className="h-32 rounded-lg bg-muted animate-pulse" />)}</div>
-          ) : lessons.length === 0 ? (
-            <EmptyState tab={tab} />
+      {/* What it does */}
+      <section className="max-w-5xl mx-auto px-4 py-16">
+        <h2 className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-center">
+          A whole new way to learn together
+        </h2>
+        <p className="text-muted-foreground text-center mt-3 max-w-2xl mx-auto">
+          Built for people who learn by sharing, remixing, and building on each other's work.
+        </p>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-12">
+          <Feature
+            icon={GitBranch}
+            title="Fork any lesson"
+            text="See a lesson you can improve? Fork it, edit it, republish. Original author gets credit and points."
+          />
+          <Feature
+            icon={Heart}
+            title="Like, comment, follow"
+            text="React to lessons, leave threaded comments, and follow authors whose work clicks for you."
+          />
+          <Feature
+            icon={Paperclip}
+            title="Attach anything"
+            text="Add PDFs, slides, images, audio, and video to your lessons. Make ideas tangible."
+          />
+          <Feature
+            icon={MessageCircle}
+            title="Public chat & DMs"
+            text="Hop into the live community chat or start a private 1-on-1 conversation with file sharing."
+          />
+          <Feature
+            icon={Trophy}
+            title="Earn points & climb"
+            text="Get rewarded every time someone learns from or forks your work. Compete on the leaderboard."
+          />
+          <Feature
+            icon={Zap}
+            title="Diff every fork"
+            text="See exactly what changed between a lesson and its fork — like git, but for ideas."
+          />
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="bg-surface border-y border-border">
+        <div className="max-w-5xl mx-auto px-4 py-16">
+          <h2 className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-center">How SkillChain works</h2>
+          <div className="grid sm:grid-cols-3 gap-8 mt-12">
+            <Step n={1} title="Write or fork">
+              Publish your own lesson in Markdown, or fork an existing one and make it your own.
+            </Step>
+            <Step n={2} title="Share & engage">
+              Tag your work, attach files, follow others, and join discussions in the comments.
+            </Step>
+            <Step n={3} title="Watch it grow">
+              Every fork branches your lesson into something new. Your knowledge spreads.
+            </Step>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="max-w-3xl mx-auto px-4 py-20 text-center">
+        <BookOpen className="h-10 w-10 mx-auto text-primary mb-4" />
+        <h2 className="text-3xl sm:text-4xl font-display font-bold tracking-tight">
+          Start your chain today
+        </h2>
+        <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
+          Join a community of curious people who believe knowledge gets better when it's shared, forked, and rebuilt.
+        </p>
+        <div className="mt-8">
+          {isSignedIn ? (
+            <Button asChild size="lg" className="gap-2">
+              <Link to="/feed"><Sparkles className="h-4 w-4" /> Open your feed</Link>
+            </Button>
           ) : (
-            lessons.map((l) => <LessonFeedCard key={l.id} lesson={l} />)
+            <Button asChild size="lg" className="gap-2">
+              <Link to="/auth"><Users className="h-4 w-4" /> Create your account</Link>
+            </Button>
           )}
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-}
-
-function HeroBanner() {
-  return (
-    <div className="rounded-xl border border-border gradient-border p-8 text-center">
-      <div className="inline-flex items-center gap-2 text-xs font-mono text-primary uppercase tracking-wider mb-3 px-3 py-1 rounded-full bg-primary-muted">
-        <GitFork className="h-3 w-3" /> Open knowledge
-      </div>
-      <h1 className="text-4xl sm:text-5xl font-display font-bold tracking-tight">
-        Fork knowledge. <span className="text-primary">Build skills.</span>
-      </h1>
-      <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-        SkillChain is a social platform where lessons live, evolve, and remix. Write a lesson. Fork another. Watch ideas branch.
-      </p>
-      <div className="mt-6 flex items-center justify-center gap-3">
-        <Button asChild size="lg"><Link to="/auth">Get started</Link></Button>
-        <Button asChild size="lg" variant="outline"><Link to="/explore">Explore lessons</Link></Button>
-      </div>
-    </div>
-  );
-}
-
-function EmptyState({ tab }: { tab: string }) {
-  return (
-    <div className="rounded-lg border border-dashed border-border p-12 text-center">
-      <p className="text-muted-foreground">
-        {tab === "following" ? "Follow some authors to populate your feed." : "Nothing here yet. Be the first."}
-      </p>
-      <Button asChild className="mt-4" variant="outline">
-        <Link to="/explore">Explore lessons</Link>
-      </Button>
-    </div>
-  );
-}
-
-export function LessonFeedCard({ lesson }: { lesson: FeedLesson }) {
-  return (
-    <article className="rounded-lg border border-border bg-card hover:border-primary/40 transition-colors p-5">
-      <div className="flex items-start gap-3">
-        <UserAvatar
-          name={lesson.author?.display_name ?? lesson.author?.username}
-          url={lesson.author?.avatar_url}
-        />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            {lesson.author && (
-              <Link to="/u/$username" params={{ username: lesson.author.username }} className="font-medium text-foreground hover:text-primary">
-                @{lesson.author.username}
-              </Link>
-            )}
-            <span>·</span>
-            <span>{timeAgo(lesson.created_at)}</span>
-            {lesson.parent_lesson_id && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary-muted text-primary font-mono text-[10px]">
-                <GitFork className="h-2.5 w-2.5" /> FORK
-              </span>
-            )}
-          </div>
-          <Link to="/lessons/$lessonId" params={{ lessonId: lesson.id }} className="block mt-1">
-            <h3 className="font-semibold text-lg leading-snug hover:text-primary transition-colors">{lesson.title}</h3>
-          </Link>
-          {lesson.summary && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{lesson.summary}</p>}
-          {lesson.tags.length > 0 && (
-            <div className="flex gap-1.5 mt-3 flex-wrap">
-              {lesson.tags.slice(0, 5).map((t) => (
-                <Link key={t} to="/explore" search={{ tag: t }} className="px-2 py-0.5 rounded bg-muted text-xs font-mono text-muted-foreground hover:text-primary">
-                  {t}
-                </Link>
-              ))}
-            </div>
-          )}
-          <div className="flex items-center gap-4 text-xs text-muted-foreground mt-3 font-mono">
-            <span className="inline-flex items-center gap-1"><Heart className="h-3.5 w-3.5" /> {lesson.like_count}</span>
-            <span className="inline-flex items-center gap-1"><GitFork className="h-3.5 w-3.5" /> {lesson.fork_count}</span>
-            <span className="inline-flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" /> {lesson.comment_count}</span>
-          </div>
         </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-border">
+        <div className="max-w-5xl mx-auto px-4 py-8 text-center text-xs text-muted-foreground font-mono">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <GitFork className="h-3.5 w-3.5 text-primary" />
+            <span className="font-display font-semibold text-foreground">SkillChain</span>
+          </div>
+          Fork knowledge. Build skills together.
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function Feature({ icon: Icon, title, text }: { icon: React.ElementType; title: string; text: string }) {
+  return (
+    <div className="rounded-lg border border-border bg-card p-5 hover:border-primary/40 transition-colors">
+      <div className="h-10 w-10 rounded-md bg-primary-muted text-primary grid place-items-center mb-3">
+        <Icon className="h-5 w-5" />
       </div>
-    </article>
+      <h3 className="font-semibold">{title}</h3>
+      <p className="text-sm text-muted-foreground mt-1.5">{text}</p>
+    </div>
+  );
+}
+
+function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
+  return (
+    <div className="text-center">
+      <div className="h-12 w-12 rounded-full bg-primary text-primary-foreground grid place-items-center mx-auto font-display font-bold text-lg">
+        {n}
+      </div>
+      <h3 className="mt-4 font-semibold text-lg">{title}</h3>
+      <p className="text-sm text-muted-foreground mt-2">{children}</p>
+    </div>
   );
 }

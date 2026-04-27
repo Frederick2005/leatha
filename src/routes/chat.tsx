@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { Send, Trash2, MessageSquare } from "lucide-react";
+import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/chat")({
   head: () => ({
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/chat")({
       { name: "description", content: "Live community chat for SkillChain learners." },
     ],
   }),
-  component: ChatPage,
+  component: () => (<RequireAuth><ChatPage /></RequireAuth>),
 });
 
 interface ChatRow {

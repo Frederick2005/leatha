@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { UserAvatar } from "@/components/user-avatar";
+import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/settings")({
-  component: SettingsPage,
+  component: () => (<RequireAuth><SettingsPage /></RequireAuth>),
 });
 
 function SettingsPage() {

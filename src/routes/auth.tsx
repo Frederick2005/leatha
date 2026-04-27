@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s) =>
+    z.object({ redirect: z.string().optional() }).parse(s),
   component: AuthPage,
 });
 
@@ -28,6 +30,8 @@ const loginSchema = z.object({
 function AuthPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const search = Route.useSearch();
+  const dest = search.redirect && search.redirect.startsWith("/") && !search.redirect.startsWith("/auth") ? search.redirect : "/feed";
   const [tab, setTab] = useState<"login" | "signup">("login");
   const [busy, setBusy] = useState(false);
 
@@ -44,8 +48,8 @@ function AuthPage() {
   const [forgotEmail, setForgotEmail] = useState("");
 
   useEffect(() => {
-    if (!loading && user) navigate({ to: "/" });
-  }, [user, loading, navigate]);
+    if (!loading && user) navigate({ to: dest, replace: true });
+  }, [user, loading, navigate, dest]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +60,7 @@ function AuthPage() {
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Welcome back");
-    navigate({ to: "/" });
+    navigate({ to: dest, replace: true });
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -68,21 +72,21 @@ function AuthPage() {
       email: suEmail,
       password: suPwd,
       options: {
-        emailRedirectTo: `${window.location.origin}/`,
+        emailRedirectTo: `${window.location.origin}/feed`,
         data: { username: suUsername, display_name: suUsername },
       },
     });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
     toast.success("Account created — you're in!");
-    navigate({ to: "/" });
+    navigate({ to: dest, replace: true });
   };
 
   const handleGoogle = async () => {
     setBusy(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/` },
+      options: { redirectTo: `${window.location.origin}${dest}` },
     });
     if (error) { setBusy(false); toast.error(error.message); }
   };

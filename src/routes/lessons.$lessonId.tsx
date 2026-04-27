@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { Markdown } from "@/components/markdown";
+import { LessonAttachment, type LessonAttachmentMeta } from "@/components/lesson-attachment";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,9 +17,10 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription,
 } from "@/components/ui/dialog";
+import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/lessons/$lessonId")({
-  component: LessonPage,
+  component: () => (<RequireAuth><LessonPage /></RequireAuth>),
 });
 
 interface LessonRow {
@@ -26,6 +28,7 @@ interface LessonRow {
   tags: string[]; language: string | null; parent_lesson_id: string | null; root_lesson_id: string | null;
   fork_count: number; like_count: number; comment_count: number; is_published: boolean;
   author_id: string; created_at: string; updated_at: string;
+  attachments: LessonAttachmentMeta[];
   author: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null;
   parent: { id: string; title: string; author: { username: string } | null } | null;
 }
@@ -238,6 +241,19 @@ function LessonPage() {
         <div className="mt-8 border-t border-border pt-8">
           <Markdown>{lesson.content || "*No content yet.*"}</Markdown>
         </div>
+
+        {Array.isArray(lesson.attachments) && lesson.attachments.length > 0 && (
+          <div className="mt-8 border-t border-border pt-6">
+            <h2 className="text-sm uppercase font-mono tracking-wider text-muted-foreground mb-3">
+              Attachments ({lesson.attachments.length})
+            </h2>
+            <div className="space-y-2">
+              {lesson.attachments.map((a) => (
+                <LessonAttachment key={a.path} att={a} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Comments */}
         <div className="mt-12 border-t border-border pt-8">

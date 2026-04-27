@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { diffLines } from "diff";
 import { ArrowLeft, GitBranch } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/lessons/$lessonId/diff")({
-  component: DiffPage,
+  component: () => (<RequireAuth><DiffPage /></RequireAuth>),
 });
 
 interface LessonLite {

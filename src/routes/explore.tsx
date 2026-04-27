@@ -4,7 +4,8 @@ import { Search, X } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
-import { LessonFeedCard } from "./index";
+import { LessonFeedCard } from "@/components/lesson-feed-card";
+import { RequireAuth } from "@/components/require-auth";
 
 const searchSchema = z.object({
   q: z.string().optional(),
@@ -13,7 +14,7 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/explore")({
   validateSearch: (search) => searchSchema.parse(search),
-  component: ExplorePage,
+  component: () => (<RequireAuth><ExplorePage /></RequireAuth>),
 });
 
 interface FeedLesson {
