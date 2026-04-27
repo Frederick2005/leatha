@@ -11,13 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { timeAgo } from "@/lib/utils";
 import {
-import { RequireAuth } from "@/components/require-auth";
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription,
 } from "@/components/ui/dialog";
+import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/lessons/$lessonId")({
   component: () => (<RequireAuth><LessonPage /></RequireAuth>),
