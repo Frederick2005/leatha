@@ -9,9 +9,10 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { LessonFeedCard } from "@/components/lesson-feed-card";
 import { timeAgo } from "@/lib/utils";
+import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/u/$username")({
-  component: ProfilePage,
+  component: () => (<RequireAuth><ProfilePage /></RequireAuth>),
 });
 
 interface ProfileFull {

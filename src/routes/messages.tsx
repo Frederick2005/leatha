@@ -6,6 +6,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { formatDistanceToNow } from "date-fns";
 import { MessagesSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/messages")({
   head: () => ({
@@ -14,7 +15,7 @@ export const Route = createFileRoute("/messages")({
       { name: "description", content: "Your private conversations." },
     ],
   }),
-  component: MessagesLayout,
+  component: () => (<RequireAuth><MessagesLayout /></RequireAuth>),
 });
 
 interface ConvoPreview {

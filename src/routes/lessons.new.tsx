@@ -14,10 +14,11 @@ import { Markdown } from "@/components/markdown";
 import { LessonAttachmentUploader } from "@/components/lesson-attachment-uploader";
 import type { LessonAttachmentMeta } from "@/components/lesson-attachment";
 import { slugify } from "@/lib/utils";
+import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/lessons/new")({
   validateSearch: (s) => z.object({ fork: z.string().uuid().optional() }).parse(s),
-  component: NewLessonPage,
+  component: () => (<RequireAuth><NewLessonPage /></RequireAuth>),
 });
 
 function NewLessonPage() {

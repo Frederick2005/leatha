@@ -12,9 +12,10 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Markdown } from "@/components/markdown";
 import { LessonAttachmentUploader } from "@/components/lesson-attachment-uploader";
 import type { LessonAttachmentMeta } from "@/components/lesson-attachment";
+import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/lessons/$lessonId/edit")({
-  component: EditLessonPage,
+  component: () => (<RequireAuth><EditLessonPage /></RequireAuth>),
 });
 
 function EditLessonPage() {
