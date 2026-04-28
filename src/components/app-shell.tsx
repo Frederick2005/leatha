@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import {
-  GitFork, Home, BookOpen, MessageSquare, MessagesSquare, Trophy,
+  GitFork, Home, BookOpen, MessageSquare, MessagesSquare, Trophy, Sparkles,
   Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X,
 } from "lucide-react";
 import { useState } from "react";
@@ -17,7 +17,8 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 
 const navItems = [
-  { to: "/feed" as const, label: "Feed", icon: Home, auth: true },
+  { to: "/dashboard" as const, label: "Dashboard", icon: Home, auth: true },
+  { to: "/feed" as const, label: "Feed", icon: Sparkles, auth: true },
   { to: "/explore" as const, label: "Explore", icon: BookOpen, auth: true },
   { to: "/chat" as const, label: "Chat", icon: MessageSquare, auth: true },
   { to: "/messages" as const, label: "Messages", icon: MessagesSquare, auth: true },
