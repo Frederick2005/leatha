@@ -54,11 +54,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (session?.user) await loadProfileAndRoles(session.user.id);
   }, [session, loadProfileAndRoles]);
 
+  // ---- 8-hour inactivity auto-logout ----
+  const MAX_SESSION_MS = 8 * 60 * 60 * 1000; // 8 hours
+  const LAST_ACTIVITY_KEY = "sc_last_activity";
+
   useEffect(() => {
     // CRITICAL: subscribe BEFORE getSession to avoid races
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, newSession) => {
       setSession(newSession);
       if (newSession?.user) {
+        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
+          try { localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now())); } catch { /* noop */ }
+        }
         // Defer profile load to avoid recursive deadlock with auth callback
         setTimeout(() => {
           void loadProfileAndRoles(newSession.user.id);
@@ -66,21 +73,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setProfile(null);
         setRoles([]);
+        try { localStorage.removeItem(LAST_ACTIVITY_KEY); } catch { /* noop */ }
       }
     });
 
     void supabase.auth.getSession().then(async ({ data }) => {
-      setSession(data.session);
       if (data.session?.user) {
+        // Enforce 8h max session
+        let last = 0;
+        try { last = Number(localStorage.getItem(LAST_ACTIVITY_KEY) ?? 0); } catch { /* noop */ }
+        if (last && Date.now() - last > MAX_SESSION_MS) {
+          await supabase.auth.signOut();
+          setSession(null);
+          setLoading(false);
+          return;
+        }
+        if (!last) {
+          try { localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now())); } catch { /* noop */ }
+        }
+        setSession(data.session);
         await loadProfileAndRoles(data.session.user.id);
+      } else {
+        setSession(data.session);
       }
       setLoading(false);
     });
 
-    return () => sub.subscription.unsubscribe();
+    // Refresh activity timestamp on user interaction
+    const bump = () => {
+      try { localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now())); } catch { /* noop */ }
+    };
+    window.addEventListener("click", bump);
+    window.addEventListener("keydown", bump);
+
+    // Periodically check for expired session
+    const interval = window.setInterval(() => {
+      let last = 0;
+      try { last = Number(localStorage.getItem(LAST_ACTIVITY_KEY) ?? 0); } catch { /* noop */ }
+      if (last && Date.now() - last > MAX_SESSION_MS) {
+        void supabase.auth.signOut();
+      }
+    }, 60 * 1000);
+
+    return () => {
+      sub.subscription.unsubscribe();
+      window.removeEventListener("click", bump);
+      window.removeEventListener("keydown", bump);
+      window.clearInterval(interval);
+    };
   }, [loadProfileAndRoles]);
 
   const signOut = useCallback(async () => {
+    try { localStorage.removeItem("sc_last_activity"); } catch { /* noop */ }
     await supabase.auth.signOut();
     setProfile(null);
     setRoles([]);
