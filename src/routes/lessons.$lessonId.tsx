@@ -4,7 +4,7 @@ import { GitFork, Heart, MessageCircle, Edit2, Trash2, Flag, ArrowLeft, GitBranc
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
-import { Markdown } from "@/components/markdown";
+import { RichContent } from "@/components/rich-content";
 import { LessonAttachment, type LessonAttachmentMeta } from "@/components/lesson-attachment";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
@@ -239,7 +239,7 @@ function LessonPage() {
         </div>
 
         <div className="mt-8 border-t border-border pt-8">
-          <Markdown>{lesson.content || "*No content yet.*"}</Markdown>
+          <RichContent content={lesson.content || "*No content yet.*"} />
         </div>
 
         {Array.isArray(lesson.attachments) && lesson.attachments.length > 0 && (
