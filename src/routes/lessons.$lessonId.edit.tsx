@@ -1,15 +1,13 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Eye, Pencil } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Markdown } from "@/components/markdown";
+import { RichEditor } from "@/components/rich-editor";
 import { LessonAttachmentUploader } from "@/components/lesson-attachment-uploader";
 import type { LessonAttachmentMeta } from "@/components/lesson-attachment";
 import { RequireAuth } from "@/components/require-auth";
@@ -95,21 +93,8 @@ function EditLessonPage() {
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Content (Markdown)</Label>
-          <Tabs defaultValue="write">
-            <TabsList>
-              <TabsTrigger value="write"><Pencil className="h-3.5 w-3.5 mr-1.5" /> Write</TabsTrigger>
-              <TabsTrigger value="preview"><Eye className="h-3.5 w-3.5 mr-1.5" /> Preview</TabsTrigger>
-            </TabsList>
-            <TabsContent value="write" className="mt-2">
-              <Textarea value={content} onChange={(e) => setContent(e.target.value)} className="min-h-[420px] font-mono text-sm" />
-            </TabsContent>
-            <TabsContent value="preview" className="mt-2">
-              <div className="min-h-[420px] rounded-md border border-border bg-surface p-4 overflow-auto">
-                <Markdown>{content || "*Nothing to preview.*"}</Markdown>
-              </div>
-            </TabsContent>
-          </Tabs>
+          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Content</Label>
+          <RichEditor value={content} onChange={setContent} />
         </div>
 
         <div className="space-y-1.5">
