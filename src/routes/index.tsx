@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { GitFork, GitBranch, Heart, MessageCircle, Sparkles, Trophy, Users, Zap, BookOpen, Paperclip } from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,19 @@ export const Route = createFileRoute("/")({
 
 function LandingPage() {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const isSignedIn = !loading && !!user;
+
+  // Logged-in users see the dashboard, not the marketing landing.
+  useEffect(() => {
+    if (!loading && user) {
+      navigate({ to: "/dashboard", replace: true });
+    }
+  }, [user, loading, navigate]);
+
+  if (loading || user) {
+    return <div className="min-h-[50vh] grid place-items-center"><div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" /></div>;
+  }
 
   return (
     <div className="min-h-screen">
