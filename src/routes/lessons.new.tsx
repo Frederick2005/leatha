@@ -1,22 +1,17 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import {
-  ArrowLeft, Eye, Pencil, GitFork,
-  Bold, Italic, Heading1, Heading2, List, ListOrdered, Quote, Code, Link as LinkIcon,
-} from "lucide-react";
+import { ArrowLeft, GitFork } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { Markdown } from "@/components/markdown";
+import { RichEditor } from "@/components/rich-editor";
 import { LessonDropzoneUploader } from "@/components/lesson-dropzone-uploader";
 import type { LessonAttachmentMeta } from "@/components/lesson-attachment";
 import { slugify } from "@/lib/utils";
@@ -33,6 +28,9 @@ const DEFAULT_CATEGORIES = [
   "Programming", "Design", "Business",
 ];
 
+// Strip HTML tags to measure real text length
+const textLen = (html: string) => html.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim().length;
+
 function NewLessonPage() {
   const { fork } = Route.useSearch();
   const { user, loading } = useAuth();
@@ -46,7 +44,6 @@ function NewLessonPage() {
   const [attachments, setAttachments] = useState<LessonAttachmentMeta[]>([]);
   const [busy, setBusy] = useState(false);
   const [parentTitle, setParentTitle] = useState<string | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth" });
@@ -72,46 +69,11 @@ function NewLessonPage() {
       });
   }, [fork]);
 
-  const wrap = (before: string, after = before, placeholder = "text") => {
-    const ta = textareaRef.current;
-    if (!ta) return;
-    const start = ta.selectionStart;
-    const end = ta.selectionEnd;
-    const selected = content.slice(start, end) || placeholder;
-    const next = content.slice(0, start) + before + selected + after + content.slice(end);
-    setContent(next);
-    requestAnimationFrame(() => {
-      ta.focus();
-      const cursor = start + before.length + selected.length;
-      ta.setSelectionRange(cursor, cursor);
-    });
-  };
-
-  const prefixLine = (prefix: string) => {
-    const ta = textareaRef.current;
-    if (!ta) return;
-    const start = ta.selectionStart;
-    const lineStart = content.lastIndexOf("\n", start - 1) + 1;
-    const next = content.slice(0, lineStart) + prefix + content.slice(lineStart);
-    setContent(next);
-    requestAnimationFrame(() => {
-      ta.focus();
-      const cursor = start + prefix.length;
-      ta.setSelectionRange(cursor, cursor);
-    });
-  };
-
-  const insertLink = () => {
-    const url = window.prompt("Enter URL");
-    if (!url) return;
-    wrap("[", `](${url})`, "link text");
-  };
-
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     if (title.trim().length < 3) { toast.error("Title too short"); return; }
-    if (content.trim().length < 10) { toast.error("Content too short"); return; }
+    if (textLen(content) < 10) { toast.error("Content too short"); return; }
     const finalCategory = category === "__other" ? customCategory.trim() : category.trim();
     if (!finalCategory) { toast.error("Please select or enter a category"); return; }
     setBusy(true);
@@ -139,26 +101,23 @@ function NewLessonPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
-      <Link to="/" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-3"><ArrowLeft className="h-3 w-3" /> Cancel</Link>
+      <Link to="/dashboard" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-3"><ArrowLeft className="h-3 w-3" /> Cancel</Link>
       <h1 className="text-2xl font-display font-semibold flex items-center gap-2">
         {fork ? <><GitFork className="h-5 w-5 text-primary" /> Fork lesson</> : "Create New Lesson"}
       </h1>
       {parentTitle && <p className="text-sm text-muted-foreground">Forking <span className="font-medium text-foreground">{parentTitle}</span></p>}
 
       <form onSubmit={submit} className="mt-6 space-y-5">
-        {/* Title */}
         <div className="space-y-1.5">
           <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Lesson Title</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="A clear, specific title…" />
         </div>
 
-        {/* Summary */}
         <div className="space-y-1.5">
           <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Summary (optional)</Label>
           <Input value={summary} onChange={(e) => setSummary(e.target.value)} maxLength={280} placeholder="One-sentence pitch…" />
         </div>
 
-        {/* Category + Tags */}
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Category</Label>
@@ -189,48 +148,15 @@ function NewLessonPage() {
           </div>
         </div>
 
-        {/* Content with toolbar */}
         <div className="space-y-1.5">
           <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Lesson Content</Label>
-          <Tabs defaultValue="write">
-            <TabsList>
-              <TabsTrigger value="write"><Pencil className="h-3.5 w-3.5 mr-1.5" /> Write</TabsTrigger>
-              <TabsTrigger value="preview"><Eye className="h-3.5 w-3.5 mr-1.5" /> Preview</TabsTrigger>
-              <TabsTrigger value="split">Split</TabsTrigger>
-            </TabsList>
-            <TabsContent value="write" className="mt-2">
-              <EditorToolbar wrap={wrap} prefixLine={prefixLine} insertLink={insertLink} />
-              <Textarea
-                ref={textareaRef}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="min-h-[420px] font-mono text-sm rounded-t-none"
-                placeholder="Write your lesson here in Markdown. Use the toolbar above for formatting."
-              />
-            </TabsContent>
-            <TabsContent value="preview" className="mt-2">
-              <div className="min-h-[420px] rounded-md border border-border bg-surface p-4 overflow-auto">
-                <Markdown>{content || "*Nothing to preview.*"}</Markdown>
-              </div>
-            </TabsContent>
-            <TabsContent value="split" className="mt-2">
-              <EditorToolbar wrap={wrap} prefixLine={prefixLine} insertLink={insertLink} />
-              <div className="grid md:grid-cols-2 gap-3">
-                <Textarea
-                  ref={textareaRef}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  className="min-h-[420px] font-mono text-sm rounded-t-none"
-                />
-                <div className="min-h-[420px] rounded-md border border-border bg-surface p-4 overflow-auto">
-                  <Markdown>{content || "*Nothing to preview.*"}</Markdown>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
+          <RichEditor
+            value={content}
+            onChange={setContent}
+            placeholder="Write your lesson here. Use the toolbar to format text, add lists, links, and more."
+          />
         </div>
 
-        {/* Attachments */}
         <div className="space-y-1.5">
           <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">
             Attachments <span className="text-muted-foreground/70 normal-case">(optional)</span>
@@ -239,38 +165,10 @@ function NewLessonPage() {
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={() => navigate({ to: "/" })}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={() => navigate({ to: "/dashboard" })}>Cancel</Button>
           <Button type="submit" disabled={busy}>{busy ? "Publishing…" : fork ? "Publish fork" : "Create Lesson"}</Button>
         </div>
       </form>
-    </div>
-  );
-}
-
-function EditorToolbar({
-  wrap,
-  prefixLine,
-  insertLink,
-}: {
-  wrap: (b: string, a?: string, p?: string) => void;
-  prefixLine: (p: string) => void;
-  insertLink: () => void;
-}) {
-  const btn = "p-1.5 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors";
-  return (
-    <div className="flex flex-wrap items-center gap-0.5 border border-border border-b-0 rounded-t-md bg-surface px-2 py-1">
-      <button type="button" className={btn} onClick={() => prefixLine("# ")} title="Heading 1"><Heading1 className="h-4 w-4" /></button>
-      <button type="button" className={btn} onClick={() => prefixLine("## ")} title="Heading 2"><Heading2 className="h-4 w-4" /></button>
-      <span className="w-px h-4 bg-border mx-1" />
-      <button type="button" className={btn} onClick={() => wrap("**")} title="Bold"><Bold className="h-4 w-4" /></button>
-      <button type="button" className={btn} onClick={() => wrap("*")} title="Italic"><Italic className="h-4 w-4" /></button>
-      <button type="button" className={btn} onClick={() => wrap("`")} title="Inline code"><Code className="h-4 w-4" /></button>
-      <span className="w-px h-4 bg-border mx-1" />
-      <button type="button" className={btn} onClick={() => prefixLine("- ")} title="Bulleted list"><List className="h-4 w-4" /></button>
-      <button type="button" className={btn} onClick={() => prefixLine("1. ")} title="Numbered list"><ListOrdered className="h-4 w-4" /></button>
-      <button type="button" className={btn} onClick={() => prefixLine("> ")} title="Quote"><Quote className="h-4 w-4" /></button>
-      <span className="w-px h-4 bg-border mx-1" />
-      <button type="button" className={btn} onClick={insertLink} title="Link"><LinkIcon className="h-4 w-4" /></button>
     </div>
   );
 }
