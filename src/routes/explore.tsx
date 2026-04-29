@@ -49,17 +49,27 @@ function ExplorePage() {
 
       if (tag) query = query.contains("tags", [tag]);
       if (q && q.trim()) {
-        // Sanitize: PostgREST `or` filter breaks on commas/parens in the value
         const safe = q.trim().replace(/[,()*]/g, " ");
         query = query.or(`title.ilike.%${safe}%,summary.ilike.%${safe}%,tags.cs.{${safe}}`);
       }
 
       query = query.order("like_count", { ascending: false }).order("created_at", { ascending: false });
 
-      const { data, error } = await query;
+      const [{ data: lessonData, error: lessonError }, userResp] = await Promise.all([
+        query,
+        q && q.trim()
+          ? supabase
+              .from("profiles")
+              .select("id, username, display_name, avatar_url, bio, follower_count")
+              .or(`username.ilike.%${q.trim()}%,display_name.ilike.%${q.trim()}%`)
+              .limit(10)
+          : Promise.resolve({ data: [], error: null }),
+      ]);
+
       if (!cancelled) {
-        if (error) console.error("explore query error", error);
-        setLessons((data as unknown as FeedLesson[]) ?? []);
+        if (lessonError) console.error("explore query error", lessonError);
+        setLessons((lessonData as unknown as FeedLesson[]) ?? []);
+        setUsers((userResp.data as typeof users) ?? []);
         setLoading(false);
       }
     }
