@@ -55,8 +55,8 @@ function LessonPage() {
     const { data, error } = await supabase
       .from("lessons")
       .select(`*,
-        author:profiles!lessons_author_id_fkey(id, username, display_name, avatar_url),
-        parent:lessons!lessons_parent_lesson_id_fkey(id, title, author:profiles!lessons_author_id_fkey(username))`)
+        author:profiles!lessons_author_profile_fkey(id, username, display_name, avatar_url),
+        parent:lessons!lessons_parent_lesson_id_fkey(id, title, author:profiles!lessons_author_profile_fkey(username))`)
       .eq("id", lessonId)
       .maybeSingle();
     if (error || !data) { setLesson(null); setLoading(false); return; }
@@ -66,7 +66,7 @@ function LessonPage() {
       supabase.from("comments").select(`id, body, created_at, author_id,
         author:profiles!comments_author_id_fkey(username, display_name, avatar_url)`)
         .eq("lesson_id", lessonId).order("created_at", { ascending: true }),
-      supabase.from("lessons").select(`id, title, author:profiles!lessons_author_id_fkey(username)`)
+      supabase.from("lessons").select(`id, title, author:profiles!lessons_author_profile_fkey(username)`)
         .eq("parent_lesson_id", lessonId).limit(20),
       supabase.from("lesson_contributors").select(`user_id, profile:profiles!lesson_contributors_user_id_fkey(username, display_name, avatar_url)`)
         .eq("lesson_id", lessonId),
