@@ -134,11 +134,32 @@ function ExplorePage() {
 
       <div className="grid lg:grid-cols-[1fr_220px] gap-6 mt-6">
         <div className="space-y-3">
+          {users.length > 0 && (
+            <div className="rounded-lg border border-border bg-card p-4">
+              <h3 className="text-xs uppercase font-mono tracking-wider text-muted-foreground mb-3">People</h3>
+              <div className="space-y-2">
+                {users.map((u) => (
+                  <Link
+                    key={u.id}
+                    to="/u/$username"
+                    params={{ username: u.username }}
+                    className="flex items-center gap-3 p-2 rounded-md hover:bg-accent transition-colors"
+                  >
+                    <UserAvatar name={u.display_name ?? u.username} url={u.avatar_url} size="sm" />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium truncate">{u.display_name ?? u.username}</div>
+                      <div className="text-xs text-muted-foreground font-mono truncate">@{u.username} · {u.follower_count} followers</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
           {loading ? (
             [1,2,3].map((i) => <div key={i} className="h-32 rounded-lg bg-muted animate-pulse" />)
-          ) : lessons.length === 0 ? (
+          ) : lessons.length === 0 && users.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border p-12 text-center text-muted-foreground">
-              No lessons match your filters.
+              No lessons or users match your search.
             </div>
           ) : (
             lessons.map((l) => <LessonFeedCard key={l.id} lesson={l} />)
