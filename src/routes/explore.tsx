@@ -30,6 +30,7 @@ function ExplorePage() {
   const navigate = useNavigate();
   const [input, setInput] = useState(q ?? "");
   const [lessons, setLessons] = useState<FeedLesson[]>([]);
+  const [users, setUsers] = useState<{ id: string; username: string; display_name: string | null; avatar_url: string | null; bio: string | null; follower_count: number }[]>([]);
   const [popularTags, setPopularTags] = useState<{ tag: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
