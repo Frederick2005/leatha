@@ -119,7 +119,7 @@ function ExplorePage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           className="pl-9"
-          placeholder="Search lessons by title or summary…"
+          placeholder="Search lessons, tags, or @users…"
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
