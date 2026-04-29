@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { LessonFeedCard } from "@/components/lesson-feed-card";
 import { RequireAuth } from "@/components/require-auth";
+import { UserAvatar } from "@/components/user-avatar";
 
 const searchSchema = z.object({
   q: z.string().optional(),
