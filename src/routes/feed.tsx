@@ -48,7 +48,7 @@ function FeedPage() {
       let query = supabase
         .from("lessons")
         .select(`id, title, slug, summary, tags, fork_count, like_count, comment_count, created_at, parent_lesson_id,
-                 author:profiles!lessons_author_id_fkey(id, username, display_name, avatar_url)`)
+                 author:profiles!lessons_author_profile_fkey(id, username, display_name, avatar_url)`)
         .eq("is_published", true)
         .limit(30);
 

@@ -25,13 +25,13 @@ function DiffPage() {
     let cancelled = false;
     async function load() {
       const { data: c } = await supabase.from("lessons")
-        .select("id, title, content, parent_lesson_id, author:profiles!lessons_author_id_fkey(username)")
+        .select("id, title, content, parent_lesson_id, author:profiles!lessons_author_profile_fkey(username)")
         .eq("id", lessonId).maybeSingle();
       if (!c || cancelled) { setLoading(false); return; }
       setChild(c as unknown as LessonLite);
       if (c.parent_lesson_id) {
         const { data: p } = await supabase.from("lessons")
-          .select("id, title, content, parent_lesson_id, author:profiles!lessons_author_id_fkey(username)")
+          .select("id, title, content, parent_lesson_id, author:profiles!lessons_author_profile_fkey(username)")
           .eq("id", c.parent_lesson_id).maybeSingle();
         if (!cancelled) setParent(p as unknown as LessonLite ?? null);
       }
