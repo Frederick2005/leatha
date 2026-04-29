@@ -37,7 +37,7 @@ function FeedRoute() {
 
 function FeedPage() {
   const { user, profile } = useAuth();
-  const [tab, setTab] = useState<"trending" | "following" | "new">("following");
+  const [tab, setTab] = useState<"trending" | "following" | "new">("trending");
   const [lessons, setLessons] = useState<FeedLesson[]>([]);
   const [loading, setLoading] = useState(true);
 
