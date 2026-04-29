@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { LessonFeedCard } from "@/components/lesson-feed-card";
 import { RequireAuth } from "@/components/require-auth";
+import { UserAvatar } from "@/components/user-avatar";
 
 const searchSchema = z.object({
   q: z.string().optional(),
@@ -29,6 +30,7 @@ function ExplorePage() {
   const navigate = useNavigate();
   const [input, setInput] = useState(q ?? "");
   const [lessons, setLessons] = useState<FeedLesson[]>([]);
+  const [users, setUsers] = useState<{ id: string; username: string; display_name: string | null; avatar_url: string | null; bio: string | null; follower_count: number }[]>([]);
   const [popularTags, setPopularTags] = useState<{ tag: string; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,23 +43,33 @@ function ExplorePage() {
       let query = supabase
         .from("lessons")
         .select(`id, title, slug, summary, tags, fork_count, like_count, comment_count, created_at, parent_lesson_id,
-                 author:profiles!lessons_author_id_fkey(id, username, display_name, avatar_url)`)
+                 author:profiles!lessons_author_profile_fkey(id, username, display_name, avatar_url)`)
         .eq("is_published", true)
         .limit(50);
 
       if (tag) query = query.contains("tags", [tag]);
       if (q && q.trim()) {
-        // Sanitize: PostgREST `or` filter breaks on commas/parens in the value
         const safe = q.trim().replace(/[,()*]/g, " ");
         query = query.or(`title.ilike.%${safe}%,summary.ilike.%${safe}%,tags.cs.{${safe}}`);
       }
 
       query = query.order("like_count", { ascending: false }).order("created_at", { ascending: false });
 
-      const { data, error } = await query;
+      const [{ data: lessonData, error: lessonError }, userResp] = await Promise.all([
+        query,
+        q && q.trim()
+          ? supabase
+              .from("profiles")
+              .select("id, username, display_name, avatar_url, bio, follower_count")
+              .or(`username.ilike.%${q.trim()}%,display_name.ilike.%${q.trim()}%`)
+              .limit(10)
+          : Promise.resolve({ data: [], error: null }),
+      ]);
+
       if (!cancelled) {
-        if (error) console.error("explore query error", error);
-        setLessons((data as unknown as FeedLesson[]) ?? []);
+        if (lessonError) console.error("explore query error", lessonError);
+        setLessons((lessonData as unknown as FeedLesson[]) ?? []);
+        setUsers((userResp.data as typeof users) ?? []);
         setLoading(false);
       }
     }
@@ -107,7 +119,7 @@ function ExplorePage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           className="pl-9"
-          placeholder="Search lessons by title or summary…"
+          placeholder="Search lessons, tags, or @users…"
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
@@ -122,11 +134,32 @@ function ExplorePage() {
 
       <div className="grid lg:grid-cols-[1fr_220px] gap-6 mt-6">
         <div className="space-y-3">
+          {users.length > 0 && (
+            <div className="rounded-lg border border-border bg-card p-4">
+              <h3 className="text-xs uppercase font-mono tracking-wider text-muted-foreground mb-3">People</h3>
+              <div className="space-y-2">
+                {users.map((u) => (
+                  <Link
+                    key={u.id}
+                    to="/u/$username"
+                    params={{ username: u.username }}
+                    className="flex items-center gap-3 p-2 rounded-md hover:bg-accent transition-colors"
+                  >
+                    <UserAvatar name={u.display_name ?? u.username} url={u.avatar_url} size="sm" />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-medium truncate">{u.display_name ?? u.username}</div>
+                      <div className="text-xs text-muted-foreground font-mono truncate">@{u.username} · {u.follower_count} followers</div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
           {loading ? (
             [1,2,3].map((i) => <div key={i} className="h-32 rounded-lg bg-muted animate-pulse" />)
-          ) : lessons.length === 0 ? (
+          ) : lessons.length === 0 && users.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border p-12 text-center text-muted-foreground">
-              No lessons match your filters.
+              No lessons or users match your search.
             </div>
           ) : (
             lessons.map((l) => <LessonFeedCard key={l.id} lesson={l} />)

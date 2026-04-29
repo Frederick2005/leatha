@@ -47,7 +47,7 @@ function ProfilePage() {
     const { data: ls } = await supabase
       .from("lessons")
       .select(`id, title, slug, summary, tags, fork_count, like_count, comment_count, created_at, parent_lesson_id,
-               author:profiles!lessons_author_id_fkey(id, username, display_name, avatar_url)`)
+               author:profiles!lessons_author_profile_fkey(id, username, display_name, avatar_url)`)
       .eq("author_id", p.id).eq("is_published", true).order("created_at", { ascending: false }).limit(50);
     setLessons((ls as unknown as FeedLesson[]) ?? []);
     if (user && user.id !== p.id) {
