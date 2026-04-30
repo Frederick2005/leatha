@@ -11,24 +11,29 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const isAuthRoute = location.pathname.startsWith("/auth");
 
   useEffect(() => {
     if (loading) return;
-    if (!user) {
+    if (!user && !isAuthRoute) {
       navigate({
         to: "/auth",
-        search: { redirect: location.pathname },
+        search: { redirect: `${location.pathname}${location.search}` },
         replace: true,
       });
     }
-  }, [user, loading, navigate, location.pathname]);
+  }, [user, loading, navigate, isAuthRoute, location.pathname, location.search]);
 
-  if (loading || !user) {
+  if (loading) {
     return (
       <div className="min-h-[50vh] grid place-items-center">
         <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
       </div>
     );
+  }
+
+  if (!user) {
+    return null;
   }
 
   return <>{children}</>;
