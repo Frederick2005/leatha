@@ -3,12 +3,13 @@ import {
   GitFork, Home, BookOpen, MessageSquare, MessagesSquare, Trophy, Sparkles,
   Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "@/providers/theme-provider";
 import { ThemePicker } from "@/components/theme-picker";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -32,6 +33,17 @@ export function AppShell() {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setSearchQuery(params.get("q") ?? "");
+  }, [location.search]);
+
+  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    navigate({ to: "/explore", search: { q: searchQuery || undefined } });
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -163,13 +175,18 @@ export function AppShell() {
             SkillChain
           </Link>
           <div className="flex-1 max-w-md hidden sm:block">
-            <Link
-              to="/explore"
-              className="flex items-center gap-2 px-3 h-9 rounded-md border border-border bg-surface text-sm text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
-            >
-              <Search className="h-4 w-4" />
-              Search lessons, tags, users…
-            </Link>
+            {location.pathname !== "/" ? (
+              <form onSubmit={handleSearchSubmit} className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  className="pl-9"
+                  placeholder="Search lessons, tags, users…"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  aria-label="Search lessons, tags, and users"
+                />
+              </form>
+            ) : null}
           </div>
           <div className="flex-1 sm:hidden" />
 
