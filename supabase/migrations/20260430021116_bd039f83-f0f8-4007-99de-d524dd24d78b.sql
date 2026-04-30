@@ -1,0 +1,2 @@
+ALTER TABLE public.comments ADD CONSTRAINT comments_author_profile_fkey FOREIGN KEY (author_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
+ALTER TABLE public.lesson_contributors ADD CONSTRAINT lesson_contributors_user_profile_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
