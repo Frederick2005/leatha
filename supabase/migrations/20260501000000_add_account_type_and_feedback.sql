@@ -49,5 +49,7 @@ END;
 $$;
 
 CREATE POLICY "Feedback is viewable by admins" ON public.feedback FOR SELECT USING (public.is_mod_or_admin(auth.uid()));
-CREATE POLICY "Authenticated users submit feedback" ON public.feedback FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Authenticated users submit feedback" ON public.feedback FOR INSERT WITH CHECK (
+  auth.uid() = user_id OR (auth.uid() IS NULL AND user_id IS NULL)
+);
 CREATE POLICY "Feedback user can delete own feedback" ON public.feedback FOR DELETE USING (auth.uid() = user_id OR public.is_mod_or_admin(auth.uid()));

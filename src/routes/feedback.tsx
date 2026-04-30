@@ -32,15 +32,22 @@ function FeedbackPage() {
       return;
     }
     setBusy(true);
-    const { error } = await supabase.from("feedback").insert({
-      user_id: user?.id ?? null,
+    const payload: {
+      subject: string;
+      message: string;
+      contact?: string | null;
+      user_id?: string | null;
+    } = {
       subject: subject.trim(),
       message: message.trim(),
       contact: user ? null : contact.trim() || null,
-    });
+    };
+    if (user) payload.user_id = user.id;
+
+    const { error } = await supabase.from("feedback").insert(payload);
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(error.message || "Unable to send feedback.");
       return;
     }
     setSubject("");
