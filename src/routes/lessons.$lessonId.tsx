@@ -64,11 +64,11 @@ function LessonPage() {
 
     const [{ data: cs }, { data: fs }, { data: contribs }] = await Promise.all([
       supabase.from("comments").select(`id, body, created_at, author_id,
-        author:profiles!comments_author_id_fkey(username, display_name, avatar_url)`)
+        author:profiles!comments_author_profile_fkey(username, display_name, avatar_url)`)
         .eq("lesson_id", lessonId).order("created_at", { ascending: true }),
       supabase.from("lessons").select(`id, title, author:profiles!lessons_author_profile_fkey(username)`)
         .eq("parent_lesson_id", lessonId).limit(20),
-      supabase.from("lesson_contributors").select(`user_id, profile:profiles!lesson_contributors_user_id_fkey(username, display_name, avatar_url)`)
+      supabase.from("lesson_contributors").select(`user_id, profile:profiles!lesson_contributors_user_profile_fkey(username, display_name, avatar_url)`)
         .eq("lesson_id", lessonId),
     ]);
     setComments((cs as unknown as CommentRow[]) ?? []);
