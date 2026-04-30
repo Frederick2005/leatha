@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from "react";
-import { useNavigate, useLocation } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/providers/auth-provider";
 
 /**
@@ -10,12 +10,10 @@ import { useAuth } from "@/providers/auth-provider";
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const isAuthRoute = location.pathname.startsWith("/auth");
-  const redirectPath =
-    typeof window === "undefined"
-      ? location.pathname
-      : `${window.location.pathname}${window.location.search}`;
+  const currentPath = typeof window === "undefined" ? "/" : window.location.pathname;
+  const currentSearch = typeof window === "undefined" ? "" : window.location.search;
+  const isAuthRoute = currentPath.startsWith("/auth");
+  const redirectPath = `${currentPath}${currentSearch}`;
 
   useEffect(() => {
     if (loading) return;
