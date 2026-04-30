@@ -9,10 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -27,6 +30,11 @@ import { Route as LessonsLessonIdRouteImport } from './routes/lessons.$lessonId'
 import { Route as LessonsLessonIdEditRouteImport } from './routes/lessons.$lessonId.edit'
 import { Route as LessonsLessonIdDiffRouteImport } from './routes/lessons.$lessonId.diff'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -37,6 +45,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MessagesRoute = MessagesRouteImport.update({
   id: '/messages',
   path: '/messages',
@@ -45,6 +58,11 @@ const MessagesRoute = MessagesRouteImport.update({
 const LeaderboardRoute = LeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FeedRoute = FeedRouteImport.update({
@@ -121,10 +139,13 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
+  '/feedback': typeof FeedbackRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRouteWithChildren
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/terms': typeof TermsRoute
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
   '/messages/$username': typeof MessagesUsernameRoute
@@ -140,10 +161,13 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
+  '/feedback': typeof FeedbackRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRouteWithChildren
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/terms': typeof TermsRoute
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
   '/messages/$username': typeof MessagesUsernameRoute
@@ -160,10 +184,13 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
+  '/feedback': typeof FeedbackRoute
   '/leaderboard': typeof LeaderboardRoute
   '/messages': typeof MessagesRouteWithChildren
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/settings': typeof SettingsRoute
+  '/terms': typeof TermsRoute
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
   '/messages/$username': typeof MessagesUsernameRoute
@@ -181,10 +208,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/explore'
     | '/feed'
+    | '/feedback'
     | '/leaderboard'
     | '/messages'
+    | '/privacy'
     | '/reset-password'
     | '/settings'
+    | '/terms'
     | '/lessons/$lessonId'
     | '/lessons/new'
     | '/messages/$username'
@@ -200,10 +230,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/explore'
     | '/feed'
+    | '/feedback'
     | '/leaderboard'
     | '/messages'
+    | '/privacy'
     | '/reset-password'
     | '/settings'
+    | '/terms'
     | '/lessons/$lessonId'
     | '/lessons/new'
     | '/messages/$username'
@@ -219,10 +252,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/explore'
     | '/feed'
+    | '/feedback'
     | '/leaderboard'
     | '/messages'
+    | '/privacy'
     | '/reset-password'
     | '/settings'
+    | '/terms'
     | '/lessons/$lessonId'
     | '/lessons/new'
     | '/messages/$username'
@@ -239,10 +275,13 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ExploreRoute: typeof ExploreRoute
   FeedRoute: typeof FeedRoute
+  FeedbackRoute: typeof FeedbackRoute
   LeaderboardRoute: typeof LeaderboardRoute
   MessagesRoute: typeof MessagesRouteWithChildren
+  PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SettingsRoute: typeof SettingsRoute
+  TermsRoute: typeof TermsRoute
   LessonsLessonIdRoute: typeof LessonsLessonIdRouteWithChildren
   LessonsNewRoute: typeof LessonsNewRoute
   UUsernameRoute: typeof UUsernameRoute
@@ -250,6 +289,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/settings': {
       id: '/settings'
       path: '/settings'
@@ -264,6 +310,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/messages': {
       id: '/messages'
       path: '/messages'
@@ -276,6 +329,13 @@ declare module '@tanstack/react-router' {
       path: '/leaderboard'
       fullPath: '/leaderboard'
       preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feed': {
@@ -406,10 +466,13 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ExploreRoute: ExploreRoute,
   FeedRoute: FeedRoute,
+  FeedbackRoute: FeedbackRoute,
   LeaderboardRoute: LeaderboardRoute,
   MessagesRoute: MessagesRouteWithChildren,
+  PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SettingsRoute: SettingsRoute,
+  TermsRoute: TermsRoute,
   LessonsLessonIdRoute: LessonsLessonIdRouteWithChildren,
   LessonsNewRoute: LessonsNewRoute,
   UUsernameRoute: UUsernameRoute,

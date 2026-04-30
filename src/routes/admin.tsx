@@ -60,8 +60,42 @@ interface LessonRow {
   author?: { username: string; display_name: string | null } | null;
 }
 
+interface AdminSummary {
+  total_users: number;
+  total_lessons: number;
+  pending_reports: number;
+  moderator_count: number;
+  admin_count: number;
+}
+
 function AdminPage() {
   const { isModOrAdmin, isAdmin, loading } = useAuth();
+  const [summary, setSummary] = useState<AdminSummary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(true);
+
+  const loadSummary = async () => {
+    setSummaryLoading(true);
+    const [usersRes, lessonsRes, pendingRes, modsRes, adminsRes] = await Promise.all([
+      supabase.from("profiles").select("id", { count: "exact", head: true }),
+      supabase.from("lessons").select("id", { count: "exact", head: true }),
+      supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "moderator"),
+      supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "admin"),
+    ]);
+
+    setSummary({
+      total_users: usersRes.count ?? 0,
+      total_lessons: lessonsRes.count ?? 0,
+      pending_reports: pendingRes.count ?? 0,
+      moderator_count: modsRes.count ?? 0,
+      admin_count: adminsRes.count ?? 0,
+    });
+    setSummaryLoading(false);
+  };
+
+  useEffect(() => {
+    void loadSummary();
+  }, []);
 
   if (loading) return <div className="p-8 text-sm text-muted-foreground">Loading…</div>;
 
@@ -85,11 +119,64 @@ function AdminPage() {
           <Shield className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="font-display text-2xl font-semibold">Moderation</h1>
+          <h1 className="font-display text-2xl font-semibold">Moderation Dashboard</h1>
           <p className="text-sm text-muted-foreground">
             Review reports and manage content {isAdmin && "· you have full admin rights"}
           </p>
         </div>
+      </div>
+
+      <div className="grid gap-4 mb-6 lg:grid-cols-[repeat(3,minmax(0,1fr))]">
+        {summaryLoading ? (
+          Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="h-24 rounded-3xl border border-border bg-card animate-pulse" />
+          ))
+        ) : (
+          <>
+            <div className="rounded-3xl border border-border bg-card p-5">
+              <p className="text-sm text-muted-foreground uppercase tracking-[0.18em]">Pending reports</p>
+              <p className="mt-3 text-3xl font-semibold text-foreground">{summary?.pending_reports ?? 0}</p>
+              <p className="text-sm text-muted-foreground mt-2">Reports waiting for review</p>
+            </div>
+            <div className="rounded-3xl border border-border bg-card p-5">
+              <p className="text-sm text-muted-foreground uppercase tracking-[0.18em]">Total content</p>
+              <p className="mt-3 text-3xl font-semibold text-foreground">{summary?.total_lessons ?? 0}</p>
+              <p className="text-sm text-muted-foreground mt-2">Lessons available on SkillChain</p>
+            </div>
+            <div className="rounded-3xl border border-border bg-card p-5">
+              <p className="text-sm text-muted-foreground uppercase tracking-[0.18em]">Community leaders</p>
+              <p className="mt-3 text-3xl font-semibold text-foreground">{summary?.moderator_count ?? 0}</p>
+              <p className="text-sm text-muted-foreground mt-2">Active moderators on duty</p>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="rounded-3xl border border-border bg-surface p-5 mb-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold">Moderator guidance</h2>
+            <p className="text-sm text-muted-foreground mt-2">
+              Use this dashboard to triage content quickly. Start with reports, then confirm profile concerns and clean up harmful lessons.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button size="sm" variant="outline" onClick={loadSummary}>Refresh summary</Button>
+            <Button size="sm" variant="ghost" asChild>
+              <Link to="/admin">Open reports</Link>
+            </Button>
+          </div>
+        </div>
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+          <li className="rounded-2xl border border-border bg-card p-3 text-sm">
+            <span className="font-semibold">Resolve pending reports</span>
+            <p className="text-muted-foreground mt-1">Mark reviews as resolved or dismiss them when content is safe.</p>
+          </li>
+          <li className="rounded-2xl border border-border bg-card p-3 text-sm">
+            <span className="font-semibold">Manage users</span>
+            <p className="text-muted-foreground mt-1">Promote trusted members to moderators or revoke access when needed.</p>
+          </li>
+        </ul>
       </div>
 
       <Tabs defaultValue="reports">

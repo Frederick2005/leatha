@@ -10,6 +10,8 @@ export interface ProfileRow {
   avatar_url: string | null;
   theme: string;
   dark_mode: boolean;
+  account_type: "student" | "teacher" | "administrator";
+  school: string | null;
   points: number;
   lesson_count: number;
   fork_received_count: number;
