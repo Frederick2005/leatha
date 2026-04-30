@@ -12,17 +12,21 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
   const isAuthRoute = location.pathname.startsWith("/auth");
+  const redirectPath =
+    typeof window === "undefined"
+      ? location.pathname
+      : `${window.location.pathname}${window.location.search}`;
 
   useEffect(() => {
     if (loading) return;
     if (!user && !isAuthRoute) {
       navigate({
         to: "/auth",
-        search: { redirect: `${location.pathname}${location.search}` },
+        search: { redirect: redirectPath },
         replace: true,
       });
     }
-  }, [user, loading, navigate, isAuthRoute, location.pathname, location.search]);
+  }, [user, loading, navigate, isAuthRoute, redirectPath]);
 
   if (loading) {
     return (
