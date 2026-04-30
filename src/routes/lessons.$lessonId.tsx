@@ -245,8 +245,9 @@ function LessonPage() {
         {Array.isArray(lesson.attachments) && lesson.attachments.length > 0 && (
           <div className="mt-8 border-t border-border pt-6">
             <h2 className="text-sm uppercase font-mono tracking-wider text-muted-foreground mb-3">
-              Attachments ({lesson.attachments.length})
+              Resources ({lesson.attachments.length})
             </h2>
+            <p className="text-sm text-muted-foreground mb-4">Download attached files and supporting materials for this lesson.</p>
             <div className="space-y-2">
               {lesson.attachments.map((a) => (
                 <LessonAttachment key={a.path} att={a} />

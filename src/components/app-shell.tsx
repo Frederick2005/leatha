@@ -127,7 +127,7 @@ export function AppShell() {
           <aside className="relative w-64 h-full bg-sidebar text-sidebar-foreground border-r border-sidebar-border p-3 space-y-1">
             <div className="flex items-center justify-between px-2 py-2">
               <div className="font-display font-semibold">SkillChain</div>
-              <button onClick={() => setMobileOpen(false)}><X className="h-5 w-5" /></button>
+              <button onClick={() => setMobileOpen(false)} aria-label="Close menu"><X className="h-5 w-5" /></button>
             </div>
             {navItems.map((item) => {
               if (item.auth && !user) return null;
@@ -155,7 +155,7 @@ export function AppShell() {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar */}
         <header className="sticky top-0 z-30 h-14 border-b border-border bg-background/80 backdrop-blur flex items-center px-4 gap-3">
-          <button className="lg:hidden p-2 -ml-2" onClick={() => setMobileOpen(true)}>
+          <button className="lg:hidden p-2 -ml-2" onClick={() => setMobileOpen(true)} aria-label="Open menu">
             <Menu className="h-5 w-5" />
           </button>
           <Link to="/" className="lg:hidden flex items-center gap-2 font-display font-semibold">
@@ -222,6 +222,21 @@ export function AppShell() {
         <main className="flex-1 min-w-0">
           <Outlet />
         </main>
+
+        <footer className="border-t border-border bg-background/80">
+          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <GitFork className="h-4 w-4 text-primary" />
+              <span className="font-semibold text-foreground">SkillChain</span>
+              <span>© {new Date().getFullYear()}</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link to="/feedback" className="hover:text-primary">Feedback</Link>
+              <Link to="/terms" className="hover:text-primary">Terms</Link>
+              <Link to="/privacy" className="hover:text-primary">Privacy</Link>
+            </div>
+          </div>
+        </footer>
       </div>
 
       <ThemePicker open={themeOpen} onOpenChange={setThemeOpen} />

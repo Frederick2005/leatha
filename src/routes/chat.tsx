@@ -122,18 +122,26 @@ function ChatPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-3.5rem)]">
-      <div className="border-b border-border px-6 py-4">
-        <div className="flex items-center gap-2">
-          <MessageSquare className="h-5 w-5 text-primary" />
-          <h1 className="font-display text-xl font-semibold">Public chat</h1>
+    <div className="flex h-[calc(100vh-3.5rem)] flex-col">
+      <header className="border-b border-border px-6 py-4 bg-background/70 backdrop-blur">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="inline-flex items-center gap-2 text-lg font-semibold">
+              <MessageSquare className="h-5 w-5 text-primary" />
+              Public chat
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              Live community room for learners and teachers. Be curious and kind.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <span>{messages.length} messages</span>
+            <span>Press Enter to send</span>
+          </div>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">
-          Open community room. Be kind. Mods can remove abusive messages.
-        </p>
-      </div>
+      </header>
 
-      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-3">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 space-y-4">
         {loading && <div className="text-sm text-muted-foreground">Loading…</div>}
         {!loading && messages.length === 0 && (
           <div className="text-sm text-muted-foreground text-center py-12">
@@ -144,45 +152,45 @@ function ChatPage() {
           const mine = user?.id === m.author_id;
           const canDelete = mine || isModOrAdmin;
           return (
-            <div key={m.id} className="group flex items-start gap-3">
-              <Link
-                to="/u/$username"
-                params={{ username: m.author?.username ?? "" }}
-                className="shrink-0"
-              >
-                <UserAvatar
-                  name={m.author?.display_name ?? m.author?.username}
-                  url={m.author?.avatar_url}
-                  size="sm"
-                />
-              </Link>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline gap-2 flex-wrap">
-                  <Link
-                    to="/u/$username"
-                    params={{ username: m.author?.username ?? "" }}
-                    className="text-sm font-semibold hover:text-primary"
-                  >
-                    {m.author?.display_name ?? m.author?.username ?? "unknown"}
-                  </Link>
-                  <span className="text-xs text-muted-foreground font-mono">
-                    @{m.author?.username ?? "…"}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(new Date(m.created_at), { addSuffix: true })}
-                  </span>
+            <div
+              key={m.id}
+              className={
+                mine
+                  ? "flex justify-end"
+                  : "flex justify-start"
+              }
+            >
+              <div className={
+                `relative max-w-[90%] ${mine ? "rounded-bl-3xl rounded-tl-3xl rounded-tr-3xl bg-primary/10 text-foreground" : "rounded-br-3xl rounded-tr-3xl rounded-tl-3xl bg-surface border border-border text-foreground"}`
+              }>
+                <div className="flex items-center gap-2 px-3 pt-3">
+                  {!mine && (
+                    <Link to="/u/$username" params={{ username: m.author?.username ?? "" }} className="shrink-0">
+                      <UserAvatar name={m.author?.display_name ?? m.author?.username} url={m.author?.avatar_url} size="sm" />
+                    </Link>
+                  )}
+                  <div className="flex flex-col">
+                    <div className="text-sm font-medium">
+                      {mine ? "You" : m.author?.display_name ?? m.author?.username ?? "Unknown"}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(new Date(m.created_at), { addSuffix: true })}
+                    </div>
+                  </div>
                 </div>
-                <div className="text-sm whitespace-pre-wrap break-words mt-0.5">{m.body}</div>
+                <div className="px-3 pb-3 pt-2 text-sm whitespace-pre-wrap break-words">
+                  {m.body}
+                </div>
+                {canDelete && (
+                  <button
+                    onClick={() => remove(m.id)}
+                    className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                    aria-label="Delete message"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                )}
               </div>
-              {canDelete && (
-                <button
-                  onClick={() => remove(m.id)}
-                  className="opacity-0 group-hover:opacity-100 p-1.5 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-opacity"
-                  aria-label="Delete message"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              )}
             </div>
           );
         })}
@@ -205,7 +213,7 @@ function ChatPage() {
                   void send();
                 }
               }}
-              placeholder="Message the room… (Enter to send, Shift+Enter for newline)"
+              placeholder="Message the room…"
               className="resize-none min-h-[44px] max-h-32"
               rows={1}
               maxLength={2000}

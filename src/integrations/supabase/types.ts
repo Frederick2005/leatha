@@ -296,6 +296,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: "student" | "teacher" | "administrator"
           avatar_url: string | null
           bio: string | null
           created_at: string
@@ -307,11 +308,13 @@ export type Database = {
           id: string
           lesson_count: number
           points: number
+          school: string | null
           theme: string
           updated_at: string
           username: string
         }
         Insert: {
+          account_type?: "student" | "teacher" | "administrator"
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -323,11 +326,13 @@ export type Database = {
           id: string
           lesson_count?: number
           points?: number
+          school?: string | null
           theme?: string
           updated_at?: string
           username: string
         }
         Update: {
+          account_type?: "student" | "teacher" | "administrator"
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -339,6 +344,7 @@ export type Database = {
           id?: string
           lesson_count?: number
           points?: number
+          school?: string | null
           theme?: string
           updated_at?: string
           username?: string
@@ -381,6 +387,33 @@ export type Database = {
           target_id?: string
           target_type?: Database["public"]["Enums"]["report_target_type"]
           updated_at?: string
+        }
+        Relationships: []
+      }
+      feedback: {
+        Row: {
+          contact: string | null
+          created_at: string
+          id: string
+          message: string
+          subject: string
+          user_id: string | null
+        }
+        Insert: {
+          contact?: string | null
+          created_at?: string
+          id?: string
+          message: string
+          subject: string
+          user_id?: string | null
+        }
+        Update: {
+          contact?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          subject?: string
+          user_id?: string | null
         }
         Relationships: []
       }

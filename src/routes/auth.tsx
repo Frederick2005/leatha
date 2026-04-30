@@ -20,7 +20,12 @@ const signupSchema = z.object({
   email: z.string().email("Invalid email"),
   password: z.string().min(8, "Min 8 characters").max(72, "Max 72 characters"),
   username: z.string().min(3, "Min 3 chars").max(24, "Max 24 chars").regex(/^[a-z0-9_]+$/, "lowercase letters, digits, _ only"),
+  role: z.enum(["student", "teacher", "administrator"]),
+  school: z.string().max(60, "Max 60 chars").optional(),
+  adminCode: z.string().optional(),
 });
+
+const ADMIN_SIGNUP_CODE = import.meta.env.VITE_ADMIN_SIGNUP_CODE ?? "SKILLCHAIN-ADMIN";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -43,6 +48,9 @@ function AuthPage() {
   const [suEmail, setSuEmail] = useState("");
   const [suPwd, setSuPwd] = useState("");
   const [suUsername, setSuUsername] = useState("");
+  const [suRole, setSuRole] = useState<"student" | "teacher" | "administrator">("student");
+  const [suSchool, setSuSchool] = useState("");
+  const [suAdminCode, setSuAdminCode] = useState("");
 
   // Forgot
   const [forgotEmail, setForgotEmail] = useState("");
@@ -65,15 +73,31 @@ function AuthPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = signupSchema.safeParse({ email: suEmail, password: suPwd, username: suUsername });
+    const parsed = signupSchema.safeParse({
+      email: suEmail,
+      password: suPwd,
+      username: suUsername,
+      role: suRole,
+      school: suSchool,
+      adminCode: suAdminCode,
+    });
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
+    if (suRole === "administrator" && suAdminCode !== ADMIN_SIGNUP_CODE) {
+      toast.error("Administrator sign up requires a valid access code.");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.auth.signUp({
       email: suEmail,
       password: suPwd,
       options: {
         emailRedirectTo: `${window.location.origin}/feed`,
-        data: { username: suUsername, display_name: suUsername },
+        data: {
+          username: suUsername,
+          display_name: suUsername,
+          account_type: suRole,
+          school: suRole === "teacher" ? suSchool : null,
+        },
       },
     });
     setBusy(false);
@@ -151,7 +175,55 @@ function AuthPage() {
                 <Field label="Password" icon={Lock}>
                   <Input type="password" value={suPwd} onChange={(e) => setSuPwd(e.target.value)} autoComplete="new-password" />
                 </Field>
-                <p className="text-xs text-muted-foreground">Min 8 chars. Checked against known leaked passwords.</p>
+                <Field label="Account type" icon={UserIcon}>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {[
+                      { value: "student", label: "Student", description: "Join as a learner." },
+                      { value: "teacher", label: "Teacher", description: "Teach or manage classes." },
+                      { value: "administrator", label: "Administrator", description: "Admin dashboard access." },
+                    ].map((option) => (
+                      <label
+                        key={option.value}
+                        className={`cursor-pointer rounded-xl border px-3 py-3 text-sm transition-colors ${
+                          suRole === option.value
+                            ? "border-primary bg-primary/10"
+                            : "border-border bg-muted"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="accountType"
+                          value={option.value}
+                          className="sr-only"
+                          checked={suRole === option.value}
+                          onChange={() => setSuRole(option.value as typeof suRole)}
+                        />
+                        <div className="font-semibold">{option.label}</div>
+                        <div className="text-xs text-muted-foreground mt-1">{option.description}</div>
+                      </label>
+                    ))}
+                  </div>
+                </Field>
+                {suRole === "teacher" && (
+                  <Field label="School or organization" icon={UserIcon}>
+                    <Input
+                      value={suSchool}
+                      onChange={(e) => setSuSchool(e.target.value)}
+                      placeholder="Oak Valley Academy"
+                    />
+                  </Field>
+                )}
+                {suRole === "administrator" && (
+                  <Field label="Administrator access code" icon={Lock}>
+                    <Input
+                      type="password"
+                      value={suAdminCode}
+                      onChange={(e) => setSuAdminCode(e.target.value)}
+                      placeholder="Enter admin invite code"
+                    />
+                  </Field>
+                )}
+                <p className="text-xs text-muted-foreground">Min 8 chars. Choose the account type that fits your role.</p>
                 <Button type="submit" className="w-full" disabled={busy}>
                   {busy ? "Creating account…" : "Create account"}
                 </Button>
