@@ -42,12 +42,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const loadProfileAndRoles = useCallback(async (userId: string) => {
-    const [{ data: profileData }, { data: rolesData }] = await Promise.all([
-      supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
-      supabase.from("user_roles").select("role").eq("user_id", userId),
-    ]);
-    setProfile((profileData as ProfileRow | null) ?? null);
-    setRoles(((rolesData ?? []) as { role: AppRole }[]).map((r) => r.role));
+    try {
+      const [profileResp, rolesResp] = await Promise.all([
+        supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+        supabase.from("user_roles").select("role").eq("user_id", userId),
+      ]);
+
+      if (profileResp.error) console.error("Failed to load profile", profileResp.error);
+      if (rolesResp.error) console.error("Failed to load roles", rolesResp.error);
+
+      setProfile((profileResp.data as ProfileRow | null) ?? null);
+      setRoles(((rolesResp.data ?? []) as { role: AppRole }[]).map((r) => r.role));
+    } catch (error) {
+      console.error("Auth bootstrap failed to load profile/roles", error);
+      setProfile(null);
+      setRoles([]);
+    }
   }, []);
 
   const refreshProfile = useCallback(async () => {
@@ -62,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // CRITICAL: subscribe BEFORE getSession to avoid races
     const { data: sub } = supabase.auth.onAuthStateChange((event, newSession) => {
       setSession(newSession);
+      setLoading(false);
       if (newSession?.user) {
         if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
           try { localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now())); } catch { /* noop */ }
@@ -77,27 +88,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    void supabase.auth.getSession().then(async ({ data }) => {
-      if (data.session?.user) {
-        // Enforce 8h max session
-        let last = 0;
-        try { last = Number(localStorage.getItem(LAST_ACTIVITY_KEY) ?? 0); } catch { /* noop */ }
-        if (last && Date.now() - last > MAX_SESSION_MS) {
-          await supabase.auth.signOut();
-          setSession(null);
-          setLoading(false);
-          return;
+    void (async () => {
+      try {
+        const { data } = await supabase.auth.getSession();
+
+        if (data.session?.user) {
+          // Enforce 8h max session
+          let last = 0;
+          try { last = Number(localStorage.getItem(LAST_ACTIVITY_KEY) ?? 0); } catch { /* noop */ }
+          if (last && Date.now() - last > MAX_SESSION_MS) {
+            await supabase.auth.signOut();
+            setSession(null);
+            setProfile(null);
+            setRoles([]);
+            return;
+          }
+          if (!last) {
+            try { localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now())); } catch { /* noop */ }
+          }
+
+          setSession(data.session);
+          void loadProfileAndRoles(data.session.user.id);
+        } else {
+          setSession(data.session);
+          setProfile(null);
+          setRoles([]);
         }
-        if (!last) {
-          try { localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now())); } catch { /* noop */ }
-        }
-        setSession(data.session);
-        await loadProfileAndRoles(data.session.user.id);
-      } else {
-        setSession(data.session);
+      } catch (error) {
+        console.error("Failed to restore auth session", error);
+        setSession(null);
+        setProfile(null);
+        setRoles([]);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    })();
 
     // Refresh activity timestamp on user interaction
     const bump = () => {
