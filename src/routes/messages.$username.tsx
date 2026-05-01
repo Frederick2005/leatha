@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { format, isToday, isYesterday } from "date-fns";
 import {
-  Send, ArrowLeft, Ban, ShieldOff, Paperclip, X, Loader2, Mic, StopCircle, Check, CheckCheck, Image as ImageIcon, Play, Pause, Smile,
+  Send, ArrowLeft, Ban, ShieldOff, Paperclip, X, Loader2, Mic, Check, CheckCheck, Play, Pause, Smile,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type AttachmentMeta } from "@/components/dm-attachment";
