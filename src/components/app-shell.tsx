@@ -213,6 +213,9 @@ export function AppShell() {
                 <DropdownMenuItem asChild>
                   <Link to="/lessons/new"><Plus className="h-4 w-4 mr-2" /> New lesson</Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/feedback"><MessageSquareWarning className="h-4 w-4 mr-2" /> Send feedback</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setThemeOpen(true)}>
                   <Palette className="h-4 w-4 mr-2" /> Themes
                 </DropdownMenuItem>
