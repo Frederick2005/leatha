@@ -49,9 +49,12 @@ function AuthPage() {
   const [suEmail, setSuEmail] = useState("");
   const [suPwd, setSuPwd] = useState("");
   const [suUsername, setSuUsername] = useState("");
+  const [suDisplayName, setSuDisplayName] = useState("");
   const [suRole, setSuRole] = useState<"student" | "teacher" | "administrator">("student");
   const [suSchool, setSuSchool] = useState("");
-  const [suAdminCode, setSuAdminCode] = useState("");
+  const [suGrade, setSuGrade] = useState("");
+  const [suSubject, setSuSubject] = useState("");
+  const [suOrg, setSuOrg] = useState("");
 
   // Forgot
   const [forgotEmail, setForgotEmail] = useState("");
@@ -78,15 +81,24 @@ function AuthPage() {
       email: suEmail,
       password: suPwd,
       username: suUsername,
+      display_name: suDisplayName || suUsername,
       role: suRole,
       school: suSchool,
-      adminCode: suAdminCode,
+      grade: suGrade,
+      subject: suSubject,
+      organization: suOrg,
     });
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
-    if (suRole === "administrator" && suAdminCode !== ADMIN_SIGNUP_CODE) {
-      toast.error("Administrator sign up requires a valid access code.");
-      return;
-    }
+    // Role-specific required fields
+    if (suRole === "student" && !suSchool.trim()) { toast.error("School is required for students."); return; }
+    if (suRole === "teacher" && !suSchool.trim()) { toast.error("School is required for teachers."); return; }
+    if (suRole === "administrator" && !suOrg.trim()) { toast.error("Organization is required for administrators."); return; }
+
+    const schoolValue =
+      suRole === "administrator" ? suOrg.trim() :
+      suRole === "teacher" ? suSchool.trim() :
+      suSchool.trim();
+
     setBusy(true);
     const { error } = await supabase.auth.signUp({
       email: suEmail,
@@ -95,9 +107,11 @@ function AuthPage() {
         emailRedirectTo: `${window.location.origin}/feed`,
         data: {
           username: suUsername,
-          display_name: suUsername,
+          display_name: suDisplayName || suUsername,
           account_type: suRole,
-          school: suRole === "teacher" ? suSchool : null,
+          school: schoolValue,
+          grade: suRole === "student" ? suGrade.trim() || null : null,
+          subject: suRole === "teacher" ? suSubject.trim() || null : null,
         },
       },
     });
