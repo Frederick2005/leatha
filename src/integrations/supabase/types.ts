@@ -135,6 +135,36 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          id: string
+          status: string
+          subject: string
+          user_id: string | null
+        }
+        Insert: {
+          body: string
+          category?: string
+          created_at?: string
+          id?: string
+          status?: string
+          subject: string
+          user_id?: string | null
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          id?: string
+          status?: string
+          subject?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -296,6 +326,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: string
           avatar_url: string | null
           bio: string | null
           created_at: string
@@ -307,11 +338,13 @@ export type Database = {
           id: string
           lesson_count: number
           points: number
+          school: string | null
           theme: string
           updated_at: string
           username: string
         }
         Insert: {
+          account_type?: string
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -323,11 +356,13 @@ export type Database = {
           id: string
           lesson_count?: number
           points?: number
+          school?: string | null
           theme?: string
           updated_at?: string
           username: string
         }
         Update: {
+          account_type?: string
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -339,6 +374,7 @@ export type Database = {
           id?: string
           lesson_count?: number
           points?: number
+          school?: string | null
           theme?: string
           updated_at?: string
           username?: string

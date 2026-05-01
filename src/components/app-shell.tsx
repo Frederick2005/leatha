@@ -1,7 +1,7 @@
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   GitFork, Home, BookOpen, MessageSquare, MessagesSquare, Trophy, Sparkles,
-  Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X,
+  Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X, MessageSquareWarning,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/providers/auth-provider";
@@ -213,6 +213,9 @@ export function AppShell() {
                 <DropdownMenuItem asChild>
                   <Link to="/lessons/new"><Plus className="h-4 w-4 mr-2" /> New lesson</Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/feedback"><MessageSquareWarning className="h-4 w-4 mr-2" /> Send feedback</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setThemeOpen(true)}>
                   <Palette className="h-4 w-4 mr-2" /> Themes
                 </DropdownMenuItem>
@@ -241,17 +244,19 @@ export function AppShell() {
         </main>
 
         <footer className="border-t border-border bg-background/80">
-          <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground">
+          <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
               <GitFork className="h-4 w-4 text-primary" />
               <span className="font-semibold text-foreground">SkillChain</span>
-              <span>© {new Date().getFullYear()}</span>
+              <span>© 2026{new Date().getFullYear() > 2026 ? `–${new Date().getFullYear()}` : ""} — All rights reserved.</span>
             </div>
-            <div className="flex flex-wrap items-center gap-3">
+            <nav className="flex flex-wrap items-center gap-x-4 gap-y-2">
               <Link to="/feedback" className="hover:text-primary">Feedback</Link>
               <Link to="/terms" className="hover:text-primary">Terms</Link>
               <Link to="/privacy" className="hover:text-primary">Privacy</Link>
-            </div>
+              <Link to="/cookies" className="hover:text-primary">Cookies</Link>
+              <Link to="/legal" className="hover:text-primary">Legal</Link>
+            </nav>
           </div>
         </footer>
       </div>
