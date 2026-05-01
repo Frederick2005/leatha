@@ -20,12 +20,13 @@ const signupSchema = z.object({
   email: z.string().email("Invalid email"),
   password: z.string().min(8, "Min 8 characters").max(72, "Max 72 characters"),
   username: z.string().min(3, "Min 3 chars").max(24, "Max 24 chars").regex(/^[a-z0-9_]+$/, "lowercase letters, digits, _ only"),
+  display_name: z.string().min(1, "Required").max(60, "Max 60 chars"),
   role: z.enum(["student", "teacher", "administrator"]),
-  school: z.string().max(60, "Max 60 chars").optional(),
-  adminCode: z.string().optional(),
+  school: z.string().max(80, "Max 80 chars").optional(),
+  grade: z.string().max(40, "Max 40 chars").optional(),
+  subject: z.string().max(80, "Max 80 chars").optional(),
+  organization: z.string().max(80, "Max 80 chars").optional(),
 });
-
-const ADMIN_SIGNUP_CODE = import.meta.env.VITE_ADMIN_SIGNUP_CODE ?? "SKILLCHAIN-ADMIN";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
