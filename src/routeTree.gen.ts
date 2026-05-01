@@ -14,11 +14,13 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as LegalRouteImport } from './routes/legal'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
@@ -55,6 +57,11 @@ const MessagesRoute = MessagesRouteImport.update({
   path: '/messages',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalRoute = LegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
@@ -78,6 +85,11 @@ const ExploreRoute = ExploreRouteImport.update({
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChatRoute = ChatRouteImport.update({
@@ -136,11 +148,13 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
+  '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
   '/feedback': typeof FeedbackRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/legal': typeof LegalRoute
   '/messages': typeof MessagesRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -158,11 +172,13 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
+  '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
   '/feedback': typeof FeedbackRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/legal': typeof LegalRoute
   '/messages': typeof MessagesRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -181,11 +197,13 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
+  '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
   '/feedback': typeof FeedbackRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/legal': typeof LegalRoute
   '/messages': typeof MessagesRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -205,11 +223,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/chat'
+    | '/cookies'
     | '/dashboard'
     | '/explore'
     | '/feed'
     | '/feedback'
     | '/leaderboard'
+    | '/legal'
     | '/messages'
     | '/privacy'
     | '/reset-password'
@@ -227,11 +247,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/chat'
+    | '/cookies'
     | '/dashboard'
     | '/explore'
     | '/feed'
     | '/feedback'
     | '/leaderboard'
+    | '/legal'
     | '/messages'
     | '/privacy'
     | '/reset-password'
@@ -249,11 +271,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/chat'
+    | '/cookies'
     | '/dashboard'
     | '/explore'
     | '/feed'
     | '/feedback'
     | '/leaderboard'
+    | '/legal'
     | '/messages'
     | '/privacy'
     | '/reset-password'
@@ -272,11 +296,13 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   ChatRoute: typeof ChatRoute
+  CookiesRoute: typeof CookiesRoute
   DashboardRoute: typeof DashboardRoute
   ExploreRoute: typeof ExploreRoute
   FeedRoute: typeof FeedRoute
   FeedbackRoute: typeof FeedbackRoute
   LeaderboardRoute: typeof LeaderboardRoute
+  LegalRoute: typeof LegalRoute
   MessagesRoute: typeof MessagesRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -324,6 +350,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal': {
+      id: '/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof LegalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/leaderboard': {
       id: '/leaderboard'
       path: '/leaderboard'
@@ -357,6 +390,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat': {
@@ -463,11 +503,13 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   ChatRoute: ChatRoute,
+  CookiesRoute: CookiesRoute,
   DashboardRoute: DashboardRoute,
   ExploreRoute: ExploreRoute,
   FeedRoute: FeedRoute,
   FeedbackRoute: FeedbackRoute,
   LeaderboardRoute: LeaderboardRoute,
+  LegalRoute: LegalRoute,
   MessagesRoute: MessagesRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,

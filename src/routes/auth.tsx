@@ -20,12 +20,13 @@ const signupSchema = z.object({
   email: z.string().email("Invalid email"),
   password: z.string().min(8, "Min 8 characters").max(72, "Max 72 characters"),
   username: z.string().min(3, "Min 3 chars").max(24, "Max 24 chars").regex(/^[a-z0-9_]+$/, "lowercase letters, digits, _ only"),
+  display_name: z.string().min(1, "Required").max(60, "Max 60 chars"),
   role: z.enum(["student", "teacher", "administrator"]),
-  school: z.string().max(60, "Max 60 chars").optional(),
-  adminCode: z.string().optional(),
+  school: z.string().max(80, "Max 80 chars").optional(),
+  grade: z.string().max(40, "Max 40 chars").optional(),
+  subject: z.string().max(80, "Max 80 chars").optional(),
+  organization: z.string().max(80, "Max 80 chars").optional(),
 });
-
-const ADMIN_SIGNUP_CODE = import.meta.env.VITE_ADMIN_SIGNUP_CODE ?? "SKILLCHAIN-ADMIN";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email"),
@@ -48,9 +49,12 @@ function AuthPage() {
   const [suEmail, setSuEmail] = useState("");
   const [suPwd, setSuPwd] = useState("");
   const [suUsername, setSuUsername] = useState("");
+  const [suDisplayName, setSuDisplayName] = useState("");
   const [suRole, setSuRole] = useState<"student" | "teacher" | "administrator">("student");
   const [suSchool, setSuSchool] = useState("");
-  const [suAdminCode, setSuAdminCode] = useState("");
+  const [suGrade, setSuGrade] = useState("");
+  const [suSubject, setSuSubject] = useState("");
+  const [suOrg, setSuOrg] = useState("");
 
   // Forgot
   const [forgotEmail, setForgotEmail] = useState("");
@@ -77,15 +81,24 @@ function AuthPage() {
       email: suEmail,
       password: suPwd,
       username: suUsername,
+      display_name: suDisplayName || suUsername,
       role: suRole,
       school: suSchool,
-      adminCode: suAdminCode,
+      grade: suGrade,
+      subject: suSubject,
+      organization: suOrg,
     });
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
-    if (suRole === "administrator" && suAdminCode !== ADMIN_SIGNUP_CODE) {
-      toast.error("Administrator sign up requires a valid access code.");
-      return;
-    }
+    // Role-specific required fields
+    if (suRole === "student" && !suSchool.trim()) { toast.error("School is required for students."); return; }
+    if (suRole === "teacher" && !suSchool.trim()) { toast.error("School is required for teachers."); return; }
+    if (suRole === "administrator" && !suOrg.trim()) { toast.error("Organization is required for administrators."); return; }
+
+    const schoolValue =
+      suRole === "administrator" ? suOrg.trim() :
+      suRole === "teacher" ? suSchool.trim() :
+      suSchool.trim();
+
     setBusy(true);
     const { error } = await supabase.auth.signUp({
       email: suEmail,
@@ -94,9 +107,11 @@ function AuthPage() {
         emailRedirectTo: `${window.location.origin}/feed`,
         data: {
           username: suUsername,
-          display_name: suUsername,
+          display_name: suDisplayName || suUsername,
           account_type: suRole,
-          school: suRole === "teacher" ? suSchool : null,
+          school: schoolValue,
+          grade: suRole === "student" ? suGrade.trim() || null : null,
+          subject: suRole === "teacher" ? suSubject.trim() || null : null,
         },
       },
     });
@@ -169,25 +184,28 @@ function AuthPage() {
                 <Field label="Username" icon={UserIcon}>
                   <Input value={suUsername} onChange={(e) => setSuUsername(e.target.value.toLowerCase())} placeholder="janedoe" autoComplete="username" />
                 </Field>
+                <Field label="Display name" icon={UserIcon}>
+                  <Input value={suDisplayName} onChange={(e) => setSuDisplayName(e.target.value)} placeholder="Jane Doe" />
+                </Field>
                 <Field label="Email" icon={Mail}>
                   <Input type="email" value={suEmail} onChange={(e) => setSuEmail(e.target.value)} autoComplete="email" />
                 </Field>
                 <Field label="Password" icon={Lock}>
                   <Input type="password" value={suPwd} onChange={(e) => setSuPwd(e.target.value)} autoComplete="new-password" />
                 </Field>
-                <Field label="Account type" icon={UserIcon}>
+                <Field label="I am a..." icon={UserIcon}>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {[
-                      { value: "student", label: "Student", description: "Join as a learner." },
-                      { value: "teacher", label: "Teacher", description: "Teach or manage classes." },
-                      { value: "administrator", label: "Administrator", description: "Admin dashboard access." },
+                      { value: "student", label: "Student", description: "Learn, fork, and build with peers." },
+                      { value: "teacher", label: "Teacher", description: "Publish lessons & guide students." },
+                      { value: "administrator", label: "Administrator", description: "School / org leadership." },
                     ].map((option) => (
                       <label
                         key={option.value}
                         className={`cursor-pointer rounded-xl border px-3 py-3 text-sm transition-colors ${
                           suRole === option.value
                             ? "border-primary bg-primary/10"
-                            : "border-border bg-muted"
+                            : "border-border bg-muted hover:bg-muted/70"
                         }`}
                       >
                         <input
@@ -204,26 +222,39 @@ function AuthPage() {
                     ))}
                   </div>
                 </Field>
+
+                {/* Role-specific fields */}
+                {suRole === "student" && (
+                  <>
+                    <Field label="School" icon={UserIcon}>
+                      <Input value={suSchool} onChange={(e) => setSuSchool(e.target.value)} placeholder="e.g. Oak Valley High" />
+                    </Field>
+                    <Field label="Grade or year (optional)" icon={UserIcon}>
+                      <Input value={suGrade} onChange={(e) => setSuGrade(e.target.value)} placeholder="e.g. Grade 11 / Year 2" />
+                    </Field>
+                  </>
+                )}
                 {suRole === "teacher" && (
-                  <Field label="School or organization" icon={UserIcon}>
-                    <Input
-                      value={suSchool}
-                      onChange={(e) => setSuSchool(e.target.value)}
-                      placeholder="Oak Valley Academy"
-                    />
-                  </Field>
+                  <>
+                    <Field label="School" icon={UserIcon}>
+                      <Input value={suSchool} onChange={(e) => setSuSchool(e.target.value)} placeholder="e.g. Oak Valley High" />
+                    </Field>
+                    <Field label="Subject taught (optional)" icon={UserIcon}>
+                      <Input value={suSubject} onChange={(e) => setSuSubject(e.target.value)} placeholder="e.g. Physics, Mathematics" />
+                    </Field>
+                  </>
                 )}
                 {suRole === "administrator" && (
-                  <Field label="Administrator access code" icon={Lock}>
-                    <Input
-                      type="password"
-                      value={suAdminCode}
-                      onChange={(e) => setSuAdminCode(e.target.value)}
-                      placeholder="Enter admin invite code"
-                    />
-                  </Field>
+                  <>
+                    <Field label="Organization" icon={UserIcon}>
+                      <Input value={suOrg} onChange={(e) => setSuOrg(e.target.value)} placeholder="e.g. Oak Valley District" />
+                    </Field>
+                    <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-xs text-muted-foreground">
+                      Heads up: administrator accounts only get the dashboard if they are the very first user on this site, or are promoted by an existing admin from the Admin → Users panel. Otherwise this label is for display only.
+                    </div>
+                  </>
                 )}
-                <p className="text-xs text-muted-foreground">Min 8 chars. Choose the account type that fits your role.</p>
+                <p className="text-xs text-muted-foreground">Min 8 chars password. You can change details later in Settings.</p>
                 <Button type="submit" className="w-full" disabled={busy}>
                   {busy ? "Creating account…" : "Create account"}
                 </Button>
