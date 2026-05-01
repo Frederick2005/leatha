@@ -113,13 +113,13 @@ function MessagesLayout() {
     <div className="flex h-[calc(100vh-3.5rem)]">
       <aside
         className={cn(
-          "border-r border-border w-full md:w-80 lg:w-96 flex-col",
+          "border-r border-border w-full md:w-80 lg:w-96 flex-col bg-card",
           showList ? "flex" : "hidden md:flex",
         )}
       >
         <div className="px-4 py-4 border-b border-border flex items-center gap-2">
           <MessagesSquare className="h-5 w-5 text-primary" />
-          <h1 className="font-display text-lg font-semibold">Messages</h1>
+          <h1 className="font-display text-lg font-semibold">Chats</h1>
         </div>
         <div className="flex-1 overflow-y-auto">
           {listLoading && <div className="p-4 text-sm text-muted-foreground">Loading…</div>}
@@ -136,7 +136,7 @@ function MessagesLayout() {
                 to="/messages/$username"
                 params={{ username: c.otherProfile?.username ?? "" }}
                 className={cn(
-                  "flex items-start gap-3 px-4 py-3 border-b border-border/50 hover:bg-accent/50 transition-colors",
+                  "flex items-start gap-3 px-4 py-3 border-b border-border/30 hover:bg-accent/50 transition-colors",
                   active && "bg-accent",
                 )}
               >
@@ -150,18 +150,18 @@ function MessagesLayout() {
                     <span className="font-semibold text-sm truncate">
                       {c.otherProfile?.display_name ?? c.otherProfile?.username ?? "unknown"}
                     </span>
-                    <span className="text-xs text-muted-foreground shrink-0">
+                    <span className={cn("text-[11px] shrink-0", c.unread ? "text-primary font-semibold" : "text-muted-foreground")}>
                       {formatDistanceToNow(new Date(c.lastAt), { addSuffix: false })}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 mt-0.5">
                     <p className={cn(
                       "text-xs truncate flex-1",
                       c.unread ? "text-foreground font-medium" : "text-muted-foreground",
                     )}>
-                      {c.fromMe && "You: "}{c.lastBody}
+                      {c.fromMe && "✓ "}{c.lastBody || "📎 attachment"}
                     </p>
-                    {c.unread && <span className="h-2 w-2 rounded-full bg-primary shrink-0" />}
+                    {c.unread && <span className="h-5 min-w-5 px-1.5 grid place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shrink-0">•</span>}
                   </div>
                 </div>
               </Link>
@@ -174,8 +174,11 @@ function MessagesLayout() {
         {isThread ? (
           <Outlet />
         ) : (
-          <div className="flex-1 grid place-items-center text-sm text-muted-foreground">
-            Select a conversation
+          <div className="flex-1 grid place-items-center text-sm text-muted-foreground bg-muted/20">
+            <div className="text-center">
+              <MessagesSquare className="h-12 w-12 mx-auto text-muted-foreground/40" />
+              <p className="mt-3">Select a conversation to start chatting</p>
+            </div>
           </div>
         )}
       </section>
