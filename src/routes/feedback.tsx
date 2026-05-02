@@ -5,7 +5,10 @@ import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Star } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/feedback")({
   head: () => ({
@@ -17,11 +20,21 @@ export const Route = createFileRoute("/feedback")({
   component: FeedbackPage,
 });
 
+const CATEGORIES = [
+  { value: "bug", label: "Bug report" },
+  { value: "suggestion", label: "Suggestion" },
+  { value: "complaint", label: "Complaint" },
+  { value: "praise", label: "Praise" },
+  { value: "other", label: "Other" },
+];
+
 function FeedbackPage() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
   const [contact, setContact] = useState("");
+  const [category, setCategory] = useState("suggestion");
+  const [rating, setRating] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
 
@@ -39,16 +52,15 @@ function FeedbackPage() {
       subject: subject.trim(),
       body: bodyText,
       user_id: user?.id ?? null,
-      category: profile?.account_type ?? "general",
+      category,
+      rating,
     });
     setBusy(false);
     if (error) {
       toast.error(error.message || "Unable to send feedback.");
       return;
     }
-    setSubject("");
-    setMessage("");
-    setContact("");
+    setSubject(""); setMessage(""); setContact(""); setRating(null);
     setSent(true);
     toast.success("Thanks for your feedback!");
   };
@@ -59,28 +71,50 @@ function FeedbackPage() {
         <div className="mb-6">
           <h1 className="text-3xl font-display font-semibold">Send feedback</h1>
           <p className="text-sm text-muted-foreground mt-2">
-            Share ideas, report bugs, or request improvements. We read every message.
+            Share ideas, report bugs, or rate your experience. We read every message.
           </p>
         </div>
 
         {sent ? (
           <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 text-center">
             <p className="text-lg font-semibold">Feedback sent</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              We appreciate your input. A member of the SkillChain team will review it soon.
-            </p>
-            <Button asChild className="mt-4"><Link to="/">Back to home</Link></Button>
+            <p className="text-sm text-muted-foreground mt-2">A member of the SkillChain team will review it soon.</p>
+            <div className="flex gap-2 justify-center mt-4">
+              <Button asChild><Link to="/">Back to home</Link></Button>
+              <Button variant="outline" onClick={() => setSent(false)}>Send another</Button>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid gap-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Subject</label>
-                <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Feature request, bug report, idea…" />
+              <div className="grid sm:grid-cols-[1fr_200px] gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Subject</label>
+                  <Input value={subject} onChange={(e) => setSubject(e.target.value)} maxLength={150} placeholder="Short summary" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Category</label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Message</label>
-                <Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={8} placeholder="Tell us what you want to see improved." />
+                <Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={8} maxLength={4000} placeholder="Tell us more…" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Rating (optional)</label>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button key={n} type="button" onClick={() => setRating(rating === n ? null : n)} aria-label={`Rate ${n}`}>
+                      <Star className={cn("h-7 w-7 transition", rating && n <= rating ? "fill-primary text-primary" : "text-muted-foreground hover:text-primary")} />
+                    </button>
+                  ))}
+                </div>
               </div>
               {!user && (
                 <div className="space-y-2">
@@ -91,9 +125,7 @@ function FeedbackPage() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-muted-foreground">
-                Your feedback helps us make SkillChain better for students, teachers, and admins.
-              </p>
+              <p className="text-xs text-muted-foreground">Your feedback helps us make SkillChain better.</p>
               <Button type="submit" disabled={busy}>{busy ? "Sending…" : "Send feedback"}</Button>
             </div>
           </form>
