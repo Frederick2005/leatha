@@ -687,7 +687,7 @@ function FeedbackTab() {
 
   useEffect(() => { const t = setTimeout(load, 250); return () => clearTimeout(t); }, [search, statusFilter, categoryFilter, ratingFilter]);
 
-  const updateItem = async (id: string, patch: Partial<FeedbackRow>) => {
+  const updateItem = async (id: string, patch: FeedbackPatch) => {
     const { error } = await supabase.from("feedback").update(patch).eq("id", id);
     if (error) return toast.error(error.message);
     await logAdminAction("feedback_updated", "feedback", id, patch as Record<string, unknown>);
@@ -794,7 +794,7 @@ function FeedbackTab() {
   );
 }
 
-function FeedbackDialog({ item, onClose, onUpdate }: { item: FeedbackRow | null; onClose: () => void; onUpdate: (id: string, patch: Partial<FeedbackRow>) => void }) {
+function FeedbackDialog({ item, onClose, onUpdate }: { item: FeedbackRow | null; onClose: () => void; onUpdate: (id: string, patch: FeedbackPatch) => void }) {
   const [notes, setNotes] = useState("");
   const [response, setResponse] = useState("");
 
@@ -852,7 +852,7 @@ function FeedbackDialog({ item, onClose, onUpdate }: { item: FeedbackRow | null;
             <Textarea value={response} onChange={(e) => setResponse(e.target.value)} rows={4} placeholder="Public response visible to the user" />
             <Button size="sm" onClick={async () => {
               const { data: { user } } = await supabase.auth.getUser();
-              onUpdate(item.id, { response, responded_at: new Date().toISOString(), responded_by: user?.id } as Partial<FeedbackRow>);
+              onUpdate(item.id, { response, responded_at: new Date().toISOString(), responded_by: user?.id } as FeedbackPatch);
             }}>Save response</Button>
             {item.responded_at && <p className="text-xs text-muted-foreground">Last responded {format(new Date(item.responded_at), "PPP p")}</p>}
           </div>
