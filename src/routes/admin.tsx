@@ -34,8 +34,16 @@ export const Route = createFileRoute("/admin")({
 async function logAdminAction(action: string, target_type?: string, target_id?: string, details: Record<string, unknown> = {}) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
-  await supabase.from("admin_logs").insert({ admin_id: user.id, action, target_type, target_id, details });
+  await supabase.from("admin_logs").insert({
+    admin_id: user.id,
+    action,
+    target_type: target_type ?? null,
+    target_id: target_id ?? null,
+    details: details as never,
+  });
 }
+
+type FeedbackPatch = Partial<Omit<FeedbackRow, "user">>;
 
 const STATUS_COLORS: Record<string, string> = {
   new: "bg-blue-500/15 text-blue-600 border-blue-500/30",
