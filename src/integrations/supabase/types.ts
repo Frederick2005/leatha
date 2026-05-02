@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_logs: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string
+          details: Json
+          id: string
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string
+          details?: Json
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
+      announcements: {
+        Row: {
+          audience: string
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          title: string
+        }
+        Insert: {
+          audience?: string
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          title: string
+        }
+        Update: {
+          audience?: string
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
       blocks: {
         Row: {
           blocked_id: string
@@ -137,28 +194,46 @@ export type Database = {
       }
       feedback: {
         Row: {
+          admin_notes: string | null
           body: string
           category: string
           created_at: string
           id: string
+          priority: boolean
+          rating: number | null
+          responded_at: string | null
+          responded_by: string | null
+          response: string | null
           status: string
           subject: string
           user_id: string | null
         }
         Insert: {
+          admin_notes?: string | null
           body: string
           category?: string
           created_at?: string
           id?: string
+          priority?: boolean
+          rating?: number | null
+          responded_at?: string | null
+          responded_by?: string | null
+          response?: string | null
           status?: string
           subject: string
           user_id?: string | null
         }
         Update: {
+          admin_notes?: string | null
           body?: string
           category?: string
           created_at?: string
           id?: string
+          priority?: boolean
+          rating?: number | null
+          responded_at?: string | null
+          responded_by?: string | null
+          response?: string | null
           status?: string
           subject?: string
           user_id?: string | null
