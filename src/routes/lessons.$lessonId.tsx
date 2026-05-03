@@ -51,16 +51,30 @@ function LessonPage() {
   const [commentBody, setCommentBody] = useState("");
   const [reportReason, setReportReason] = useState("");
 
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const reload = async () => {
+    setErrorMsg(null);
     const { data, error } = await supabase
       .from("lessons")
       .select(`*,
-        author:profiles!lessons_author_profile_fkey(id, username, display_name, avatar_url),
-        parent:lessons!lessons_parent_lesson_id_fkey(id, title, author:profiles!lessons_author_profile_fkey(username))`)
+        author:profiles!lessons_author_profile_fkey(id, username, display_name, avatar_url)`)
       .eq("id", lessonId)
       .maybeSingle();
-    if (error || !data) { setLesson(null); setLoading(false); return; }
-    setLesson(data as unknown as LessonRow);
+    if (error) { setErrorMsg(error.message); setLesson(null); setLoading(false); return; }
+    if (!data) { setErrorMsg("This lesson does not exist or has been removed."); setLesson(null); setLoading(false); return; }
+
+    // Fetch parent separately to avoid PostgREST self-join hint issues
+    let parent: LessonRow["parent"] = null;
+    if (data.parent_lesson_id) {
+      const { data: p } = await supabase
+        .from("lessons")
+        .select(`id, title, author:profiles!lessons_author_profile_fkey(username)`)
+        .eq("id", data.parent_lesson_id)
+        .maybeSingle();
+      if (p) parent = p as unknown as LessonRow["parent"];
+    }
+    setLesson({ ...(data as unknown as LessonRow), parent });
 
     const [{ data: cs }, { data: fs }, { data: contribs }] = await Promise.all([
       supabase.from("comments").select(`id, body, created_at, author_id,
