@@ -42,6 +42,10 @@ function NewLessonPage() {
   const [category, setCategory] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [attachments, setAttachments] = useState<LessonAttachmentMeta[]>([]);
+  const [contentType, setContentType] = useState<"text" | "video" | "document">("text");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [documentUrl, setDocumentUrl] = useState("");
+  const [documentType, setDocumentType] = useState("pdf");
   const [busy, setBusy] = useState(false);
   const [parentTitle, setParentTitle] = useState<string | null>(null);
 
@@ -73,7 +77,9 @@ function NewLessonPage() {
     e.preventDefault();
     if (!user) return;
     if (title.trim().length < 3) { toast.error("Title too short"); return; }
-    if (textLen(content) < 10) { toast.error("Content too short"); return; }
+    if (contentType === "text" && textLen(content) < 10) { toast.error("Content too short"); return; }
+    if (contentType === "video" && !videoUrl.trim()) { toast.error("Add a YouTube link"); return; }
+    if (contentType === "document" && !documentUrl.trim()) { toast.error("Add a document URL"); return; }
     const finalCategory = category === "__other" ? customCategory.trim() : category.trim();
     if (!finalCategory) { toast.error("Please select or enter a category"); return; }
     setBusy(true);
@@ -90,6 +96,10 @@ function NewLessonPage() {
       parent_lesson_id: fork ?? null,
       is_published: true,
       attachments: attachments as never,
+      content_type: contentType,
+      video_url: contentType === "video" ? videoUrl.trim() : null,
+      document_url: contentType === "document" ? documentUrl.trim() : null,
+      document_type: contentType === "document" ? documentType : null,
     }).select("id").single();
     setBusy(false);
     if (error) { toast.error(error.message); return; }
@@ -149,7 +159,49 @@ function NewLessonPage() {
         </div>
 
         <div className="space-y-1.5">
-          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Lesson Content</Label>
+          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Content Type</Label>
+          <Select value={contentType} onValueChange={(v) => setContentType(v as "text" | "video" | "document")}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="text">Text / Article</SelectItem>
+              <SelectItem value="video">YouTube Video</SelectItem>
+              <SelectItem value="document">Document (PDF/DOC/PPT/TXT)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {contentType === "video" && (
+          <div className="space-y-1.5">
+            <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">YouTube URL</Label>
+            <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://www.youtube.com/watch?v=…" />
+          </div>
+        )}
+
+        {contentType === "document" && (
+          <div className="grid sm:grid-cols-[1fr_180px] gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Document URL</Label>
+              <Input value={documentUrl} onChange={(e) => setDocumentUrl(e.target.value)} placeholder="https://…/file.pdf" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Type</Label>
+              <Select value={documentType} onValueChange={setDocumentType}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                  <SelectItem value="doc">DOC/DOCX</SelectItem>
+                  <SelectItem value="ppt">PPT/PPTX</SelectItem>
+                  <SelectItem value="txt">TXT</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-1.5">
+          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">
+            {contentType === "text" ? "Lesson Content" : "Description / Notes (optional)"}
+          </Label>
           <RichEditor
             value={content}
             onChange={setContent}
