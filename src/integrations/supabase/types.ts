@@ -323,7 +323,10 @@ export type Database = {
           author_id: string
           comment_count: number
           content: string
+          content_type: string
           created_at: string
+          document_type: string | null
+          document_url: string | null
           fork_count: number
           id: string
           is_published: boolean
@@ -336,13 +339,17 @@ export type Database = {
           tags: string[]
           title: string
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           attachments?: Json
           author_id: string
           comment_count?: number
           content?: string
+          content_type?: string
           created_at?: string
+          document_type?: string | null
+          document_url?: string | null
           fork_count?: number
           id?: string
           is_published?: boolean
@@ -355,13 +362,17 @@ export type Database = {
           tags?: string[]
           title: string
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           attachments?: Json
           author_id?: string
           comment_count?: number
           content?: string
+          content_type?: string
           created_at?: string
+          document_type?: string | null
+          document_url?: string | null
           fork_count?: number
           id?: string
           is_published?: boolean
@@ -374,6 +385,7 @@ export type Database = {
           tags?: string[]
           title?: string
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: [
           {
