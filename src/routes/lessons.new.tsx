@@ -42,6 +42,10 @@ function NewLessonPage() {
   const [category, setCategory] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [attachments, setAttachments] = useState<LessonAttachmentMeta[]>([]);
+  const [contentType, setContentType] = useState<"text" | "video" | "document">("text");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [documentUrl, setDocumentUrl] = useState("");
+  const [documentType, setDocumentType] = useState("pdf");
   const [busy, setBusy] = useState(false);
   const [parentTitle, setParentTitle] = useState<string | null>(null);
 
