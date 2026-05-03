@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { RichContent } from "@/components/rich-content";
+import { LessonContentViewer } from "@/components/lesson-content-viewer";
 import { LessonAttachment, type LessonAttachmentMeta } from "@/components/lesson-attachment";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
