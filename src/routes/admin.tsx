@@ -376,7 +376,7 @@ function FeedbackPanel() {
   useEffect(() => { void load(); }, []);
 
   const update = async (id: string, patch: Record<string, unknown>) => {
-    await supabase.from("feedback").update(patch).eq("id", id);
+    await supabase.from("feedback").update(patch as never).eq("id", id);
     await logAdminAction("feedback_update", "feedback", id, patch);
     void load();
   };
