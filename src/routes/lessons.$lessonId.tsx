@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { RichContent } from "@/components/rich-content";
+import { LessonContentViewer } from "@/components/lesson-content-viewer";
 import { LessonAttachment, type LessonAttachmentMeta } from "@/components/lesson-attachment";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,10 @@ interface LessonRow {
   fork_count: number; like_count: number; comment_count: number; is_published: boolean;
   author_id: string; created_at: string; updated_at: string;
   attachments: LessonAttachmentMeta[];
+  content_type: "text" | "video" | "document";
+  video_url: string | null;
+  document_url: string | null;
+  document_type: string | null;
   author: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null;
   parent: { id: string; title: string; author: { username: string } | null } | null;
 }
@@ -255,7 +260,13 @@ function LessonPage() {
         </div>
 
         <div className="mt-8 border-t border-border pt-8">
-          <RichContent content={lesson.content || "*No content yet.*"} />
+          <LessonContentViewer
+            contentType={lesson.content_type ?? "text"}
+            content={lesson.content}
+            videoUrl={lesson.video_url}
+            documentUrl={lesson.document_url}
+            documentType={lesson.document_type}
+          />
         </div>
 
         {Array.isArray(lesson.attachments) && lesson.attachments.length > 0 && (
