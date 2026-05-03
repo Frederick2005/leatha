@@ -77,7 +77,9 @@ function NewLessonPage() {
     e.preventDefault();
     if (!user) return;
     if (title.trim().length < 3) { toast.error("Title too short"); return; }
-    if (textLen(content) < 10) { toast.error("Content too short"); return; }
+    if (contentType === "text" && textLen(content) < 10) { toast.error("Content too short"); return; }
+    if (contentType === "video" && !videoUrl.trim()) { toast.error("Add a YouTube link"); return; }
+    if (contentType === "document" && !documentUrl.trim()) { toast.error("Add a document URL"); return; }
     const finalCategory = category === "__other" ? customCategory.trim() : category.trim();
     if (!finalCategory) { toast.error("Please select or enter a category"); return; }
     setBusy(true);
@@ -94,6 +96,10 @@ function NewLessonPage() {
       parent_lesson_id: fork ?? null,
       is_published: true,
       attachments: attachments as never,
+      content_type: contentType,
+      video_url: contentType === "video" ? videoUrl.trim() : null,
+      document_url: contentType === "document" ? documentUrl.trim() : null,
+      document_type: contentType === "document" ? documentType : null,
     }).select("id").single();
     setBusy(false);
     if (error) { toast.error(error.message); return; }
