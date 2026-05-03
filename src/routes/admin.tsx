@@ -34,7 +34,8 @@ async function logAdminAction(action: string, target_type?: string, target_id?: 
 
 function AdminGate() {
   const { isModOrAdmin, isAdmin, loading } = useAuth();
-  const { isDark } = useTheme();
+  const { darkMode } = useTheme();
+  const isDark = darkMode;
 
   if (loading) return <div className="min-h-[60vh] grid place-items-center"><div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" /></div>;
   if (!isModOrAdmin) {
