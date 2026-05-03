@@ -260,7 +260,13 @@ function LessonPage() {
         </div>
 
         <div className="mt-8 border-t border-border pt-8">
-          <RichContent content={lesson.content || "*No content yet.*"} />
+          <LessonContentViewer
+            contentType={lesson.content_type ?? "text"}
+            content={lesson.content}
+            videoUrl={lesson.video_url}
+            documentUrl={lesson.document_url}
+            documentType={lesson.document_type}
+          />
         </div>
 
         {Array.isArray(lesson.attachments) && lesson.attachments.length > 0 && (
