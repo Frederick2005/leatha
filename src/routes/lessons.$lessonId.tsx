@@ -29,6 +29,10 @@ interface LessonRow {
   fork_count: number; like_count: number; comment_count: number; is_published: boolean;
   author_id: string; created_at: string; updated_at: string;
   attachments: LessonAttachmentMeta[];
+  content_type: "text" | "video" | "document";
+  video_url: string | null;
+  document_url: string | null;
+  document_type: string | null;
   author: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null;
   parent: { id: string; title: string; author: { username: string } | null } | null;
 }
