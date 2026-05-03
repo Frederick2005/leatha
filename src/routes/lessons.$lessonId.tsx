@@ -156,7 +156,9 @@ function LessonPage() {
   if (!lesson) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-10 text-center">
-        <p className="text-muted-foreground">Lesson not found.</p>
+        <h1 className="text-xl font-semibold mb-2">Couldn't load lesson</h1>
+        <p className="text-muted-foreground text-sm">{errorMsg ?? "Lesson not found."}</p>
+        <p className="text-xs text-muted-foreground mt-2 font-mono">ID: {lessonId}</p>
         <Button asChild variant="outline" className="mt-4"><Link to="/">Back to feed</Link></Button>
       </div>
     );
