@@ -51,16 +51,30 @@ function LessonPage() {
   const [commentBody, setCommentBody] = useState("");
   const [reportReason, setReportReason] = useState("");
 
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   const reload = async () => {
+    setErrorMsg(null);
     const { data, error } = await supabase
       .from("lessons")
       .select(`*,
-        author:profiles!lessons_author_profile_fkey(id, username, display_name, avatar_url),
-        parent:lessons!lessons_parent_lesson_id_fkey(id, title, author:profiles!lessons_author_profile_fkey(username))`)
+        author:profiles!lessons_author_profile_fkey(id, username, display_name, avatar_url)`)
       .eq("id", lessonId)
       .maybeSingle();
-    if (error || !data) { setLesson(null); setLoading(false); return; }
-    setLesson(data as unknown as LessonRow);
+    if (error) { setErrorMsg(error.message); setLesson(null); setLoading(false); return; }
+    if (!data) { setErrorMsg("This lesson does not exist or has been removed."); setLesson(null); setLoading(false); return; }
+
+    // Fetch parent separately to avoid PostgREST self-join hint issues
+    let parent: LessonRow["parent"] = null;
+    if (data.parent_lesson_id) {
+      const { data: p } = await supabase
+        .from("lessons")
+        .select(`id, title, author:profiles!lessons_author_profile_fkey(username)`)
+        .eq("id", data.parent_lesson_id)
+        .maybeSingle();
+      if (p) parent = p as unknown as LessonRow["parent"];
+    }
+    setLesson({ ...(data as unknown as LessonRow), parent });
 
     const [{ data: cs }, { data: fs }, { data: contribs }] = await Promise.all([
       supabase.from("comments").select(`id, body, created_at, author_id,
@@ -142,7 +156,9 @@ function LessonPage() {
   if (!lesson) {
     return (
       <div className="max-w-3xl mx-auto px-4 py-10 text-center">
-        <p className="text-muted-foreground">Lesson not found.</p>
+        <h1 className="text-xl font-semibold mb-2">Couldn't load lesson</h1>
+        <p className="text-muted-foreground text-sm">{errorMsg ?? "Lesson not found."}</p>
+        <p className="text-xs text-muted-foreground mt-2 font-mono">ID: {lessonId}</p>
         <Button asChild variant="outline" className="mt-4"><Link to="/">Back to feed</Link></Button>
       </div>
     );
