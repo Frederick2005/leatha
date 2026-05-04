@@ -6,7 +6,7 @@ import { RequireAuth } from "@/components/require-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Bank, Check, X, Clock, BadgeCheck } from "lucide-react";
+import { Building2, Check, X, Clock, BadgeCheck } from "lucide-react";
 
 export const Route = createFileRoute("/schools")({
   head: () => ({ meta: [{ title: "Schools — SkillChain" }] }),
@@ -59,11 +59,11 @@ function SchoolsPage() {
     <div className="max-w-3xl mx-auto p-6 space-y-6">
       <header>
         <h1 className="text-3xl font-display font-semibold flex items-center gap-2">
-          <Bank className="h-7 w-7 text-primary" /> Schools
+          <Building2 className="h-7 w-7 text-primary" /> Schools
         </h1>
         <p className="text-muted-foreground mt-1">
           Join a school to collaborate with verified teachers, or stay independent as a freelancer.
-          {profile?.is_verified && <span className="ml-2 inline-flex items-center gap-1 text-primary"><BadgeCheck className="h-4 w-4" /> Verified</span>}
+          {(profile as { is_verified?: boolean } | null)?.is_verified && <span className="ml-2 inline-flex items-center gap-1 text-primary"><BadgeCheck className="h-4 w-4" /> Verified</span>}
         </p>
       </header>
 
