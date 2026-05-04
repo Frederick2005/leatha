@@ -103,6 +103,7 @@ function NewLessonPage() {
     }).select("id").single();
     setBusy(false);
     if (error) { toast.error(error.message); return; }
+    void import("@/lib/analytics").then((m) => m.trackEvent(fork ? "lesson_forked" : "lesson_created", { lesson_id: data.id }));
     toast.success(fork ? "Forked & published — +10 points!" : "Lesson published — +10 points!");
     navigate({ to: "/lessons/$lessonId", params: { lessonId: data.id } });
   };
