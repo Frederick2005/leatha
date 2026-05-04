@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { type AttachmentMeta } from "@/components/dm-attachment";
 import { RequireAuth } from "@/components/require-auth";
+import { trackEvent } from "@/lib/analytics";
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
 const MAX_FILES = 6;
