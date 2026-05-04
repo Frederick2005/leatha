@@ -570,7 +570,7 @@ export type Database = {
       is_mod_or_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "user" | "moderator" | "admin"
+      app_role: "user" | "moderator" | "admin" | "super_admin"
       report_status: "pending" | "reviewed" | "resolved" | "dismissed"
       report_target_type:
         | "lesson"
@@ -705,7 +705,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["user", "moderator", "admin"],
+      app_role: ["user", "moderator", "admin", "super_admin"],
       report_status: ["pending", "reviewed", "resolved", "dismissed"],
       report_target_type: [
         "lesson",
