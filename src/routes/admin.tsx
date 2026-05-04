@@ -7,8 +7,9 @@ import {
 import {
   DashboardOutlined, UserOutlined, BookOutlined, FlagOutlined, MessageOutlined,
   TrophyOutlined, NotificationOutlined, SafetyOutlined, ArrowLeftOutlined,
+  BankOutlined, BarChartOutlined, CheckCircleOutlined,
 } from "@ant-design/icons";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Legend } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { RequireAuth } from "@/components/require-auth";
