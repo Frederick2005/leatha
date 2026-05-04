@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SchoolsRouteImport } from './routes/schools'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MessagesRouteImport } from './routes/messages'
@@ -40,6 +41,11 @@ const TermsRoute = TermsRouteImport.update({
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolsRoute = SchoolsRouteImport.update({
+  id: '/schools',
+  path: '/schools',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/messages': typeof MessagesRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
@@ -182,6 +189,7 @@ export interface FileRoutesByTo {
   '/messages': typeof MessagesRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
@@ -207,6 +215,7 @@ export interface FileRoutesById {
   '/messages': typeof MessagesRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/privacy'
     | '/reset-password'
+    | '/schools'
     | '/settings'
     | '/terms'
     | '/lessons/$lessonId'
@@ -257,6 +267,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/privacy'
     | '/reset-password'
+    | '/schools'
     | '/settings'
     | '/terms'
     | '/lessons/$lessonId'
@@ -281,6 +292,7 @@ export interface FileRouteTypes {
     | '/messages'
     | '/privacy'
     | '/reset-password'
+    | '/schools'
     | '/settings'
     | '/terms'
     | '/lessons/$lessonId'
@@ -306,6 +318,7 @@ export interface RootRouteChildren {
   MessagesRoute: typeof MessagesRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SchoolsRoute: typeof SchoolsRoute
   SettingsRoute: typeof SettingsRoute
   TermsRoute: typeof TermsRoute
   LessonsLessonIdRoute: typeof LessonsLessonIdRouteWithChildren
@@ -327,6 +340,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/schools': {
+      id: '/schools'
+      path: '/schools'
+      fullPath: '/schools'
+      preLoaderRoute: typeof SchoolsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -513,6 +533,7 @@ const rootRouteChildren: RootRouteChildren = {
   MessagesRoute: MessagesRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SchoolsRoute: SchoolsRoute,
   SettingsRoute: SettingsRoute,
   TermsRoute: TermsRoute,
   LessonsLessonIdRoute: LessonsLessonIdRouteWithChildren,

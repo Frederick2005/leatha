@@ -44,6 +44,30 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           audience: string
@@ -423,6 +447,7 @@ export type Database = {
           following_count: number
           fork_received_count: number
           id: string
+          is_verified: boolean
           lesson_count: number
           points: number
           school: string | null
@@ -441,6 +466,7 @@ export type Database = {
           following_count?: number
           fork_received_count?: number
           id: string
+          is_verified?: boolean
           lesson_count?: number
           points?: number
           school?: string | null
@@ -459,6 +485,7 @@ export type Database = {
           following_count?: number
           fork_received_count?: number
           id?: string
+          is_verified?: boolean
           lesson_count?: number
           points?: number
           school?: string | null
@@ -534,6 +561,62 @@ export type Database = {
         }
         Relationships: []
       }
+      schools: {
+        Row: {
+          admin_id: string
+          code: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          admin_id: string
+          code: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          admin_id?: string
+          code?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      teacher_schools: {
+        Row: {
+          created_at: string
+          id: string
+          school_id: string
+          status: string
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          school_id: string
+          status?: string
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          school_id?: string
+          status?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_schools_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -568,9 +651,10 @@ export type Database = {
         Returns: boolean
       }
       is_mod_or_admin: { Args: { _user_id: string }; Returns: boolean }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      app_role: "user" | "moderator" | "admin"
+      app_role: "user" | "moderator" | "admin" | "super_admin"
       report_status: "pending" | "reviewed" | "resolved" | "dismissed"
       report_target_type:
         | "lesson"
@@ -705,7 +789,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["user", "moderator", "admin"],
+      app_role: ["user", "moderator", "admin", "super_admin"],
       report_status: ["pending", "reviewed", "resolved", "dismissed"],
       report_target_type: [
         "lesson",

@@ -12,6 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 import { type AttachmentMeta } from "@/components/dm-attachment";
 import { RequireAuth } from "@/components/require-auth";
+import { trackEvent } from "@/lib/analytics";
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
 const MAX_FILES = 6;
@@ -180,8 +181,10 @@ function ThreadPage() {
     });
     setSending(false);
     if (error) { toast.error(error.message); return; }
+    void trackEvent(uploaded.some((a) => a.type.startsWith("audio/")) ? "voice_message_sent" : "message_sent", { has_attachments: uploaded.length > 0 });
     setBody("");
     setPendingFiles([]);
+    if (inputRef.current) { inputRef.current.style.height = "auto"; }
   };
 
   // Voice recording
