@@ -27,19 +27,29 @@ const iconFor = (type: string) => {
 export function DmAttachment({ att, mine }: { att: AttachmentMeta; mine: boolean }) {
   const [url, setUrl] = useState<string | null>(null);
   const isImage = att.type.startsWith("image/");
+  const isAudio = att.type.startsWith("audio/");
+  const isVideo = att.type.startsWith("video/");
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const { data } = await supabase.storage
-        .from("dm-attachments")
-        .createSignedUrl(att.path, 3600);
-      if (!cancelled) setUrl(data?.signedUrl ?? null);
+      // Voice notes & media are uploaded to the public chat-media bucket
+      const { data } = supabase.storage.from("chat-media").getPublicUrl(att.path);
+      if (!cancelled) setUrl(data?.publicUrl ?? null);
     })();
     return () => {
       cancelled = true;
     };
   }, [att.path]);
+
+  if (isAudio && url) {
+    return (
+      <div className={cn("rounded-2xl px-3 py-2 max-w-[280px]", mine ? "bg-primary-foreground/10" : "bg-background border border-border")}>
+        <audio controls src={url} className="w-full h-10" preload="metadata" />
+        <div className="text-[10px] opacity-60 mt-1">Voice note · {formatBytes(att.size)}</div>
+      </div>
+    );
+  }
 
   if (isImage && url) {
     return (
@@ -51,6 +61,12 @@ export function DmAttachment({ att, mine }: { att: AttachmentMeta; mine: boolean
           loading="lazy"
         />
       </a>
+    );
+  }
+
+  if (isVideo && url) {
+    return (
+      <video controls src={url} className="max-w-full max-h-64 rounded-lg border border-border/50" preload="metadata" />
     );
   }
 
