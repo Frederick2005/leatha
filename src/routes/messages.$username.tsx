@@ -181,8 +181,10 @@ function ThreadPage() {
     });
     setSending(false);
     if (error) { toast.error(error.message); return; }
+    void trackEvent(uploaded.some((a) => a.type.startsWith("audio/")) ? "voice_message_sent" : "message_sent", { has_attachments: uploaded.length > 0 });
     setBody("");
     setPendingFiles([]);
+    if (inputRef.current) { inputRef.current.style.height = "auto"; }
   };
 
   // Voice recording
