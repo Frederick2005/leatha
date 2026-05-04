@@ -392,11 +392,16 @@ function ThreadPage() {
               <button type="button" onClick={() => fileInputRef.current?.click()} disabled={pendingFiles.length >= MAX_FILES} className="p-2 rounded-full hover:bg-accent text-muted-foreground" aria-label="Attach">
                 <Paperclip className="h-5 w-5" />
               </button>
-              <div className="flex-1 bg-background rounded-3xl border border-border px-3 py-2 max-h-32 overflow-auto">
+              <div className="flex-1 bg-background rounded-3xl border border-border px-3 py-2 max-h-40 overflow-auto">
                 <textarea
                   ref={inputRef}
                   value={body}
-                  onChange={(e) => setBody(e.target.value)}
+                  onChange={(e) => {
+                    setBody(e.target.value);
+                    const el = e.target as HTMLTextAreaElement;
+                    el.style.height = "auto";
+                    el.style.height = Math.min(el.scrollHeight, 140) + "px";
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
