@@ -61,7 +61,7 @@ function AdminGate() {
   );
 }
 
-type Section = "dashboard" | "users" | "lessons" | "reports" | "feedback" | "rewards" | "announcements" | "logs";
+type Section = "dashboard" | "users" | "lessons" | "reports" | "feedback" | "rewards" | "announcements" | "schools" | "analytics" | "logs";
 
 function AdminApp({ isAdmin }: { isAdmin: boolean }) {
   const [section, setSection] = useState<Section>("dashboard");
@@ -82,8 +82,10 @@ function AdminApp({ isAdmin }: { isAdmin: boolean }) {
           onClick={(e) => setSection(e.key as Section)}
           items={[
             { key: "dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
+            { key: "analytics", icon: <BarChartOutlined />, label: "Analytics" },
             { key: "users", icon: <UserOutlined />, label: "Users" },
             { key: "lessons", icon: <BookOutlined />, label: "Lessons" },
+            { key: "schools", icon: <BankOutlined />, label: "Schools" },
             { key: "reports", icon: <FlagOutlined />, label: "Reports" },
             { key: "feedback", icon: <MessageOutlined />, label: "Feedback" },
             { key: "rewards", icon: <TrophyOutlined />, label: "Rewards" },
@@ -95,8 +97,10 @@ function AdminApp({ isAdmin }: { isAdmin: boolean }) {
       <Layout style={{ background: "transparent" }}>
         <Content style={{ padding: 24 }}>
           {section === "dashboard" && <DashboardPanel />}
+          {section === "analytics" && <AnalyticsPanel />}
           {section === "users" && <UsersPanel isAdmin={isAdmin} />}
           {section === "lessons" && <LessonsPanel />}
+          {section === "schools" && <SchoolsPanel isAdmin={isAdmin} />}
           {section === "reports" && <ReportsPanel />}
           {section === "feedback" && <FeedbackPanel />}
           {section === "rewards" && <RewardsPanel isAdmin={isAdmin} />}
