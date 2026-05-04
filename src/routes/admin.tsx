@@ -537,3 +537,165 @@ function LogsPanel() {
     </Card>
   );
 }
+
+// ─────────────── Analytics ───────────────
+function AnalyticsPanel() {
+  const [byDay, setByDay] = useState<{ date: string; total: number }[]>([]);
+  const [byType, setByType] = useState<{ type: string; count: number }[]>([]);
+  const [totals, setTotals] = useState({ events: 0, voice: 0, text: 0 });
+
+  useEffect(() => {
+    void (async () => {
+      const since = new Date(); since.setDate(since.getDate() - 30);
+      const { data } = await supabase
+        .from("analytics_events")
+        .select("event_type, created_at")
+        .gte("created_at", since.toISOString())
+        .limit(5000);
+      const days: Record<string, number> = {};
+      const types: Record<string, number> = {};
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        days[d.toISOString().slice(5, 10)] = 0;
+      }
+      let voice = 0, text = 0;
+      (data ?? []).forEach((e: { event_type: string; created_at: string }) => {
+        const k = e.created_at.slice(5, 10);
+        if (days[k] !== undefined) days[k]++;
+        types[e.event_type] = (types[e.event_type] || 0) + 1;
+        if (e.event_type === "voice_message_sent") voice++;
+        if (e.event_type === "message_sent") text++;
+      });
+      setByDay(Object.entries(days).map(([date, total]) => ({ date, total })));
+      setByType(Object.entries(types).map(([type, count]) => ({ type, count })));
+      setTotals({ events: (data ?? []).length, voice, text });
+    })();
+  }, []);
+
+  return (
+    <div>
+      <Title level={3}>Analytics (last 30 days)</Title>
+      <Row gutter={16}>
+        <Col xs={12} md={8}><Card><Statistic title="Total events" value={totals.events} /></Card></Col>
+        <Col xs={12} md={8}><Card><Statistic title="Text messages" value={totals.text} /></Card></Col>
+        <Col xs={12} md={8}><Card><Statistic title="Voice notes" value={totals.voice} /></Card></Col>
+      </Row>
+      <Card style={{ marginTop: 16 }} title="Daily activity">
+        <div style={{ width: "100%", height: 280 }}>
+          <ResponsiveContainer>
+            <AreaChart data={byDay}>
+              <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+              <XAxis dataKey="date" /><YAxis allowDecimals={false} />
+              <Tooltip />
+              <Area type="monotone" dataKey="total" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+      <Card style={{ marginTop: 16 }} title="Events by type">
+        <div style={{ width: "100%", height: 280 }}>
+          <ResponsiveContainer>
+            <BarChart data={byType}>
+              <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+              <XAxis dataKey="type" interval={0} angle={-15} textAnchor="end" height={80} />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="count" fill="#10b981" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+// ─────────────── Schools ───────────────
+interface SchoolRow { id: string; name: string; code: string; admin_id: string; created_at: string; }
+interface PendingTeacher { id: string; teacher_id: string; school_id: string; status: string; created_at: string; school?: { name: string } | null; teacher?: { username: string; display_name: string | null } | null; }
+
+function SchoolsPanel({ isAdmin }: { isAdmin: boolean }) {
+  const [schools, setSchools] = useState<SchoolRow[]>([]);
+  const [pending, setPending] = useState<PendingTeacher[]>([]);
+  const [open, setOpen] = useState(false);
+  const [form] = Form.useForm();
+
+  const load = async () => {
+    const [{ data: s }, { data: p }] = await Promise.all([
+      supabase.from("schools").select("*").order("created_at", { ascending: false }),
+      supabase.from("teacher_schools").select("*").order("created_at", { ascending: false }).limit(200),
+    ]);
+    setSchools((s ?? []) as SchoolRow[]);
+    const rows = (p ?? []) as PendingTeacher[];
+    if (rows.length) {
+      const teacherIds = Array.from(new Set(rows.map((r) => r.teacher_id)));
+      const schoolIds = Array.from(new Set(rows.map((r) => r.school_id)));
+      const [{ data: tp }, { data: sp }] = await Promise.all([
+        supabase.from("profiles").select("id, username, display_name").in("id", teacherIds),
+        supabase.from("schools").select("id, name").in("id", schoolIds),
+      ]);
+      const tMap = new Map((tp ?? []).map((x) => [x.id, x]));
+      const sMap = new Map((sp ?? []).map((x) => [x.id, x]));
+      rows.forEach((r) => {
+        r.teacher = (tMap.get(r.teacher_id) as never) ?? null;
+        r.school = (sMap.get(r.school_id) as never) ?? null;
+      });
+    }
+    setPending(rows);
+  };
+  useEffect(() => { void load(); }, []);
+
+  const create = async (vals: { name: string; code: string }) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { error } = await supabase.from("schools").insert({ ...vals, admin_id: user.id });
+    if (error) { message.error(error.message); return; }
+    await logAdminAction("create_school", "school", undefined, vals);
+    message.success("School created"); setOpen(false); form.resetFields(); void load();
+  };
+
+  const setStatus = async (id: string, status: "approved" | "rejected") => {
+    await supabase.from("teacher_schools").update({ status }).eq("id", id);
+    await logAdminAction(`teacher_${status}`, "teacher_school", id);
+    void load();
+  };
+
+  return (
+    <div>
+      <Card title="Schools" extra={isAdmin && <Button type="primary" onClick={() => setOpen(true)}>New school</Button>}>
+        <Table
+          rowKey="id" dataSource={schools} size="small" pagination={{ pageSize: 10 }}
+          columns={[
+            { title: "Name", dataIndex: "name" },
+            { title: "Join code", dataIndex: "code", render: (v) => <Text code>{v}</Text> },
+            { title: "Created", dataIndex: "created_at", render: (v) => new Date(v).toLocaleDateString() },
+          ]}
+        />
+      </Card>
+      <Card style={{ marginTop: 16 }} title="Teacher membership requests">
+        <Table
+          rowKey="id" dataSource={pending} size="small" pagination={{ pageSize: 20 }}
+          columns={[
+            { title: "Teacher", render: (_, r) => r.teacher ? `${r.teacher.display_name ?? r.teacher.username} (@${r.teacher.username})` : r.teacher_id.slice(0, 8) },
+            { title: "School", render: (_, r) => r.school?.name ?? r.school_id.slice(0, 8) },
+            { title: "Status", dataIndex: "status", render: (v) => <Tag color={v === "approved" ? "green" : v === "rejected" ? "red" : "gold"}>{v}</Tag> },
+            { title: "Date", dataIndex: "created_at", render: (v) => new Date(v).toLocaleDateString() },
+            { title: "Actions", render: (_, r) => r.status === "pending" ? (
+              <Space size="small">
+                <Button size="small" type="primary" icon={<CheckCircleOutlined />} onClick={() => setStatus(r.id, "approved")}>Approve</Button>
+                <Button size="small" danger onClick={() => setStatus(r.id, "rejected")}>Reject</Button>
+              </Space>
+            ) : null },
+          ]}
+        />
+      </Card>
+      <Modal open={open} title="Create school" onCancel={() => setOpen(false)} footer={null} destroyOnClose>
+        <Form form={form} layout="vertical" onFinish={create}>
+          <Form.Item name="name" label="Name" rules={[{ required: true, max: 120 }]}><Input /></Form.Item>
+          <Form.Item name="code" label="Unique join code" rules={[{ required: true, max: 24 }]}><Input placeholder="e.g. SKILL-2026" /></Form.Item>
+          <Button type="primary" htmlType="submit">Create</Button>
+        </Form>
+      </Modal>
+    </div>
+  );
+}
