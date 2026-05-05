@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/feedback")({
   head: () => ({
     meta: [
-      { title: "Feedback — SkillChain" },
-      { name: "description", content: "Send feedback to the SkillChain team." },
+      { title: "Feedback — Leatha" },
+      { name: "description", content: "Send feedback to the Leatha team." },
     ],
   }),
   component: FeedbackPage,
@@ -78,7 +78,7 @@ function FeedbackPage() {
         {sent ? (
           <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 text-center">
             <p className="text-lg font-semibold">Feedback sent</p>
-            <p className="text-sm text-muted-foreground mt-2">A member of the SkillChain team will review it soon.</p>
+            <p className="text-sm text-muted-foreground mt-2">A member of the Leatha team will review it soon.</p>
             <div className="flex gap-2 justify-center mt-4">
               <Button asChild><Link to="/">Back to home</Link></Button>
               <Button variant="outline" onClick={() => setSent(false)}>Send another</Button>
@@ -125,7 +125,7 @@ function FeedbackPage() {
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-muted-foreground">Your feedback helps us make SkillChain better.</p>
+              <p className="text-xs text-muted-foreground">Your feedback helps us make Leatha better.</p>
               <Button type="submit" disabled={busy}>{busy ? "Sending…" : "Send feedback"}</Button>
             </div>
           </form>

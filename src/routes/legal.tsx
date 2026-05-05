@@ -4,15 +4,15 @@ import { FileText, Shield, Cookie, Mail } from "lucide-react";
 export const Route = createFileRoute("/legal")({
   head: () => ({
     meta: [
-      { title: "Legal — SkillChain" },
-      { name: "description", content: "Legal information, terms, and policies for SkillChain." },
+      { title: "Legal — Leatha" },
+      { name: "description", content: "Legal information, terms, and policies for Leatha." },
     ],
   }),
   component: LegalPage,
 });
 
 const sections = [
-  { to: "/terms" as const, icon: FileText, title: "Terms of Service", desc: "The rules that govern your use of SkillChain." },
+  { to: "/terms" as const, icon: FileText, title: "Terms of Service", desc: "The rules that govern your use of Leatha." },
   { to: "/privacy" as const, icon: Shield, title: "Privacy Policy", desc: "How we collect, use, and protect your data." },
   { to: "/cookies" as const, icon: Cookie, title: "Cookie Policy", desc: "How we use cookies and local storage." },
   { to: "/feedback" as const, icon: Mail, title: "Contact / Feedback", desc: "Reach out with questions or concerns." },
@@ -23,7 +23,7 @@ function LegalPage() {
     <div className="max-w-4xl mx-auto px-4 py-10">
       <h1 className="font-display text-3xl font-bold tracking-tight">Legal & policies</h1>
       <p className="text-sm text-muted-foreground mt-2">
-        Everything you need to know about using SkillChain responsibly.
+        Everything you need to know about using Leatha responsibly.
       </p>
 
       <div className="grid gap-3 sm:grid-cols-2 mt-8">
@@ -47,7 +47,7 @@ function LegalPage() {
       </div>
 
       <div className="mt-10 text-xs text-muted-foreground">
-        © 2026{new Date().getFullYear() > 2026 ? `–${new Date().getFullYear()}` : ""} SkillChain. All rights reserved.
+        © 2026{new Date().getFullYear() > 2026 ? `–${new Date().getFullYear()}` : ""} Leatha. All rights reserved.
       </div>
     </div>
   );

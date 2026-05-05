@@ -147,7 +147,7 @@ function AuthPage() {
           <div className="inline-flex h-12 w-12 rounded-xl bg-primary text-primary-foreground items-center justify-center mb-3">
             <GitFork className="h-6 w-6" />
           </div>
-          <h1 className="text-2xl font-display font-bold">Welcome to SkillChain</h1>
+          <h1 className="text-2xl font-display font-bold">Welcome to Leatha</h1>
           <p className="text-sm text-muted-foreground mt-1">Fork knowledge. Build skills together.</p>
         </div>
 
@@ -274,7 +274,7 @@ function AuthPage() {
           </Button>
 
           <p className="text-xs text-center text-muted-foreground mt-4">
-            By continuing, you agree to be a kind and curious citizen of SkillChain.
+            By continuing, you agree to be a kind and curious citizen of Leatha.
           </p>
         </div>
 
