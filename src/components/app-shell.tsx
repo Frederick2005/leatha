@@ -3,6 +3,7 @@ import {
   GitFork, Home, BookOpen, MessageSquare, MessagesSquare, Trophy, Sparkles,
   Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X, MessageSquareWarning,
 } from "lucide-react";
+import { LeathaLogo } from "@/components/leatha-logo";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/providers/auth-provider";
 import { useTheme } from "@/providers/theme-provider";
@@ -60,9 +61,7 @@ export function AppShell() {
       {/* Sidebar — desktop */}
       <aside className="hidden lg:flex w-60 flex-col border-r border-border bg-sidebar text-sidebar-foreground sticky top-0 h-screen">
         <div className="px-5 py-5 border-b border-sidebar-border flex items-center gap-2">
-          <div className="h-8 w-8 rounded-md bg-primary text-primary-foreground grid place-items-center font-mono font-bold">
-            <GitFork className="h-4 w-4" />
-          </div>
+          <LeathaLogo size={32} />
           <div className="font-display font-semibold text-lg tracking-tight">Leatha</div>
         </div>
 
@@ -171,7 +170,7 @@ export function AppShell() {
             <Menu className="h-5 w-5" />
           </button>
           <Link to="/" className="lg:hidden flex items-center gap-2 font-display font-semibold">
-            <div className="h-7 w-7 rounded-md bg-primary text-primary-foreground grid place-items-center"><GitFork className="h-3.5 w-3.5" /></div>
+            <LeathaLogo size={28} />
             Leatha
           </Link>
           <div className="flex-1 max-w-md hidden sm:block">
@@ -246,7 +245,7 @@ export function AppShell() {
         <footer className="border-t border-border bg-background/80">
           <div className="max-w-6xl mx-auto px-4 py-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
-              <GitFork className="h-4 w-4 text-primary" />
+              <LeathaLogo size={16} />
               <span className="font-semibold text-foreground">Leatha</span>
               <span>© 2026{new Date().getFullYear() > 2026 ? `–${new Date().getFullYear()}` : ""} — All rights reserved.</span>
             </div>
