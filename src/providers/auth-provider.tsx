@@ -20,7 +20,7 @@ export interface ProfileRow {
   created_at: string;
 }
 
-export type AppRole = "user" | "moderator" | "admin";
+export type AppRole = "user" | "moderator" | "admin" | "super_admin";
 
 interface AuthContextValue {
   session: Session | null;
@@ -28,6 +28,7 @@ interface AuthContextValue {
   profile: ProfileRow | null;
   roles: AppRole[];
   isAdmin: boolean;
+  isSuperAdmin: boolean;
   isModerator: boolean;
   isModOrAdmin: boolean;
   loading: boolean;
@@ -158,7 +159,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthContextValue>(() => {
-    const isAdmin = roles.includes("admin");
+    const isSuperAdmin = roles.includes("super_admin");
+    const isAdmin = isSuperAdmin || roles.includes("admin");
     const isModerator = roles.includes("moderator");
     return {
       session,
@@ -166,6 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profile,
       roles,
       isAdmin,
+      isSuperAdmin,
       isModerator,
       isModOrAdmin: isAdmin || isModerator,
       loading,

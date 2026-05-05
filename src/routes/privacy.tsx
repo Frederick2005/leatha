@@ -3,8 +3,8 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy — SkillChain" },
-      { name: "description", content: "Privacy policy for SkillChain users." },
+      { title: "Privacy Policy — Leatha" },
+      { name: "description", content: "Privacy policy for Leatha users." },
     ],
   }),
   component: PrivacyPage,
@@ -41,7 +41,7 @@ function PrivacyPage() {
           <div>
             <h2 className="text-xl font-semibold">4. Feedback</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Feedback submissions may be stored to help improve SkillChain and may be reviewed by administrators.
+              Feedback submissions may be stored to help improve Leatha and may be reviewed by administrators.
             </p>
           </div>
         </section>
