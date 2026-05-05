@@ -13,8 +13,8 @@ import { RequireAuth } from "@/components/require-auth";
 export const Route = createFileRoute("/chat")({
   head: () => ({
     meta: [
-      { title: "Public Chat — SkillChain" },
-      { name: "description", content: "Live community chat for SkillChain learners." },
+      { title: "Public Chat — Leatha" },
+      { name: "description", content: "Live community chat for Leatha learners." },
     ],
   }),
   component: () => (<RequireAuth><ChatPage /></RequireAuth>),

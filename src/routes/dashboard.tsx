@@ -12,7 +12,7 @@ import { timeAgo } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
-    meta: [{ title: "Dashboard — SkillChain" }],
+    meta: [{ title: "Dashboard — Leatha" }],
   }),
   component: () => (<RequireAuth><DashboardPage /></RequireAuth>),
 });
