@@ -16,7 +16,7 @@ import { RequireAuth } from "@/components/require-auth";
 import { useTheme } from "@/providers/theme-provider";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin Dashboard — SkillChain" }] }),
+  head: () => ({ meta: [{ title: "Admin Dashboard — Leatha" }] }),
   component: () => (<RequireAuth><AdminGate /></RequireAuth>),
 });
 
@@ -34,7 +34,7 @@ async function logAdminAction(action: string, target_type?: string, target_id?: 
 }
 
 function AdminGate() {
-  const { isModOrAdmin, isAdmin, loading } = useAuth();
+  const { isModOrAdmin, isAdmin, isSuperAdmin, loading } = useAuth();
   const { darkMode } = useTheme();
   const isDark = darkMode;
 
@@ -56,14 +56,14 @@ function AdminGate() {
         token: { colorPrimary: "#3b82f6", borderRadius: 8 },
       }}
     >
-      <AdminApp isAdmin={isAdmin} />
+      <AdminApp isAdmin={isAdmin} isSuperAdmin={isSuperAdmin} />
     </ConfigProvider>
   );
 }
 
 type Section = "dashboard" | "users" | "lessons" | "reports" | "feedback" | "rewards" | "announcements" | "schools" | "analytics" | "logs";
 
-function AdminApp({ isAdmin }: { isAdmin: boolean }) {
+function AdminApp({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin: boolean }) {
   const [section, setSection] = useState<Section>("dashboard");
 
   return (
@@ -73,7 +73,7 @@ function AdminApp({ isAdmin }: { isAdmin: boolean }) {
           <Link to="/" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
             <ArrowLeftOutlined /> Back to app
           </Link>
-          <Title level={4} style={{ margin: "12px 0 0" }}>SkillChain Admin</Title>
+          <Title level={4} style={{ margin: "12px 0 0" }}>Leatha Admin</Title>
         </div>
         <Menu
           mode="inline"
@@ -98,7 +98,7 @@ function AdminApp({ isAdmin }: { isAdmin: boolean }) {
         <Content style={{ padding: 24 }}>
           {section === "dashboard" && <DashboardPanel />}
           {section === "analytics" && <AnalyticsPanel />}
-          {section === "users" && <UsersPanel isAdmin={isAdmin} />}
+          {section === "users" && <UsersPanel isAdmin={isAdmin} isSuperAdmin={isSuperAdmin} />}
           {section === "lessons" && <LessonsPanel />}
           {section === "schools" && <SchoolsPanel isAdmin={isAdmin} />}
           {section === "reports" && <ReportsPanel />}
@@ -177,7 +177,7 @@ interface UserRow {
   roles: string[];
 }
 
-function UsersPanel({ isAdmin }: { isAdmin: boolean }) {
+function UsersPanel({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin: boolean }) {
   const [rows, setRows] = useState<UserRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -197,10 +197,12 @@ function UsersPanel({ isAdmin }: { isAdmin: boolean }) {
 
   const toggleRole = async (userId: string, role: "moderator" | "admin", has: boolean) => {
     if (has) {
-      await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role);
+      const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role);
+      if (error) { message.error(error.message); return; }
       await logAdminAction("revoke_role", "user", userId, { role });
     } else {
-      await supabase.from("user_roles").insert({ user_id: userId, role });
+      const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
+      if (error) { message.error(error.message); return; }
       await logAdminAction("grant_role", "user", userId, { role });
     }
     void load();
@@ -213,7 +215,20 @@ function UsersPanel({ isAdmin }: { isAdmin: boolean }) {
   );
 
   return (
-    <Card title="Users" extra={<Input.Search placeholder="Search…" allowClear style={{ width: 240 }} onChange={(e) => setSearch(e.target.value)} />}>
+    <Card
+      title={
+        <Space>
+          <span>Users</span>
+          {isSuperAdmin && <Tag color="gold">Master Admin</Tag>}
+        </Space>
+      }
+      extra={<Input.Search placeholder="Search…" allowClear style={{ width: 240 }} onChange={(e) => setSearch(e.target.value)} />}
+    >
+      {!isSuperAdmin && isAdmin && (
+        <Text type="secondary" style={{ display: "block", marginBottom: 12, fontSize: 12 }}>
+          You can manage moderators. Only the master admin can promote or remove other admins.
+        </Text>
+      )}
       <Table
         rowKey="id" loading={loading} dataSource={filtered} size="small" scroll={{ x: 800 }}
         pagination={{ pageSize: 20 }}
@@ -224,22 +239,46 @@ function UsersPanel({ isAdmin }: { isAdmin: boolean }) {
             </Space>
           )},
           { title: "Type", dataIndex: "account_type", render: (v) => <Tag>{v}</Tag> },
-          { title: "Roles", dataIndex: "roles", render: (rs: string[]) => rs.map((r) => <Tag key={r} color={r === "admin" ? "red" : r === "moderator" ? "blue" : undefined}>{r}</Tag>) },
+          { title: "Roles", dataIndex: "roles", render: (rs: string[]) => rs.map((r) => (
+            <Tag key={r} color={r === "super_admin" ? "gold" : r === "admin" ? "red" : r === "moderator" ? "blue" : undefined}>
+              {r === "super_admin" ? "master admin" : r}
+            </Tag>
+          )) },
           { title: "Points", dataIndex: "points", sorter: (a, b) => a.points - b.points },
           { title: "Lessons", dataIndex: "lesson_count" },
           { title: "Joined", dataIndex: "created_at", render: (v) => new Date(v).toLocaleDateString() },
           isAdmin ? {
             title: "Actions",
-            render: (_, r) => (
-              <Space size="small">
-                <Button size="small" onClick={() => toggleRole(r.id, "moderator", r.roles.includes("moderator"))}>
-                  {r.roles.includes("moderator") ? "Unset Mod" : "Make Mod"}
-                </Button>
-                <Button size="small" danger={r.roles.includes("admin")} onClick={() => toggleRole(r.id, "admin", r.roles.includes("admin"))}>
-                  {r.roles.includes("admin") ? "Revoke Admin" : "Make Admin"}
-                </Button>
-              </Space>
-            ),
+            render: (_, r) => {
+              const isSuper = r.roles.includes("super_admin");
+              const targetIsAdmin = r.roles.includes("admin");
+              // Master admin row can never be modified from the UI
+              if (isSuper) return <Tag color="gold">Protected</Tag>;
+              // Only super admin can grant/revoke admin role
+              const canChangeAdmin = isSuperAdmin;
+              // Only super admin can change role of an existing admin (mod toggle included)
+              const canTouch = isSuperAdmin || !targetIsAdmin;
+              return (
+                <Space size="small">
+                  <Button
+                    size="small"
+                    disabled={!canTouch}
+                    onClick={() => toggleRole(r.id, "moderator", r.roles.includes("moderator"))}
+                  >
+                    {r.roles.includes("moderator") ? "Unset Mod" : "Make Mod"}
+                  </Button>
+                  <Popconfirm
+                    title={targetIsAdmin ? "Revoke admin role?" : "Promote to admin?"}
+                    onConfirm={() => toggleRole(r.id, "admin", targetIsAdmin)}
+                    disabled={!canChangeAdmin}
+                  >
+                    <Button size="small" danger={targetIsAdmin} disabled={!canChangeAdmin}>
+                      {targetIsAdmin ? "Revoke Admin" : "Make Admin"}
+                    </Button>
+                  </Popconfirm>
+                </Space>
+              );
+            },
           } : { title: "", render: () => null },
         ]}
       />

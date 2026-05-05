@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Building2, Check, X, Clock, BadgeCheck } from "lucide-react";
 
 export const Route = createFileRoute("/schools")({
-  head: () => ({ meta: [{ title: "Schools — SkillChain" }] }),
+  head: () => ({ meta: [{ title: "Schools — Leatha" }] }),
   component: () => (<RequireAuth><SchoolsPage /></RequireAuth>),
 });
 

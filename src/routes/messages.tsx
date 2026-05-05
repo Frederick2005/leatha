@@ -11,7 +11,7 @@ import { RequireAuth } from "@/components/require-auth";
 export const Route = createFileRoute("/messages")({
   head: () => ({
     meta: [
-      { title: "Messages — SkillChain" },
+      { title: "Messages — Leatha" },
       { name: "description", content: "Your private conversations." },
     ],
   }),
