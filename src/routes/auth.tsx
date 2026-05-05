@@ -85,18 +85,13 @@ function AuthPage() {
       school: suSchool,
       grade: suGrade,
       subject: suSubject,
-      organization: suOrg,
     });
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
     // Role-specific required fields
     if (suRole === "student" && !suSchool.trim()) { toast.error("School is required for students."); return; }
     if (suRole === "teacher" && !suSchool.trim()) { toast.error("School is required for teachers."); return; }
-    if (suRole === "administrator" && !suOrg.trim()) { toast.error("Organization is required for administrators."); return; }
 
-    const schoolValue =
-      suRole === "administrator" ? suOrg.trim() :
-      suRole === "teacher" ? suSchool.trim() :
-      suSchool.trim();
+    const schoolValue = suSchool.trim();
 
     setBusy(true);
     const { error } = await supabase.auth.signUp({
