@@ -21,7 +21,7 @@ const signupSchema = z.object({
   password: z.string().min(8, "Min 8 characters").max(72, "Max 72 characters"),
   username: z.string().min(3, "Min 3 chars").max(24, "Max 24 chars").regex(/^[a-z0-9_]+$/, "lowercase letters, digits, _ only"),
   display_name: z.string().min(1, "Required").max(60, "Max 60 chars"),
-  role: z.enum(["student", "teacher", "administrator"]),
+  role: z.enum(["student", "teacher"]),
   school: z.string().max(80, "Max 80 chars").optional(),
   grade: z.string().max(40, "Max 40 chars").optional(),
   subject: z.string().max(80, "Max 80 chars").optional(),
