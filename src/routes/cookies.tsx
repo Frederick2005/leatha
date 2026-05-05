@@ -3,8 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/cookies")({
   head: () => ({
     meta: [
-      { title: "Cookie Policy — SkillChain" },
-      { name: "description", content: "How SkillChain uses cookies and similar technologies." },
+      { title: "Cookie Policy — Leatha" },
+      { name: "description", content: "How Leatha uses cookies and similar technologies." },
     ],
   }),
   component: CookiesPage,
@@ -18,7 +18,7 @@ function CookiesPage() {
 
       <h2>What are cookies?</h2>
       <p>
-        Cookies are small text files stored on your device when you visit a website. SkillChain uses cookies and
+        Cookies are small text files stored on your device when you visit a website. Leatha uses cookies and
         similar storage (such as <code>localStorage</code>) to keep you signed in, remember your theme preference,
         and improve performance.
       </p>
@@ -32,13 +32,13 @@ function CookiesPage() {
 
       <h2>Third-party services</h2>
       <p>
-        SkillChain uses Lovable Cloud for authentication, database, and storage. These services may set cookies
+        Leatha uses Lovable Cloud for authentication, database, and storage. These services may set cookies
         required for security and session management.
       </p>
 
       <h2>Managing cookies</h2>
       <p>
-        You can clear cookies and storage from your browser settings. Doing so will sign you out of SkillChain
+        You can clear cookies and storage from your browser settings. Doing so will sign you out of Leatha
         and reset your preferences.
       </p>
 

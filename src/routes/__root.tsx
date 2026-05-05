@@ -32,9 +32,9 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "SkillChain — Fork knowledge. Build skills together." },
+      { title: "Leatha — Fork knowledge. Build skills together." },
       { name: "description", content: "Social learning platform where lessons can be forked, remixed, and improved by everyone." },
-      { property: "og:title", content: "SkillChain" },
+      { property: "og:title", content: "Leatha" },
       { property: "og:description", content: "Fork knowledge. Build skills together." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

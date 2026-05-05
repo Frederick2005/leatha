@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "SkillChain — Fork knowledge. Build skills together." },
+      { title: "Leatha — Fork knowledge. Build skills together." },
       { name: "description", content: "A social platform where lessons are written, forked, and remixed by a community of learners and teachers. Sign in to start your chain." },
-      { property: "og:title", content: "SkillChain — Fork knowledge. Build skills together." },
+      { property: "og:title", content: "Leatha — Fork knowledge. Build skills together." },
       { property: "og:description", content: "Write a lesson. Fork another. Watch ideas branch and grow." },
     ],
   }),
@@ -47,7 +47,7 @@ function LandingPage() {
             <span className="bg-gradient-to-br from-primary to-primary-glow bg-clip-text text-transparent">Build skills together.</span>
           </h1>
           <p className="text-muted-foreground mt-6 max-w-2xl mx-auto text-lg">
-            SkillChain is the social platform where lessons live, evolve, and remix.
+            Leatha is the social platform where lessons live, evolve, and remix.
             Publish a tutorial, fork someone else's, and watch ideas branch into entire chains of learning.
           </p>
           <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
@@ -123,7 +123,7 @@ function LandingPage() {
       {/* How it works */}
       <section className="bg-surface border-y border-border">
         <div className="max-w-5xl mx-auto px-4 py-16">
-          <h2 className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-center">How SkillChain works</h2>
+          <h2 className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-center">How Leatha works</h2>
           <div className="grid sm:grid-cols-3 gap-8 mt-12">
             <Step n={1} title="Write or fork">
               Publish your own lesson in Markdown, or fork an existing one and make it your own.
@@ -165,7 +165,7 @@ function LandingPage() {
         <div className="max-w-5xl mx-auto px-4 py-8 text-center text-xs text-muted-foreground font-mono">
           <div className="flex items-center justify-center gap-2 mb-2">
             <GitFork className="h-3.5 w-3.5 text-primary" />
-            <span className="font-display font-semibold text-foreground">SkillChain</span>
+            <span className="font-display font-semibold text-foreground">Leatha</span>
           </div>
           Fork knowledge. Build skills together.
         </div>
