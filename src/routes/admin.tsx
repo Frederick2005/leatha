@@ -34,7 +34,7 @@ async function logAdminAction(action: string, target_type?: string, target_id?: 
 }
 
 function AdminGate() {
-  const { isModOrAdmin, isAdmin, loading } = useAuth();
+  const { isModOrAdmin, isAdmin, isSuperAdmin, loading } = useAuth();
   const { darkMode } = useTheme();
   const isDark = darkMode;
 
@@ -56,7 +56,7 @@ function AdminGate() {
         token: { colorPrimary: "#3b82f6", borderRadius: 8 },
       }}
     >
-      <AdminApp isAdmin={isAdmin} />
+      <AdminApp isAdmin={isAdmin} isSuperAdmin={isSuperAdmin} />
     </ConfigProvider>
   );
 }
