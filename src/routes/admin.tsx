@@ -16,7 +16,7 @@ import { RequireAuth } from "@/components/require-auth";
 import { useTheme } from "@/providers/theme-provider";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin Dashboard — SkillChain" }] }),
+  head: () => ({ meta: [{ title: "Admin Dashboard — Leatha" }] }),
   component: () => (<RequireAuth><AdminGate /></RequireAuth>),
 });
 
@@ -73,7 +73,7 @@ function AdminApp({ isAdmin }: { isAdmin: boolean }) {
           <Link to="/" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
             <ArrowLeftOutlined /> Back to app
           </Link>
-          <Title level={4} style={{ margin: "12px 0 0" }}>SkillChain Admin</Title>
+          <Title level={4} style={{ margin: "12px 0 0" }}>Leatha Admin</Title>
         </div>
         <Menu
           mode="inline"

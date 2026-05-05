@@ -13,8 +13,8 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
-const STORAGE_KEY = "skillchain.theme";
-const DARK_KEY = "skillchain.dark";
+const STORAGE_KEY = "leatha.theme";
+const DARK_KEY = "leatha.dark";
 
 function readInitialTheme(): { theme: ThemeId; darkMode: boolean } {
   if (typeof window === "undefined") return { theme: "blue", darkMode: true };
