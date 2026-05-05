@@ -50,11 +50,10 @@ function AuthPage() {
   const [suPwd, setSuPwd] = useState("");
   const [suUsername, setSuUsername] = useState("");
   const [suDisplayName, setSuDisplayName] = useState("");
-  const [suRole, setSuRole] = useState<"student" | "teacher" | "administrator">("student");
+  const [suRole, setSuRole] = useState<"student" | "teacher">("student");
   const [suSchool, setSuSchool] = useState("");
   const [suGrade, setSuGrade] = useState("");
   const [suSubject, setSuSubject] = useState("");
-  const [suOrg, setSuOrg] = useState("");
 
   // Forgot
   const [forgotEmail, setForgotEmail] = useState("");
