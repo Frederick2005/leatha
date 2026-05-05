@@ -21,7 +21,7 @@ const signupSchema = z.object({
   password: z.string().min(8, "Min 8 characters").max(72, "Max 72 characters"),
   username: z.string().min(3, "Min 3 chars").max(24, "Max 24 chars").regex(/^[a-z0-9_]+$/, "lowercase letters, digits, _ only"),
   display_name: z.string().min(1, "Required").max(60, "Max 60 chars"),
-  role: z.enum(["student", "teacher", "administrator"]),
+  role: z.enum(["student", "teacher"]),
   school: z.string().max(80, "Max 80 chars").optional(),
   grade: z.string().max(40, "Max 40 chars").optional(),
   subject: z.string().max(80, "Max 80 chars").optional(),
@@ -50,11 +50,10 @@ function AuthPage() {
   const [suPwd, setSuPwd] = useState("");
   const [suUsername, setSuUsername] = useState("");
   const [suDisplayName, setSuDisplayName] = useState("");
-  const [suRole, setSuRole] = useState<"student" | "teacher" | "administrator">("student");
+  const [suRole, setSuRole] = useState<"student" | "teacher">("student");
   const [suSchool, setSuSchool] = useState("");
   const [suGrade, setSuGrade] = useState("");
   const [suSubject, setSuSubject] = useState("");
-  const [suOrg, setSuOrg] = useState("");
 
   // Forgot
   const [forgotEmail, setForgotEmail] = useState("");
@@ -86,18 +85,13 @@ function AuthPage() {
       school: suSchool,
       grade: suGrade,
       subject: suSubject,
-      organization: suOrg,
     });
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
     // Role-specific required fields
     if (suRole === "student" && !suSchool.trim()) { toast.error("School is required for students."); return; }
     if (suRole === "teacher" && !suSchool.trim()) { toast.error("School is required for teachers."); return; }
-    if (suRole === "administrator" && !suOrg.trim()) { toast.error("Organization is required for administrators."); return; }
 
-    const schoolValue =
-      suRole === "administrator" ? suOrg.trim() :
-      suRole === "teacher" ? suSchool.trim() :
-      suSchool.trim();
+    const schoolValue = suSchool.trim();
 
     setBusy(true);
     const { error } = await supabase.auth.signUp({
@@ -194,11 +188,10 @@ function AuthPage() {
                   <Input type="password" value={suPwd} onChange={(e) => setSuPwd(e.target.value)} autoComplete="new-password" />
                 </Field>
                 <Field label="I am a..." icon={UserIcon}>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {[
                       { value: "student", label: "Student", description: "Learn, fork, and build with peers." },
                       { value: "teacher", label: "Teacher", description: "Publish lessons & guide students." },
-                      { value: "administrator", label: "Administrator", description: "School / org leadership." },
                     ].map((option) => (
                       <label
                         key={option.value}
@@ -242,16 +235,6 @@ function AuthPage() {
                     <Field label="Subject taught (optional)" icon={UserIcon}>
                       <Input value={suSubject} onChange={(e) => setSuSubject(e.target.value)} placeholder="e.g. Physics, Mathematics" />
                     </Field>
-                  </>
-                )}
-                {suRole === "administrator" && (
-                  <>
-                    <Field label="Organization" icon={UserIcon}>
-                      <Input value={suOrg} onChange={(e) => setSuOrg(e.target.value)} placeholder="e.g. Oak Valley District" />
-                    </Field>
-                    <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-xs text-muted-foreground">
-                      Heads up: administrator accounts only get the dashboard if they are the very first user on this site, or are promoted by an existing admin from the Admin → Users panel. Otherwise this label is for display only.
-                    </div>
                   </>
                 )}
                 <p className="text-xs text-muted-foreground">Min 8 chars password. You can change details later in Settings.</p>
