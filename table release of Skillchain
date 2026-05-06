@@ -1,0 +1,154 @@
+[33m2325554[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32main[m[33m)[m none
+[33m4491b23[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Removed admin signup option
+[33md658918[m Changes
+[33mcf20fa4[m Changes
+[33mdc8a7f2[m Changes
+[33mb4f3aa9[m Changes
+[33ma66f410[m Changes
+[33me2ffcf8[m Work in progress
+[33m1ec9a5b[m new updates
+[33m07925be[m node modukes download
+[33mea0a6c3[m Renamed to Leatha with logo
+[33m0e7a2bc[m Changes
+[33m7ac0127[m Changes
+[33m8480094[m Changes
+[33m539c401[m Changes
+[33m9b4ad18[m Changes
+[33med02f18[m Changes
+[33m043ad5b[m Changes
+[33m47fa071[m Changes
+[33ma2baa40[m Changes
+[33me9b186e[m Changes
+[33me76741c[m Added analytics + schools sys
+[33m0640643[m Changes
+[33m7b2327e[m Changes
+[33m61bc67c[m Changes
+[33m7219ffc[m Changes
+[33m3bd6114[m Changes
+[33m22af51d[m Changes
+[33m4556acb[m Changes
+[33m210e878[m Changes
+[33m1d9112b[m Changes
+[33md1d7234[m Changes
+[33m93b7f60[m Changes
+[33mc5694b3[m Changes
+[33mfeaac7e[m Fixed voice msg constraint & UI
+[33m40c7bbf[m Changes
+[33m037e914[m Changes
+[33me77cdf7[m Work in progress
+[33m094d8e6[m Fixed lesson "not found" bug
+[33m9a30279[m Changes
+[33m897267b[m Changes
+[33m8ddb471[m Changes
+[33ma943d69[m Changes
+[33m535b8e4[m Changes
+[33m72062ea[m Changes
+[33m6926952[m Changes
+[33mb28b51d[m Changes
+[33mafa8a28[m Changes
+[33m12914b3[m Changes
+[33m3843cb5[m Changes
+[33m37191c1[m Changes
+[33m054755e[m Fixed lesson view API failure
+[33m89f84d6[m Changes
+[33mb77f342[m Changes
+[33mace0d95[m Built admin dashboard modules
+[33m698cc4b[m Changes
+[33m745ba80[m Changes
+[33m07a8fc0[m Changes
+[33m02a22c9[m Changes
+[33m0aaca2a[m Changes
+[33m065eafe[m Added voice, media & feedback
+[33m3089211[m Changes
+[33m922092d[m Changes
+[33meb30dc4[m Changes
+[33m5ecd061[m Changes
+[33mbfb6306[m Changes
+[33m57ec631[m Changes
+[33ma146ab1[m Changes
+[33me536cd2[m Changes
+[33m04ffbe7[m Changes
+[33md2c5374[m Changes
+[33mc2a99d9[m Changes
+[33m729699e[m Changes
+[33m3ad4e39[m Started roleplay and planning
+[33m5ea0be7[m Changes
+[33m1c662cd[m feedback page
+[33m6c15984[m worked on admin and content navigation
+[33m02ed61b[m Fixed auth redirect loop crash
+[33mc4c6bd0[m Changes
+[33m08579d6[m Changes
+[33m6c21316[m Changes
+[33m4beeec9[m Changes
+[33m735c81b[m Fixed lesson page FK references
+[33m8ddd300[m Changes
+[33medce67b[m Changes
+[33mec271b9[m Added FK to profiles, search
+[33md2f0cf0[m Changes
+[33mdb4d075[m Changes
+[33ma41efc6[m Changes
+[33m6cc561e[m Changes
+[33md341915[m Changes
+[33mdce9ce8[m Changes
+[33mcaf96a3[m Changes
+[33mcf96479[m Fixed feed defaults and search
+[33m586ac4d[m Changes
+[33mc2fdbd9[m Work in progress
+[33m053f091[m Added Quill and dashboard
+[33ma02322e[m Changes
+[33m82a0eb8[m Changes
+[33mbd598a3[m Changes
+[33m78a9ab4[m Changes
+[33mff6ca51[m Changes
+[33m9a8b09e[m Changes
+[33m59dfd65[m Changes
+[33m8459372[m Changes
+[33m540be42[m Changes
+[33mcf3ed50[m Changes
+[33m1d9c475[m Changes
+[33m753e240[m Redesigned create lesson page
+[33mc9d220b[m Changes
+[33m18036bd[m Changes
+[33mddb0638[m Fixed stale build error
+[33m83bcb2e[m Changes
+[33m5a3654b[m Added auth routing & index
+[33meccf6da[m Changes
+[33mb827ee2[m Changes
+[33m8d38332[m Changes
+[33m755285d[m Changes
+[33mf9eab1b[m Changes
+[33m6978144[m Changes
+[33m12bced1[m Changes
+[33m061a667[m Changes
+[33m0867caa[m Changes
+[33mea8f74b[m Changes
+[33m4a6b7e0[m Changes
+[33m0c207e4[m Changes
+[33mdff093d[m Changes
+[33m678dd4b[m Changes
+[33mcf48bef[m Added file upload to DMs
+[33mf9b9d14[m Changes
+[33m60d7d50[m Changes
+[33mfcecee2[m Changes
+[33mc2da050[m Fixed redirect import in admin
+[33mb4c267a[m Changes
+[33m4008c23[m Completed feature routes
+[33m585c00d[m Changes
+[33m85cd706[m Changes
+[33mc50b69f[m Changes
+[33m019149b[m Changes
+[33m571112c[m Changes
+[33md66fea1[m Added markdown renderer
+[33mefa3f57[m Changes
+[33m32e4a28[m Changes
+[33m7fe23b4[m Changes
+[33m5d5d6d1[m Changes
+[33m63979cc[m Changes
+[33mb4774de[m Changes
+[33m5694a51[m Changes
+[33m49645a0[m Changes
+[33mf99b6b9[m Changes
+[33m64974a3[m Changes
+[33m1072daf[m Changes
+[33m07d4513[m Work in progress
+[33m929a9a4[m template: tanstack_start_ts
