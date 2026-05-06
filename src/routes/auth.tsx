@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { GitFork, Mail, Lock, User as UserIcon } from "lucide-react";
+import { Mail, Lock, User as UserIcon } from "lucide-react";
+import { LeathaLogo } from "@/components/leatha-logo";
 import { z } from "zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -138,8 +139,8 @@ function AuthPage() {
     <div className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
         <div className="text-center mb-6">
-          <div className="inline-flex h-12 w-12 rounded-xl bg-primary text-primary-foreground items-center justify-center mb-3">
-            <GitFork className="h-6 w-6" />
+          <div className="inline-flex h-14 w-14 items-center justify-center mb-3 text-primary">
+            <LeathaLogo size={56} />
           </div>
           <h1 className="text-2xl font-display font-bold">Welcome to Leatha</h1>
           <p className="text-sm text-muted-foreground mt-1">Fork knowledge. Build skills together.</p>
