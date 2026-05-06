@@ -252,14 +252,27 @@ function UsersPanel({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin:
             render: (_, r) => {
               const isSuper = r.roles.includes("super_admin");
               const targetIsAdmin = r.roles.includes("admin");
-              // Master admin row can never be modified from the UI
               if (isSuper) return <Tag color="gold">Protected</Tag>;
-              // Only super admin can grant/revoke admin role
               const canChangeAdmin = isSuperAdmin;
-              // Only super admin can change role of an existing admin (mod toggle included)
               const canTouch = isSuperAdmin || !targetIsAdmin;
+
+              const handleDeleteUser = async () => {
+                const { data: { session } } = await supabase.auth.getSession();
+                const token = session?.access_token;
+                const { data, error } = await supabase.functions.invoke("admin-delete-user", {
+                  body: { user_id: r.id },
+                  headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+                });
+                if (error || (data && (data as { error?: string }).error)) {
+                  message.error(error?.message ?? (data as { error?: string }).error ?? "Delete failed");
+                  return;
+                }
+                message.success("Account deleted");
+                void load();
+              };
+
               return (
-                <Space size="small">
+                <Space size="small" wrap>
                   <Button
                     size="small"
                     disabled={!canTouch}
@@ -275,6 +288,15 @@ function UsersPanel({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin:
                     <Button size="small" danger={targetIsAdmin} disabled={!canChangeAdmin}>
                       {targetIsAdmin ? "Revoke Admin" : "Make Admin"}
                     </Button>
+                  </Popconfirm>
+                  <Popconfirm
+                    title="Delete this account permanently?"
+                    description="This removes the user's auth, profile, and roles."
+                    okText="Delete"
+                    okButtonProps={{ danger: true }}
+                    onConfirm={handleDeleteUser}
+                  >
+                    <Button size="small" danger>Delete</Button>
                   </Popconfirm>
                 </Space>
               );

@@ -41,6 +41,16 @@ export function AppShell() {
     setSearchQuery(params.get("q") ?? "");
   }, [location.search]);
 
+  // Redirect new users to onboarding (skip on auth/onboarding/legal pages)
+  useEffect(() => {
+    if (loading || !user || !profile) return;
+    const p = profile as unknown as { has_completed_onboarding?: boolean };
+    if (p.has_completed_onboarding) return;
+    const skip = ["/onboarding", "/auth", "/reset-password", "/terms", "/privacy", "/cookies", "/legal"];
+    if (skip.some((s) => location.pathname.startsWith(s))) return;
+    navigate({ to: "/onboarding", replace: true });
+  }, [loading, user, profile, location.pathname, navigate]);
+
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     navigate({ to: "/explore", search: { q: searchQuery || undefined } });
