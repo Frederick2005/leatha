@@ -446,11 +446,14 @@ export type Database = {
           follower_count: number
           following_count: number
           fork_received_count: number
+          has_completed_onboarding: boolean
           id: string
+          interests: string[]
           is_verified: boolean
           lesson_count: number
           points: number
           school: string | null
+          skill_level: string | null
           theme: string
           updated_at: string
           username: string
@@ -465,11 +468,14 @@ export type Database = {
           follower_count?: number
           following_count?: number
           fork_received_count?: number
+          has_completed_onboarding?: boolean
           id: string
+          interests?: string[]
           is_verified?: boolean
           lesson_count?: number
           points?: number
           school?: string | null
+          skill_level?: string | null
           theme?: string
           updated_at?: string
           username: string
@@ -484,11 +490,14 @@ export type Database = {
           follower_count?: number
           following_count?: number
           fork_received_count?: number
+          has_completed_onboarding?: boolean
           id?: string
+          interests?: string[]
           is_verified?: boolean
           lesson_count?: number
           points?: number
           school?: string | null
+          skill_level?: string | null
           theme?: string
           updated_at?: string
           username?: string
