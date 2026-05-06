@@ -1,11 +1,10 @@
 import type { SVGProps } from "react";
 
 /**
- * Leatha brand mark — a circle containing two capital "A"s rotated 90°,
- * mirrored so their apexes meet in the center (forming a horizontal diamond
- * with a small gap between the tips).
- *
- * Uses `currentColor` so the mark adapts to any theme color.
+ * Leatha brand mark — two capital "A"s rotated 90° (left A's apex points right,
+ * right A's apex points left) inside a circle. Uses `currentColor` so it adapts
+ * to any theme color, and `fill-rule="evenodd"` so the inner counter of each
+ * "A" is transparent (no hard-coded background color).
  *
  * Usage: <LeathaLogo size={32} className="text-primary" />
  */
@@ -33,32 +32,19 @@ export function LeathaLogo({
         strokeWidth="6"
       />
 
-      {/*
-        Left "A" rotated 90° clockwise:
-        - base (the two legs) is vertical on the far left
-        - apex points right toward the center
-        - crossbar sits near the apex
-      */}
-      <polygon
-        points="18,22 18,78 47,50"
+      {/* Left "A" rotated 90° CW — apex points right.
+          Outer triangle minus inner triangle (counter) via evenodd. */}
+      <path
         fill="currentColor"
-      />
-      {/* notch to form the inner triangle of the A (the counter) */}
-      <polygon
-        points="26,38 26,62 42,50"
-        fill="var(--logo-bg, #000)"
+        fillRule="evenodd"
+        d="M16 24 L16 76 L49 50 Z M26 38 L26 62 L41 50 Z"
       />
 
-      {/*
-        Right "A" — mirror of the left one, apex pointing left.
-      */}
-      <polygon
-        points="82,22 82,78 53,50"
+      {/* Right "A" — mirror, apex points left. */}
+      <path
         fill="currentColor"
-      />
-      <polygon
-        points="74,38 74,62 58,50"
-        fill="var(--logo-bg, #000)"
+        fillRule="evenodd"
+        d="M84 24 L84 76 L51 50 Z M74 38 L74 62 L59 50 Z"
       />
     </svg>
   );
