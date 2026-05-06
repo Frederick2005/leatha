@@ -1,8 +1,10 @@
 import type { SVGProps } from "react";
 
 /**
- * Leatha brand mark — a circle containing two capital "A"s facing each other.
- * Uses `currentColor` everywhere so it adapts to any theme color.
+ * Leatha brand mark — two capital "A"s rotated 90° (left A's apex points right,
+ * right A's apex points left) inside a circle. Uses `currentColor` so it adapts
+ * to any theme color, and `fill-rule="evenodd"` so the inner counter of each
+ * "A" is transparent (no hard-coded background color).
  *
  * Usage: <LeathaLogo size={32} className="text-primary" />
  */
@@ -18,32 +20,32 @@ export function LeathaLogo({
       height={size}
       role="img"
       aria-label="Leatha"
-      fill="none"
-      stroke="currentColor"
       {...props}
     >
       {/* outer ring */}
-      <circle cx="50" cy="50" r="44" strokeWidth="6" />
-
-      {/* Left "A" — apex points right */}
-      {/* outer legs */}
-      <path
-        d="M40 28 L20 72 M40 28 L60 50 L40 72"
+      <circle
+        cx="50"
+        cy="50"
+        r="44"
+        fill="none"
+        stroke="currentColor"
         strokeWidth="6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
       />
-      {/* crossbar */}
-      <path d="M27 56 L48 56" strokeWidth="6" strokeLinecap="round" />
 
-      {/* Right "A" — apex points left (mirror) */}
+      {/* Left "A" rotated 90° CW — apex points right.
+          Outer triangle minus inner triangle (counter) via evenodd. */}
       <path
-        d="M60 28 L80 72 M60 28 L40 50 L60 72"
-        strokeWidth="6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        fill="currentColor"
+        fillRule="evenodd"
+        d="M16 24 L16 76 L49 50 Z M26 38 L26 62 L41 50 Z"
       />
-      <path d="M52 56 L73 56" strokeWidth="6" strokeLinecap="round" />
+
+      {/* Right "A" — mirror, apex points left. */}
+      <path
+        fill="currentColor"
+        fillRule="evenodd"
+        d="M84 24 L84 76 L51 50 Z M74 38 L74 62 L59 50 Z"
+      />
     </svg>
   );
 }
