@@ -1,7 +1,7 @@
 {
   "name": "leatha",
   "private": true,
-  "sideEffects": false,
+  
   "type": "module",
   "scripts": {
     "dev": "vite",
