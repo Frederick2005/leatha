@@ -3,7 +3,9 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-
+/* ============================================================
+   Global styles, CSS variables, and theme definitions.
+   ============================================================ */
 /* ============================================================
    Leatha — design system
    GitHub-inspired developer aesthetic, monospace accents.
