@@ -23,25 +23,29 @@ function PrivacyPage() {
           <div>
             <h2 className="text-xl font-semibold">1. Information we collect</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              We collect account data such as email, username, display name, and any profile fields you choose to provide.
+              We collect account data such as email, username, display name, and any profile fields
+              you choose to provide.
             </p>
           </div>
           <div>
             <h2 className="text-xl font-semibold">2. How we use it</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Data is used to authenticate users, show profiles, store lessons and messages, and to improve the service.
+              Data is used to authenticate users, show profiles, store lessons and messages, and to
+              improve the service.
             </p>
           </div>
           <div>
             <h2 className="text-xl font-semibold">3. Your control</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              You can update your profile, and if you want your account deleted, contact the site administrators.
+              You can update your profile, and if you want your account deleted, contact the site
+              administrators.
             </p>
           </div>
           <div>
             <h2 className="text-xl font-semibold">4. Feedback</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Feedback submissions may be stored to help improve Leatha and may be reviewed by administrators.
+              Feedback submissions may be stored to help improve Leatha and may be reviewed by
+              administrators.
             </p>
           </div>
         </section>

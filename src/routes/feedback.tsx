@@ -5,7 +5,13 @@ import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -60,7 +66,10 @@ function FeedbackPage() {
       toast.error(error.message || "Unable to send feedback.");
       return;
     }
-    setSubject(""); setMessage(""); setContact(""); setRating(null);
+    setSubject("");
+    setMessage("");
+    setContact("");
+    setRating(null);
     setSent(true);
     toast.success("Thanks for your feedback!");
   };
@@ -78,10 +87,16 @@ function FeedbackPage() {
         {sent ? (
           <div className="rounded-2xl border border-primary/30 bg-primary/5 p-6 text-center">
             <p className="text-lg font-semibold">Feedback sent</p>
-            <p className="text-sm text-muted-foreground mt-2">A member of the Leatha team will review it soon.</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              A member of the Leatha team will review it soon.
+            </p>
             <div className="flex gap-2 justify-center mt-4">
-              <Button asChild><Link to="/">Back to home</Link></Button>
-              <Button variant="outline" onClick={() => setSent(false)}>Send another</Button>
+              <Button asChild>
+                <Link to="/">Back to home</Link>
+              </Button>
+              <Button variant="outline" onClick={() => setSent(false)}>
+                Send another
+              </Button>
             </div>
           </div>
         ) : (
@@ -90,28 +105,57 @@ function FeedbackPage() {
               <div className="grid sm:grid-cols-[1fr_200px] gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Subject</label>
-                  <Input value={subject} onChange={(e) => setSubject(e.target.value)} maxLength={150} placeholder="Short summary" />
+                  <Input
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    maxLength={150}
+                    placeholder="Short summary"
+                  />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Category</label>
                   <Select value={category} onValueChange={setCategory}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
-                      {CATEGORIES.map((c) => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
+                      {CATEGORIES.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>
+                          {c.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Message</label>
-                <Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={8} maxLength={4000} placeholder="Tell us more…" />
+                <Textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows={8}
+                  maxLength={4000}
+                  placeholder="Tell us more…"
+                />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Rating (optional)</label>
                 <div className="flex gap-1">
                   {[1, 2, 3, 4, 5].map((n) => (
-                    <button key={n} type="button" onClick={() => setRating(rating === n ? null : n)} aria-label={`Rate ${n}`}>
-                      <Star className={cn("h-7 w-7 transition", rating && n <= rating ? "fill-primary text-primary" : "text-muted-foreground hover:text-primary")} />
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => setRating(rating === n ? null : n)}
+                      aria-label={`Rate ${n}`}
+                    >
+                      <Star
+                        className={cn(
+                          "h-7 w-7 transition",
+                          rating && n <= rating
+                            ? "fill-primary text-primary"
+                            : "text-muted-foreground hover:text-primary",
+                        )}
+                      />
                     </button>
                   ))}
                 </div>
@@ -119,14 +163,22 @@ function FeedbackPage() {
               {!user && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Contact email (optional)</label>
-                  <Input value={contact} onChange={(e) => setContact(e.target.value)} placeholder="you@example.com" />
+                  <Input
+                    value={contact}
+                    onChange={(e) => setContact(e.target.value)}
+                    placeholder="you@example.com"
+                  />
                 </div>
               )}
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs text-muted-foreground">Your feedback helps us make Leatha better.</p>
-              <Button type="submit" disabled={busy}>{busy ? "Sending…" : "Send feedback"}</Button>
+              <p className="text-xs text-muted-foreground">
+                Your feedback helps us make Leatha better.
+              </p>
+              <Button type="submit" disabled={busy}>
+                {busy ? "Sending…" : "Send feedback"}
+              </Button>
             </div>
           </form>
         )}

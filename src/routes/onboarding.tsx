@@ -12,18 +12,42 @@ import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({ meta: [{ title: "Welcome to Leatha" }] }),
-  component: () => (<RequireAuth><Onboarding /></RequireAuth>),
+  component: () => (
+    <RequireAuth>
+      <Onboarding />
+    </RequireAuth>
+  ),
 });
 
-const TOPICS = ["Math", "Science", "Programming", "Business", "Design", "AI", "Languages", "Art"] as const;
+const TOPICS = [
+  "Math",
+  "Science",
+  "Programming",
+  "Business",
+  "Design",
+  "AI",
+  "Languages",
+  "Art",
+] as const;
 const LEVELS = [
   { value: "Beginner", desc: "New to this area — start with the basics." },
   { value: "Intermediate", desc: "I know the fundamentals and want to go deeper." },
   { value: "Advanced", desc: "I'm comfortable and looking for challenges." },
 ] as const;
 
-type Suggested = { id: string; username: string; display_name: string | null; avatar_url: string | null };
-type Lesson = { id: string; title: string; summary: string | null; like_count: number; tags: string[] };
+type Suggested = {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+};
+type Lesson = {
+  id: string;
+  title: string;
+  summary: string | null;
+  like_count: number;
+  tags: string[];
+};
 
 function Onboarding() {
   const navigate = useNavigate();
@@ -49,7 +73,7 @@ function Onboarding() {
   const back = () => setStep((s) => Math.max(s - 1, 0));
 
   const toggleInterest = (t: string) => {
-    setInterests((arr) => arr.includes(t) ? arr.filter((x) => x !== t) : [...arr, t]);
+    setInterests((arr) => (arr.includes(t) ? arr.filter((x) => x !== t) : [...arr, t]));
   };
 
   // Load follow suggestions when entering step 3
@@ -109,7 +133,11 @@ function Onboarding() {
     const has = following.has(id);
     if (has) {
       await supabase.from("follows").delete().eq("follower_id", user.id).eq("followee_id", id);
-      setFollowing((s) => { const n = new Set(s); n.delete(id); return n; });
+      setFollowing((s) => {
+        const n = new Set(s);
+        n.delete(id);
+        return n;
+      });
     } else {
       await supabase.from("follows").insert({ follower_id: user.id, followee_id: id });
       setFollowing((s) => new Set(s).add(id));
@@ -128,7 +156,10 @@ function Onboarding() {
       } as never)
       .eq("id", user.id);
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     await refreshProfile();
     toast.success("You're all set!");
     navigate({ to: "/feed", replace: true });
@@ -139,13 +170,18 @@ function Onboarding() {
       <div className="w-full max-w-xl">
         {/* Progress */}
         <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden mb-6">
-          <div className="h-full bg-primary transition-all duration-500" style={{ width: `${progress}%` }} />
+          <div
+            className="h-full bg-primary transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm transition-all">
           {step === 0 && (
             <div className="text-center space-y-4">
-              <div className="inline-flex text-primary"><LeathaLogo size={72} /></div>
+              <div className="inline-flex text-primary">
+                <LeathaLogo size={72} />
+              </div>
               <h1 className="text-3xl font-display font-bold">Welcome to Leatha</h1>
               <p className="text-muted-foreground">Learn, create, and grow with Leatha.</p>
               <Button size="lg" className="mt-2" onClick={next}>
@@ -158,7 +194,9 @@ function Onboarding() {
             <div className="space-y-5">
               <div>
                 <h2 className="text-2xl font-display font-semibold">What are you into?</h2>
-                <p className="text-sm text-muted-foreground">Pick at least one topic to personalize your feed.</p>
+                <p className="text-sm text-muted-foreground">
+                  Pick at least one topic to personalize your feed.
+                </p>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {TOPICS.map((t) => {
@@ -169,7 +207,9 @@ function Onboarding() {
                       onClick={() => toggleInterest(t)}
                       className={cn(
                         "rounded-xl border px-4 py-3 text-sm font-medium transition-all",
-                        on ? "border-primary bg-primary/10 text-foreground" : "border-border bg-muted hover:bg-muted/70",
+                        on
+                          ? "border-primary bg-primary/10 text-foreground"
+                          : "border-border bg-muted hover:bg-muted/70",
                       )}
                     >
                       {on && <Check className="inline h-4 w-4 mr-1 text-primary" />}
@@ -186,7 +226,9 @@ function Onboarding() {
             <div className="space-y-5">
               <div>
                 <h2 className="text-2xl font-display font-semibold">What's your level?</h2>
-                <p className="text-sm text-muted-foreground">We'll tune recommendations to your pace.</p>
+                <p className="text-sm text-muted-foreground">
+                  We'll tune recommendations to your pace.
+                </p>
               </div>
               <div className="space-y-2">
                 {LEVELS.map((l) => (
@@ -195,7 +237,9 @@ function Onboarding() {
                     onClick={() => setLevel(l.value)}
                     className={cn(
                       "w-full text-left rounded-xl border px-4 py-3 transition-all",
-                      level === l.value ? "border-primary bg-primary/10" : "border-border bg-muted hover:bg-muted/70",
+                      level === l.value
+                        ? "border-primary bg-primary/10"
+                        : "border-border bg-muted hover:bg-muted/70",
                     )}
                   >
                     <div className="font-semibold">{l.value}</div>
@@ -211,22 +255,41 @@ function Onboarding() {
             <div className="space-y-5">
               <div>
                 <h2 className="text-2xl font-display font-semibold">Follow a few people</h2>
-                <p className="text-sm text-muted-foreground">Suggestions based on your interests. You can skip.</p>
+                <p className="text-sm text-muted-foreground">
+                  Suggestions based on your interests. You can skip.
+                </p>
               </div>
               <div className="space-y-2">
-                {suggested.length === 0 && <p className="text-sm text-muted-foreground">No suggestions yet — you can always discover later.</p>}
+                {suggested.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No suggestions yet — you can always discover later.
+                  </p>
+                )}
                 {suggested.map((s) => {
                   const on = following.has(s.id);
                   return (
-                    <div key={s.id} className="flex items-center justify-between rounded-xl border border-border bg-muted/40 p-3">
+                    <div
+                      key={s.id}
+                      className="flex items-center justify-between rounded-xl border border-border bg-muted/40 p-3"
+                    >
                       <div className="flex items-center gap-3 min-w-0">
-                        <UserAvatar name={s.display_name ?? s.username} url={s.avatar_url} size="sm" />
+                        <UserAvatar
+                          name={s.display_name ?? s.username}
+                          url={s.avatar_url}
+                          size="sm"
+                        />
                         <div className="min-w-0">
                           <div className="font-medium truncate">{s.display_name ?? s.username}</div>
-                          <div className="text-xs text-muted-foreground font-mono truncate">@{s.username}</div>
+                          <div className="text-xs text-muted-foreground font-mono truncate">
+                            @{s.username}
+                          </div>
                         </div>
                       </div>
-                      <Button size="sm" variant={on ? "secondary" : "default"} onClick={() => toggleFollow(s.id)}>
+                      <Button
+                        size="sm"
+                        variant={on ? "secondary" : "default"}
+                        onClick={() => toggleFollow(s.id)}
+                      >
                         {on ? "Following" : "Follow"}
                       </Button>
                     </div>
@@ -243,24 +306,41 @@ function Onboarding() {
                 <h2 className="text-2xl font-display font-semibold flex items-center gap-2">
                   <Sparkles className="h-6 w-6 text-primary" /> Picked for you
                 </h2>
-                <p className="text-sm text-muted-foreground">A starting set of lessons based on what you chose.</p>
+                <p className="text-sm text-muted-foreground">
+                  A starting set of lessons based on what you chose.
+                </p>
               </div>
               <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
-                {recs.length === 0 && <p className="text-sm text-muted-foreground">No published lessons yet — be the first to create one!</p>}
+                {recs.length === 0 && (
+                  <p className="text-sm text-muted-foreground">
+                    No published lessons yet — be the first to create one!
+                  </p>
+                )}
                 {recs.map((l) => (
                   <div key={l.id} className="rounded-xl border border-border bg-muted/40 p-3">
                     <div className="font-medium">{l.title}</div>
-                    {l.summary && <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{l.summary}</div>}
+                    {l.summary && (
+                      <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                        {l.summary}
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-1 mt-2">
                       {(l.tags ?? []).slice(0, 4).map((t) => (
-                        <span key={t} className="text-[10px] uppercase font-mono text-muted-foreground bg-background border border-border rounded px-1.5 py-0.5">{t}</span>
+                        <span
+                          key={t}
+                          className="text-[10px] uppercase font-mono text-muted-foreground bg-background border border-border rounded px-1.5 py-0.5"
+                        >
+                          {t}
+                        </span>
                       ))}
                     </div>
                   </div>
                 ))}
               </div>
               <div className="flex items-center justify-between gap-3 pt-2">
-                <Button variant="ghost" onClick={back}>Back</Button>
+                <Button variant="ghost" onClick={back}>
+                  Back
+                </Button>
                 <Button onClick={finish} disabled={busy}>
                   {busy ? "Finishing…" : "Enter Leatha"} <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -274,11 +354,21 @@ function Onboarding() {
 }
 
 function Footer({
-  onBack, onNext, nextDisabled, nextLabel = "Next",
-}: { onBack: () => void; onNext: () => void; nextDisabled?: boolean; nextLabel?: string }) {
+  onBack,
+  onNext,
+  nextDisabled,
+  nextLabel = "Next",
+}: {
+  onBack: () => void;
+  onNext: () => void;
+  nextDisabled?: boolean;
+  nextLabel?: string;
+}) {
   return (
     <div className="flex items-center justify-between gap-3 pt-2">
-      <Button variant="ghost" onClick={onBack}>Back</Button>
+      <Button variant="ghost" onClick={onBack}>
+        Back
+      </Button>
       <Button onClick={onNext} disabled={nextDisabled}>
         {nextLabel} <ArrowRight className="ml-2 h-4 w-4" />
       </Button>

@@ -44,7 +44,12 @@ export function DmAttachment({ att, mine }: { att: AttachmentMeta; mine: boolean
 
   if (isAudio && url) {
     return (
-      <div className={cn("rounded-2xl px-3 py-2 max-w-[280px]", mine ? "bg-primary-foreground/10" : "bg-background border border-border")}>
+      <div
+        className={cn(
+          "rounded-2xl px-3 py-2 max-w-[280px]",
+          mine ? "bg-primary-foreground/10" : "bg-background border border-border",
+        )}
+      >
         <audio controls src={url} className="w-full h-10" preload="metadata" />
         <div className="text-[10px] opacity-60 mt-1">Voice note · {formatBytes(att.size)}</div>
       </div>
@@ -66,7 +71,12 @@ export function DmAttachment({ att, mine }: { att: AttachmentMeta; mine: boolean
 
   if (isVideo && url) {
     return (
-      <video controls src={url} className="max-w-full max-h-64 rounded-lg border border-border/50" preload="metadata" />
+      <video
+        controls
+        src={url}
+        className="max-w-full max-h-64 rounded-lg border border-border/50"
+        preload="metadata"
+      />
     );
   }
 

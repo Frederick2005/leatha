@@ -46,31 +46,40 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [profile]);
 
-  const persist = useCallback(async (next: { theme?: ThemeId; darkMode?: boolean }) => {
-    if (typeof window !== "undefined") {
-      if (next.theme) window.localStorage.setItem(STORAGE_KEY, next.theme);
-      if (next.darkMode != null) window.localStorage.setItem(DARK_KEY, next.darkMode ? "1" : "0");
-    }
-    if (user) {
-      await supabase
-        .from("profiles")
-        .update({
-          ...(next.theme ? { theme: next.theme } : {}),
-          ...(next.darkMode != null ? { dark_mode: next.darkMode } : {}),
-        })
-        .eq("id", user.id);
-    }
-  }, [user]);
+  const persist = useCallback(
+    async (next: { theme?: ThemeId; darkMode?: boolean }) => {
+      if (typeof window !== "undefined") {
+        if (next.theme) window.localStorage.setItem(STORAGE_KEY, next.theme);
+        if (next.darkMode != null) window.localStorage.setItem(DARK_KEY, next.darkMode ? "1" : "0");
+      }
+      if (user) {
+        await supabase
+          .from("profiles")
+          .update({
+            ...(next.theme ? { theme: next.theme } : {}),
+            ...(next.darkMode != null ? { dark_mode: next.darkMode } : {}),
+          })
+          .eq("id", user.id);
+      }
+    },
+    [user],
+  );
 
-  const setTheme = useCallback((id: ThemeId) => {
-    setThemeState(id);
-    void persist({ theme: id });
-  }, [persist]);
+  const setTheme = useCallback(
+    (id: ThemeId) => {
+      setThemeState(id);
+      void persist({ theme: id });
+    },
+    [persist],
+  );
 
-  const setDarkMode = useCallback((dark: boolean) => {
-    setDarkModeState(dark);
-    void persist({ darkMode: dark });
-  }, [persist]);
+  const setDarkMode = useCallback(
+    (dark: boolean) => {
+      setDarkModeState(dark);
+      void persist({ darkMode: dark });
+    },
+    [persist],
+  );
 
   const toggleDarkMode = useCallback(() => {
     setDarkModeState((prev) => {

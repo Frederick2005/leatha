@@ -11,12 +11,11 @@ export type AnalyticsEvent =
   | "comment_created"
   | "lesson_liked";
 
-export async function trackEvent(
-  event: AnalyticsEvent,
-  metadata: Record<string, unknown> = {},
-) {
+export async function trackEvent(event: AnalyticsEvent, metadata: Record<string, unknown> = {}) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
     await supabase.from("analytics_events").insert({
       user_id: user.id,

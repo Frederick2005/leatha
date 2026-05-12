@@ -1,7 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  BookOpen, GitFork, Heart, MessageSquare, Plus, Sparkles, Trophy, Users, TrendingUp,
+  BookOpen,
+  GitFork,
+  Heart,
+  MessageSquare,
+  Plus,
+  Sparkles,
+  Trophy,
+  Users,
+  TrendingUp,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
@@ -14,7 +22,11 @@ export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [{ title: "Dashboard — Leatha" }],
   }),
-  component: () => (<RequireAuth><DashboardPage /></RequireAuth>),
+  component: () => (
+    <RequireAuth>
+      <DashboardPage />
+    </RequireAuth>
+  ),
 });
 
 interface RecentLesson {
@@ -70,7 +82,11 @@ function DashboardPage() {
       {/* Welcome */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="flex items-center gap-3">
-          <UserAvatar name={profile.display_name ?? profile.username} url={profile.avatar_url} size="lg" />
+          <UserAvatar
+            name={profile.display_name ?? profile.username}
+            url={profile.avatar_url}
+            size="lg"
+          />
           <div>
             <h1 className="text-2xl font-display font-semibold">
               Welcome back, {profile.display_name ?? profile.username}
@@ -79,8 +95,16 @@ function DashboardPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button asChild><Link to="/lessons/new"><Plus className="h-4 w-4 mr-1.5" /> New lesson</Link></Button>
-          <Button asChild variant="outline"><Link to="/feed"><Sparkles className="h-4 w-4 mr-1.5" /> Feed</Link></Button>
+          <Button asChild>
+            <Link to="/lessons/new">
+              <Plus className="h-4 w-4 mr-1.5" /> New lesson
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/feed">
+              <Sparkles className="h-4 w-4 mr-1.5" /> Feed
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -103,7 +127,9 @@ function DashboardPage() {
               <MessageSquare className="h-5 w-5" />
             </div>
             <div>
-              <div className="font-semibold">{unread} unread message{unread === 1 ? "" : "s"}</div>
+              <div className="font-semibold">
+                {unread} unread message{unread === 1 ? "" : "s"}
+              </div>
               <div className="text-sm text-muted-foreground">Tap to open your inbox</div>
             </div>
           </div>
@@ -116,7 +142,13 @@ function DashboardPage() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-lg font-display font-semibold">Your recent lessons</h2>
-            <Link to="/u/$username" params={{ username: profile.username }} className="text-xs text-primary hover:underline">View all</Link>
+            <Link
+              to="/u/$username"
+              params={{ username: profile.username }}
+              className="text-xs text-primary hover:underline"
+            >
+              View all
+            </Link>
           </div>
           {loading ? (
             <SkeletonList />
@@ -124,11 +156,17 @@ function DashboardPage() {
             <EmptyState
               title="No lessons yet"
               hint="Start your chain by publishing your first lesson."
-              action={<Button size="sm" onClick={() => navigate({ to: "/lessons/new" })}>Create one</Button>}
+              action={
+                <Button size="sm" onClick={() => navigate({ to: "/lessons/new" })}>
+                  Create one
+                </Button>
+              }
             />
           ) : (
             <ul className="space-y-2">
-              {recent.map((l) => <LessonRow key={l.id} lesson={l} />)}
+              {recent.map((l) => (
+                <LessonRow key={l.id} lesson={l} />
+              ))}
             </ul>
           )}
         </section>
@@ -139,7 +177,9 @@ function DashboardPage() {
             <h2 className="text-lg font-display font-semibold flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-primary" /> Trending now
             </h2>
-            <Link to="/explore" className="text-xs text-primary hover:underline">Explore more</Link>
+            <Link to="/explore" className="text-xs text-primary hover:underline">
+              Explore more
+            </Link>
           </div>
           {loading ? (
             <SkeletonList />
@@ -147,7 +187,9 @@ function DashboardPage() {
             <EmptyState title="Nothing trending yet" hint="Be the first to publish a lesson." />
           ) : (
             <ul className="space-y-2">
-              {trending.map((l) => <LessonRow key={l.id} lesson={l} />)}
+              {trending.map((l) => (
+                <LessonRow key={l.id} lesson={l} />
+              ))}
             </ul>
           )}
         </section>
@@ -156,13 +198,27 @@ function DashboardPage() {
   );
 }
 
-function StatCard({ icon: Icon, label, value, accent }: { icon: React.ElementType; label: string; value: number; accent?: boolean }) {
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  accent,
+}: {
+  icon: React.ElementType;
+  label: string;
+  value: number;
+  accent?: boolean;
+}) {
   return (
-    <div className={`rounded-lg border p-4 ${accent ? "border-primary/40 bg-primary/5" : "border-border bg-card"}`}>
+    <div
+      className={`rounded-lg border p-4 ${accent ? "border-primary/40 bg-primary/5" : "border-border bg-card"}`}
+    >
       <div className="flex items-center gap-2 text-xs uppercase font-mono tracking-wider text-muted-foreground">
         <Icon className="h-3.5 w-3.5" /> {label}
       </div>
-      <div className={`text-2xl font-display font-bold mt-1 ${accent ? "text-primary" : ""}`}>{value}</div>
+      <div className={`text-2xl font-display font-bold mt-1 ${accent ? "text-primary" : ""}`}>
+        {value}
+      </div>
     </div>
   );
 }
@@ -177,9 +233,18 @@ function LessonRow({ lesson }: { lesson: RecentLesson }) {
       >
         <div className="font-medium line-clamp-1">{lesson.title}</div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground font-mono mt-1">
-          <span className="flex items-center gap-1"><Heart className="h-3 w-3" />{lesson.like_count}</span>
-          <span className="flex items-center gap-1"><GitFork className="h-3 w-3" />{lesson.fork_count}</span>
-          <span className="flex items-center gap-1"><MessageSquare className="h-3 w-3" />{lesson.comment_count}</span>
+          <span className="flex items-center gap-1">
+            <Heart className="h-3 w-3" />
+            {lesson.like_count}
+          </span>
+          <span className="flex items-center gap-1">
+            <GitFork className="h-3 w-3" />
+            {lesson.fork_count}
+          </span>
+          <span className="flex items-center gap-1">
+            <MessageSquare className="h-3 w-3" />
+            {lesson.comment_count}
+          </span>
           <span className="ml-auto">{timeAgo(lesson.created_at)}</span>
         </div>
       </Link>
@@ -197,7 +262,15 @@ function SkeletonList() {
   );
 }
 
-function EmptyState({ title, hint, action }: { title: string; hint: string; action?: React.ReactNode }) {
+function EmptyState({
+  title,
+  hint,
+  action,
+}: {
+  title: string;
+  hint: string;
+  action?: React.ReactNode;
+}) {
   return (
     <div className="rounded-md border border-dashed border-border p-6 text-center">
       <div className="font-medium">{title}</div>

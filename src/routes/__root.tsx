@@ -8,8 +8,12 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <div className="font-mono text-xs text-muted-foreground tracking-widest uppercase">Error 404</div>
-        <h1 className="text-7xl font-bold mt-2 bg-gradient-to-br from-primary to-foreground bg-clip-text text-transparent">404</h1>
+        <div className="font-mono text-xs text-muted-foreground tracking-widest uppercase">
+          Error 404
+        </div>
+        <h1 className="text-7xl font-bold mt-2 bg-gradient-to-br from-primary to-foreground bg-clip-text text-transparent">
+          404
+        </h1>
         <h2 className="mt-2 text-xl font-semibold">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           That URL forks into the void. Try the feed instead.
@@ -33,7 +37,11 @@ export const Route = createRootRoute({
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Leatha — Fork knowledge. Build skills together." },
-      { name: "description", content: "Social learning platform where lessons can be forked, remixed, and improved by everyone." },
+      {
+        name: "description",
+        content:
+          "Social learning platform where lessons can be forked, remixed, and improved by everyone.",
+      },
       { property: "og:title", content: "Leatha" },
       { property: "og:description", content: "Fork knowledge. Build skills together." },
       { property: "og:type", content: "website" },

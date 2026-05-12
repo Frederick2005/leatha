@@ -1,6 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { GitFork, GitBranch, Heart, MessageCircle, Sparkles, Trophy, Users, Zap, BookOpen, Paperclip } from "lucide-react";
+import {
+  GitFork,
+  GitBranch,
+  Heart,
+  MessageCircle,
+  Sparkles,
+  Trophy,
+  Users,
+  Zap,
+  BookOpen,
+  Paperclip,
+} from "lucide-react";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 
@@ -8,9 +19,16 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Leatha — Fork knowledge. Build skills together." },
-      { name: "description", content: "A social platform where lessons are written, forked, and remixed by a community of learners and teachers. Sign in to start your chain." },
+      {
+        name: "description",
+        content:
+          "A social platform where lessons are written, forked, and remixed by a community of learners and teachers. Sign in to start your chain.",
+      },
       { property: "og:title", content: "Leatha — Fork knowledge. Build skills together." },
-      { property: "og:description", content: "Write a lesson. Fork another. Watch ideas branch and grow." },
+      {
+        property: "og:description",
+        content: "Write a lesson. Fork another. Watch ideas branch and grow.",
+      },
     ],
   }),
   component: LandingPage,
@@ -29,7 +47,11 @@ function LandingPage() {
   }, [user, loading, navigate]);
 
   if (loading || user) {
-    return <div className="min-h-[50vh] grid place-items-center"><div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" /></div>;
+    return (
+      <div className="min-h-[50vh] grid place-items-center">
+        <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -44,17 +66,21 @@ function LandingPage() {
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-display font-bold tracking-tight">
             Fork knowledge.
             <br />
-            <span className="bg-gradient-to-br from-primary to-primary-glow bg-clip-text text-transparent">Build skills together.</span>
+            <span className="bg-gradient-to-br from-primary to-primary-glow bg-clip-text text-transparent">
+              Build skills together.
+            </span>
           </h1>
           <p className="text-muted-foreground mt-6 max-w-2xl mx-auto text-lg">
-            Leatha is the social platform where lessons live, evolve, and remix.
-            Publish a tutorial, fork someone else's, and watch ideas branch into entire chains of learning.
+            Leatha is the social platform where lessons live, evolve, and remix. Publish a tutorial,
+            fork someone else's, and watch ideas branch into entire chains of learning.
           </p>
           <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
             {isSignedIn ? (
               <>
                 <Button asChild size="lg" className="gap-2">
-                  <Link to="/feed"><Sparkles className="h-4 w-4" /> Go to your feed</Link>
+                  <Link to="/feed">
+                    <Sparkles className="h-4 w-4" /> Go to your feed
+                  </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline">
                   <Link to="/lessons/new">Write a lesson</Link>
@@ -123,7 +149,9 @@ function LandingPage() {
       {/* How it works */}
       <section className="bg-surface border-y border-border">
         <div className="max-w-5xl mx-auto px-4 py-16">
-          <h2 className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-center">How Leatha works</h2>
+          <h2 className="text-3xl sm:text-4xl font-display font-bold tracking-tight text-center">
+            How Leatha works
+          </h2>
           <div className="grid sm:grid-cols-3 gap-8 mt-12">
             <Step n={1} title="Write or fork">
               Publish your own lesson in Markdown, or fork an existing one and make it your own.
@@ -145,16 +173,21 @@ function LandingPage() {
           Start your chain today
         </h2>
         <p className="text-muted-foreground mt-3 max-w-xl mx-auto">
-          Join a community of curious people who believe knowledge gets better when it's shared, forked, and rebuilt.
+          Join a community of curious people who believe knowledge gets better when it's shared,
+          forked, and rebuilt.
         </p>
         <div className="mt-8">
           {isSignedIn ? (
             <Button asChild size="lg" className="gap-2">
-              <Link to="/feed"><Sparkles className="h-4 w-4" /> Open your feed</Link>
+              <Link to="/feed">
+                <Sparkles className="h-4 w-4" /> Open your feed
+              </Link>
             </Button>
           ) : (
             <Button asChild size="lg" className="gap-2">
-              <Link to="/auth"><Users className="h-4 w-4" /> Create your account</Link>
+              <Link to="/auth">
+                <Users className="h-4 w-4" /> Create your account
+              </Link>
             </Button>
           )}
         </div>
@@ -174,7 +207,15 @@ function LandingPage() {
   );
 }
 
-function Feature({ icon: Icon, title, text }: { icon: React.ElementType; title: string; text: string }) {
+function Feature({
+  icon: Icon,
+  title,
+  text,
+}: {
+  icon: React.ElementType;
+  title: string;
+  text: string;
+}) {
   return (
     <div className="rounded-lg border border-border bg-card p-5 hover:border-primary/40 transition-colors">
       <div className="h-10 w-10 rounded-md bg-primary-muted text-primary grid place-items-center mb-3">

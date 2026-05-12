@@ -15,7 +15,11 @@ export const Route = createFileRoute("/messages")({
       { name: "description", content: "Your private conversations." },
     ],
   }),
-  component: () => (<RequireAuth><MessagesLayout /></RequireAuth>),
+  component: () => (
+    <RequireAuth>
+      <MessagesLayout />
+    </RequireAuth>
+  ),
 });
 
 interface ConvoPreview {
@@ -49,8 +53,12 @@ function MessagesLayout() {
 
       const seen = new Map<string, ConvoPreview>();
       for (const m of (data ?? []) as Array<{
-        id: string; body: string; created_at: string; read_at: string | null;
-        sender_id: string; recipient_id: string;
+        id: string;
+        body: string;
+        created_at: string;
+        read_at: string | null;
+        sender_id: string;
+        recipient_id: string;
       }>) {
         const otherId = m.sender_id === user.id ? m.recipient_id : m.sender_id;
         if (seen.has(otherId)) continue;
@@ -71,7 +79,12 @@ function MessagesLayout() {
           .in("id", ids);
         (profs ?? []).forEach((p) => {
           const c = seen.get(p.id);
-          if (c) c.otherProfile = { username: p.username, display_name: p.display_name, avatar_url: p.avatar_url };
+          if (c)
+            c.otherProfile = {
+              username: p.username,
+              display_name: p.display_name,
+              avatar_url: p.avatar_url,
+            };
         });
       }
       if (cancelled) return;
@@ -101,7 +114,9 @@ function MessagesLayout() {
     return (
       <div className="p-8 text-center">
         <p className="text-muted-foreground">Sign in to view your messages.</p>
-        <Link to="/auth" className="text-primary hover:underline mt-2 inline-block">Go to sign in</Link>
+        <Link to="/auth" className="text-primary hover:underline mt-2 inline-block">
+          Go to sign in
+        </Link>
       </div>
     );
   }
@@ -150,18 +165,30 @@ function MessagesLayout() {
                     <span className="font-semibold text-sm truncate">
                       {c.otherProfile?.display_name ?? c.otherProfile?.username ?? "unknown"}
                     </span>
-                    <span className={cn("text-[11px] shrink-0", c.unread ? "text-primary font-semibold" : "text-muted-foreground")}>
+                    <span
+                      className={cn(
+                        "text-[11px] shrink-0",
+                        c.unread ? "text-primary font-semibold" : "text-muted-foreground",
+                      )}
+                    >
                       {formatDistanceToNow(new Date(c.lastAt), { addSuffix: false })}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <p className={cn(
-                      "text-xs truncate flex-1",
-                      c.unread ? "text-foreground font-medium" : "text-muted-foreground",
-                    )}>
-                      {c.fromMe && "✓ "}{c.lastBody || "📎 attachment"}
+                    <p
+                      className={cn(
+                        "text-xs truncate flex-1",
+                        c.unread ? "text-foreground font-medium" : "text-muted-foreground",
+                      )}
+                    >
+                      {c.fromMe && "✓ "}
+                      {c.lastBody || "📎 attachment"}
                     </p>
-                    {c.unread && <span className="h-5 min-w-5 px-1.5 grid place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shrink-0">•</span>}
+                    {c.unread && (
+                      <span className="h-5 min-w-5 px-1.5 grid place-items-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shrink-0">
+                        •
+                      </span>
+                    )}
                   </div>
                 </div>
               </Link>
@@ -185,4 +212,3 @@ function MessagesLayout() {
     </div>
   );
 }
-

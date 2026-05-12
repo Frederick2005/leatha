@@ -6,13 +6,15 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function slugify(input: string): string {
-  return input
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-")
-    .slice(0, 80) || `untitled-${Math.random().toString(36).slice(2, 8)}`;
+  return (
+    input
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .slice(0, 80) || `untitled-${Math.random().toString(36).slice(2, 8)}`
+  );
 }
 
 export function timeAgo(input: string | Date): string {

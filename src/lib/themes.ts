@@ -1,7 +1,19 @@
 export type ThemeId =
-  | "blue" | "teal" | "green" | "purple" | "red"
-  | "orange" | "yellow" | "pink" | "indigo" | "cyan"
-  | "neon-cyber" | "sunset" | "ocean" | "forest" | "midnight-gold";
+  | "blue"
+  | "teal"
+  | "green"
+  | "purple"
+  | "red"
+  | "orange"
+  | "yellow"
+  | "pink"
+  | "indigo"
+  | "cyan"
+  | "neon-cyber"
+  | "sunset"
+  | "ocean"
+  | "forest"
+  | "midnight-gold";
 
 export interface ThemeMeta {
   id: ThemeId;

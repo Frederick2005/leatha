@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -78,7 +86,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
       if (newSession?.user) {
         if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-          try { localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now())); } catch { /* noop */ }
+          try {
+            localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
+          } catch {
+            /* noop */
+          }
         }
         // Defer profile load to avoid recursive deadlock with auth callback
         setTimeout(() => {
@@ -87,7 +99,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setProfile(null);
         setRoles([]);
-        try { localStorage.removeItem(LAST_ACTIVITY_KEY); } catch { /* noop */ }
+        try {
+          localStorage.removeItem(LAST_ACTIVITY_KEY);
+        } catch {
+          /* noop */
+        }
       }
     });
 
@@ -98,7 +114,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (data.session?.user) {
           // Enforce 8h max session
           let last = 0;
-          try { last = Number(localStorage.getItem(LAST_ACTIVITY_KEY) ?? 0); } catch { /* noop */ }
+          try {
+            last = Number(localStorage.getItem(LAST_ACTIVITY_KEY) ?? 0);
+          } catch {
+            /* noop */
+          }
           if (last && Date.now() - last > MAX_SESSION_MS) {
             await supabase.auth.signOut();
             setSession(null);
@@ -107,7 +127,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
           if (!last) {
-            try { localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now())); } catch { /* noop */ }
+            try {
+              localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
+            } catch {
+              /* noop */
+            }
           }
 
           setSession(data.session);
@@ -129,7 +153,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Refresh activity timestamp on user interaction
     const bump = () => {
-      try { localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now())); } catch { /* noop */ }
+      try {
+        localStorage.setItem(LAST_ACTIVITY_KEY, String(Date.now()));
+      } catch {
+        /* noop */
+      }
     };
     window.addEventListener("click", bump);
     window.addEventListener("keydown", bump);
@@ -137,7 +165,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Periodically check for expired session
     const interval = window.setInterval(() => {
       let last = 0;
-      try { last = Number(localStorage.getItem(LAST_ACTIVITY_KEY) ?? 0); } catch { /* noop */ }
+      try {
+        last = Number(localStorage.getItem(LAST_ACTIVITY_KEY) ?? 0);
+      } catch {
+        /* noop */
+      }
       if (last && Date.now() - last > MAX_SESSION_MS) {
         void supabase.auth.signOut();
       }
@@ -152,7 +184,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadProfileAndRoles]);
 
   const signOut = useCallback(async () => {
-    try { localStorage.removeItem("sc_last_activity"); } catch { /* noop */ }
+    try {
+      localStorage.removeItem("sc_last_activity");
+    } catch {
+      /* noop */
+    }
     await supabase.auth.signOut();
     setProfile(null);
     setRoles([]);
