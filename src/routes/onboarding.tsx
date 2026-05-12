@@ -375,3 +375,7 @@ function Footer({
     </div>
   );
 }
+await supabase
+  .from("profiles")
+  .update({ has_completed_onboarding: true })
+  .eq("id", user.id);
