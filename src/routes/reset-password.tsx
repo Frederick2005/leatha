@@ -23,17 +23,24 @@ function ResetPasswordPage() {
       if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") setReady(true);
     });
     // Also check if hash is present
-    if (typeof window !== "undefined" && window.location.hash.includes("type=recovery")) setReady(true);
+    if (typeof window !== "undefined" && window.location.hash.includes("type=recovery"))
+      setReady(true);
     return () => sub.subscription.unsubscribe();
   }, []);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pwd.length < 8) { toast.error("Min 8 characters"); return; }
+    if (pwd.length < 8) {
+      toast.error("Min 8 characters");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.auth.updateUser({ password: pwd });
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Password updated");
     navigate({ to: "/" });
   };
@@ -43,14 +50,22 @@ function ResetPasswordPage() {
       <div className="w-full max-w-md rounded-xl border border-border bg-card p-6">
         <h1 className="text-2xl font-display font-bold">Set a new password</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {ready ? "Enter a strong new password below." : "Open this page from the email link to continue."}
+          {ready
+            ? "Enter a strong new password below."
+            : "Open this page from the email link to continue."}
         </p>
         <form onSubmit={submit} className="space-y-3 mt-4">
           <div className="space-y-1.5">
             <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground flex items-center gap-1.5">
               <Lock className="h-3 w-3" /> New password
             </Label>
-            <Input type="password" value={pwd} onChange={(e) => setPwd(e.target.value)} autoComplete="new-password" disabled={!ready} />
+            <Input
+              type="password"
+              value={pwd}
+              onChange={(e) => setPwd(e.target.value)}
+              autoComplete="new-password"
+              disabled={!ready}
+            />
           </div>
           <Button type="submit" className="w-full" disabled={busy || !ready}>
             {busy ? "Updating…" : "Update password"}

@@ -17,7 +17,11 @@ export const Route = createFileRoute("/chat")({
       { name: "description", content: "Live community chat for Leatha learners." },
     ],
   }),
-  component: () => (<RequireAuth><ChatPage /></RequireAuth>),
+  component: () => (
+    <RequireAuth>
+      <ChatPage />
+    </RequireAuth>
+  ),
 });
 
 interface ChatRow {
@@ -66,7 +70,9 @@ function ChatPage() {
       const rows = (data ?? []).reverse() as ChatRow[];
       await hydrate(rows);
       if (cancelled) return;
-      setMessages(rows.map((r) => ({ ...r, author: profileCache.current.get(r.author_id) ?? null })));
+      setMessages(
+        rows.map((r) => ({ ...r, author: profileCache.current.get(r.author_id) ?? null })),
+      );
       setLoading(false);
     })();
 
@@ -152,26 +158,27 @@ function ChatPage() {
           const mine = user?.id === m.author_id;
           const canDelete = mine || isModOrAdmin;
           return (
-            <div
-              key={m.id}
-              className={
-                mine
-                  ? "flex justify-end"
-                  : "flex justify-start"
-              }
-            >
-              <div className={
-                `relative max-w-[90%] ${mine ? "rounded-bl-3xl rounded-tl-3xl rounded-tr-3xl bg-primary/10 text-foreground" : "rounded-br-3xl rounded-tr-3xl rounded-tl-3xl bg-surface border border-border text-foreground"}`
-              }>
+            <div key={m.id} className={mine ? "flex justify-end" : "flex justify-start"}>
+              <div
+                className={`relative max-w-[90%] ${mine ? "rounded-bl-3xl rounded-tl-3xl rounded-tr-3xl bg-primary/10 text-foreground" : "rounded-br-3xl rounded-tr-3xl rounded-tl-3xl bg-surface border border-border text-foreground"}`}
+              >
                 <div className="flex items-center gap-2 px-3 pt-3">
                   {!mine && (
-                    <Link to="/u/$username" params={{ username: m.author?.username ?? "" }} className="shrink-0">
-                      <UserAvatar name={m.author?.display_name ?? m.author?.username} url={m.author?.avatar_url} size="sm" />
+                    <Link
+                      to="/u/$username"
+                      params={{ username: m.author?.username ?? "" }}
+                      className="shrink-0"
+                    >
+                      <UserAvatar
+                        name={m.author?.display_name ?? m.author?.username}
+                        url={m.author?.avatar_url}
+                        size="sm"
+                      />
                     </Link>
                   )}
                   <div className="flex flex-col">
                     <div className="text-sm font-medium">
-                      {mine ? "You" : m.author?.display_name ?? m.author?.username ?? "Unknown"}
+                      {mine ? "You" : (m.author?.display_name ?? m.author?.username ?? "Unknown")}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {formatDistanceToNow(new Date(m.created_at), { addSuffix: true })}
@@ -224,7 +231,10 @@ function ChatPage() {
           </div>
         ) : (
           <div className="text-sm text-muted-foreground text-center">
-            <Link to="/auth" className="text-primary hover:underline">Sign in</Link> to join the conversation.
+            <Link to="/auth" className="text-primary hover:underline">
+              Sign in
+            </Link>{" "}
+            to join the conversation.
           </div>
         )}
       </div>

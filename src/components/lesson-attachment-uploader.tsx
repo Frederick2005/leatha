@@ -1,5 +1,14 @@
 import { useRef, useState } from "react";
-import { Paperclip, Loader2, X, FileText, Image as ImageIcon, Film, Music, File } from "lucide-react";
+import {
+  Paperclip,
+  Loader2,
+  X,
+  FileText,
+  Image as ImageIcon,
+  Film,
+  Music,
+  File,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -56,7 +65,12 @@ export function LessonAttachmentUploader({
         toast.error(`Failed: ${file.name} — ${error.message}`);
         continue;
       }
-      next.push({ path, name: file.name, size: file.size, type: file.type || "application/octet-stream" });
+      next.push({
+        path,
+        name: file.name,
+        size: file.size,
+        type: file.type || "application/octet-stream",
+      });
     }
     onChange(next);
     setUploading(false);
@@ -84,16 +98,25 @@ export function LessonAttachmentUploader({
         onClick={() => inputRef.current?.click()}
         disabled={uploading || attachments.length >= MAX_FILES}
       >
-        {uploading ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Paperclip className="h-4 w-4 mr-1.5" />}
+        {uploading ? (
+          <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+        ) : (
+          <Paperclip className="h-4 w-4 mr-1.5" />
+        )}
         {uploading ? "Uploading…" : "Attach files"}
       </Button>
-      <p className="text-xs text-muted-foreground">PDFs, images, docs, video, audio — up to 20MB each, max {MAX_FILES} files.</p>
+      <p className="text-xs text-muted-foreground">
+        PDFs, images, docs, video, audio — up to 20MB each, max {MAX_FILES} files.
+      </p>
       {attachments.length > 0 && (
         <ul className="space-y-1.5 mt-2">
           {attachments.map((a) => {
             const Icon = iconFor(a.type);
             return (
-              <li key={a.path} className="flex items-center gap-2 px-3 py-2 rounded-md border border-border bg-surface text-sm">
+              <li
+                key={a.path}
+                className="flex items-center gap-2 px-3 py-2 rounded-md border border-border bg-surface text-sm"
+              >
                 <Icon className="h-4 w-4 shrink-0 text-primary" />
                 <span className="flex-1 truncate">{a.name}</span>
                 <span className="text-xs text-muted-foreground">{formatBytes(a.size)}</span>

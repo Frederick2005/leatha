@@ -19,41 +19,68 @@ Deno.serve(async (req) => {
     const userClient = createClient(SUPABASE_URL, ANON, {
       global: { headers: { Authorization: auth } },
     });
-    const { data: { user }, error: userErr } = await userClient.auth.getUser();
+    const {
+      data: { user },
+      error: userErr,
+    } = await userClient.auth.getUser();
     if (userErr || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...cors, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
     }
 
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE);
 
     // Verify caller is admin or super_admin
-    const { data: callerRoles } = await admin.from("user_roles").select("role").eq("user_id", user.id);
+    const { data: callerRoles } = await admin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id);
     const callerRoleSet = new Set((callerRoles ?? []).map((r) => r.role));
     if (!callerRoleSet.has("admin") && !callerRoleSet.has("super_admin")) {
-      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...cors, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
     }
 
     const body = await req.json().catch(() => ({}));
     const targetId: string | undefined = body.user_id;
     if (!targetId) {
-      return new Response(JSON.stringify({ error: "user_id required" }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "user_id required" }), {
+        status: 400,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
     }
 
     if (targetId === user.id) {
-      return new Response(JSON.stringify({ error: "You cannot delete your own account from here." }), { status: 400, headers: { ...cors, "Content-Type": "application/json" } });
+      return new Response(
+        JSON.stringify({ error: "You cannot delete your own account from here." }),
+        { status: 400, headers: { ...cors, "Content-Type": "application/json" } },
+      );
     }
 
     // Block deleting any super_admin (master admin)
-    const { data: targetRoles } = await admin.from("user_roles").select("role").eq("user_id", targetId);
+    const { data: targetRoles } = await admin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", targetId);
     const targetRoleSet = new Set((targetRoles ?? []).map((r) => r.role));
     if (targetRoleSet.has("super_admin")) {
-      return new Response(JSON.stringify({ error: "The master admin cannot be deleted." }), { status: 403, headers: { ...cors, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "The master admin cannot be deleted." }), {
+        status: 403,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
     }
 
     // Delete auth user; cascade through related public-table FKs that reference auth.users
     const { error: delErr } = await admin.auth.admin.deleteUser(targetId);
     if (delErr) {
-      return new Response(JSON.stringify({ error: delErr.message }), { status: 500, headers: { ...cors, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: delErr.message }), {
+        status: 500,
+        headers: { ...cors, "Content-Type": "application/json" },
+      });
     }
 
     // Best-effort cleanup of public rows that don't have FK cascade
@@ -68,8 +95,13 @@ Deno.serve(async (req) => {
       details: {},
     });
 
-    return new Response(JSON.stringify({ ok: true }), { headers: { ...cors, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
   } catch (e) {
-    return new Response(JSON.stringify({ error: (e as Error).message }), { status: 500, headers: { ...cors, "Content-Type": "application/json" } });
+    return new Response(JSON.stringify({ error: (e as Error).message }), {
+      status: 500,
+      headers: { ...cors, "Content-Type": "application/json" },
+    });
   }
 });

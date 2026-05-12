@@ -13,7 +13,11 @@ import type { LessonAttachmentMeta } from "@/components/lesson-attachment";
 import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/lessons/$lessonId/edit")({
-  component: () => (<RequireAuth><EditLessonPage /></RequireAuth>),
+  component: () => (
+    <RequireAuth>
+      <EditLessonPage />
+    </RequireAuth>
+  ),
 });
 
 function EditLessonPage() {
@@ -32,36 +36,66 @@ function EditLessonPage() {
 
   useEffect(() => {
     if (loading) return;
-    if (!user) { navigate({ to: "/auth" }); return; }
-    void supabase.from("lessons").select("*").eq("id", lessonId).maybeSingle().then(({ data }) => {
-      if (!data) { toast.error("Lesson not found"); navigate({ to: "/" }); return; }
-      if (data.author_id !== user.id) { toast.error("Not your lesson"); navigate({ to: "/lessons/$lessonId", params: { lessonId } }); return; }
-      setTitle(data.title);
-      setSummary(data.summary ?? "");
-      setContent(data.content);
-      setTagsInput((data.tags ?? []).join(", "));
-      setLanguage(data.language ?? "");
-      setAttachments(Array.isArray(data.attachments) ? (data.attachments as unknown as LessonAttachmentMeta[]) : []);
-      setAllowed(true);
-      setReady(true);
-    });
+    if (!user) {
+      navigate({ to: "/auth" });
+      return;
+    }
+    void supabase
+      .from("lessons")
+      .select("*")
+      .eq("id", lessonId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) {
+          toast.error("Lesson not found");
+          navigate({ to: "/" });
+          return;
+        }
+        if (data.author_id !== user.id) {
+          toast.error("Not your lesson");
+          navigate({ to: "/lessons/$lessonId", params: { lessonId } });
+          return;
+        }
+        setTitle(data.title);
+        setSummary(data.summary ?? "");
+        setContent(data.content);
+        setTagsInput((data.tags ?? []).join(", "));
+        setLanguage(data.language ?? "");
+        setAttachments(
+          Array.isArray(data.attachments)
+            ? (data.attachments as unknown as LessonAttachmentMeta[])
+            : [],
+        );
+        setAllowed(true);
+        setReady(true);
+      });
   }, [lessonId, user, loading, navigate]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setBusy(true);
-    const tags = tagsInput.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean).slice(0, 8);
-    const { error } = await supabase.from("lessons").update({
-      title: title.trim(),
-      summary: summary.trim() || null,
-      content,
-      tags,
-      language: language.trim() || null,
-      attachments: attachments as never,
-    }).eq("id", lessonId);
+    const tags = tagsInput
+      .split(",")
+      .map((t) => t.trim().toLowerCase())
+      .filter(Boolean)
+      .slice(0, 8);
+    const { error } = await supabase
+      .from("lessons")
+      .update({
+        title: title.trim(),
+        summary: summary.trim() || null,
+        content,
+        tags,
+        language: language.trim() || null,
+        attachments: attachments as never,
+      })
+      .eq("id", lessonId);
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Lesson updated");
     navigate({ to: "/lessons/$lessonId", params: { lessonId } });
   };
@@ -70,41 +104,71 @@ function EditLessonPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
-      <Link to="/lessons/$lessonId" params={{ lessonId }} className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-3"><ArrowLeft className="h-3 w-3" /> Back to lesson</Link>
+      <Link
+        to="/lessons/$lessonId"
+        params={{ lessonId }}
+        className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-3"
+      >
+        <ArrowLeft className="h-3 w-3" /> Back to lesson
+      </Link>
       <h1 className="text-2xl font-display font-semibold">Edit lesson</h1>
 
       <form onSubmit={submit} className="mt-6 space-y-4">
         <div className="space-y-1.5">
-          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Title</Label>
+          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">
+            Title
+          </Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} />
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Summary</Label>
+          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">
+            Summary
+          </Label>
           <Input value={summary} onChange={(e) => setSummary(e.target.value)} maxLength={280} />
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Tags</Label>
+            <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">
+              Tags
+            </Label>
             <Input value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Language</Label>
+            <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">
+              Language
+            </Label>
             <Input value={language} onChange={(e) => setLanguage(e.target.value)} />
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Content</Label>
+          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">
+            Content
+          </Label>
           <RichEditor value={content} onChange={setContent} />
         </div>
 
         <div className="space-y-1.5">
-          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Attachments</Label>
-          <LessonAttachmentUploader userId={user!.id} attachments={attachments} onChange={setAttachments} />
+          <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">
+            Attachments
+          </Label>
+          <LessonAttachmentUploader
+            userId={user!.id}
+            attachments={attachments}
+            onChange={setAttachments}
+          />
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={() => navigate({ to: "/lessons/$lessonId", params: { lessonId } })}>Cancel</Button>
-          <Button type="submit" disabled={busy}>{busy ? "Saving…" : "Save changes"}</Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate({ to: "/lessons/$lessonId", params: { lessonId } })}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={busy}>
+            {busy ? "Saving…" : "Save changes"}
+          </Button>
         </div>
       </form>
     </div>

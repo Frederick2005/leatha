@@ -33,13 +33,22 @@ interface Props {
   documentType?: string | null;
 }
 
-export function LessonContentViewer({ contentType, content, videoUrl, documentUrl, documentType }: Props) {
+export function LessonContentViewer({
+  contentType,
+  content,
+  videoUrl,
+  documentUrl,
+  documentType,
+}: Props) {
   const [txtBody, setTxtBody] = useState<string | null>(null);
-  const docType = documentUrl ? (documentType || inferDocType(documentUrl)) : null;
+  const docType = documentUrl ? documentType || inferDocType(documentUrl) : null;
 
   useEffect(() => {
     if (contentType === "document" && docType === "txt" && documentUrl) {
-      fetch(documentUrl).then((r) => r.text()).then(setTxtBody).catch(() => setTxtBody("Failed to load text file."));
+      fetch(documentUrl)
+        .then((r) => r.text())
+        .then(setTxtBody)
+        .catch(() => setTxtBody("Failed to load text file."));
     }
   }, [contentType, docType, documentUrl]);
 
@@ -72,7 +81,11 @@ export function LessonContentViewer({ contentType, content, videoUrl, documentUr
     return (
       <div className="space-y-4">
         {docType === "pdf" && (
-          <iframe src={documentUrl} className="w-full h-[80vh] rounded-lg border border-border bg-white" title="PDF" />
+          <iframe
+            src={documentUrl}
+            className="w-full h-[80vh] rounded-lg border border-border bg-white"
+            title="PDF"
+          />
         )}
         {(docType === "doc" || docType === "ppt") && (
           <iframe
@@ -90,7 +103,12 @@ export function LessonContentViewer({ contentType, content, videoUrl, documentUr
           <div className="rounded-md border border-border p-4 flex items-center gap-3">
             <FileText className="h-5 w-5 text-muted-foreground" />
             <span className="text-sm flex-1 truncate">{documentUrl}</span>
-            <a href={documentUrl} target="_blank" rel="noreferrer" className="text-primary text-sm inline-flex items-center gap-1">
+            <a
+              href={documentUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="text-primary text-sm inline-flex items-center gap-1"
+            >
               <Download className="h-4 w-4" /> Open
             </a>
           </div>

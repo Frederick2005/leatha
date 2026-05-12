@@ -1,15 +1,55 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  ConfigProvider, theme as antdTheme, Layout, Menu, Card, Row, Col, Statistic,
-  Table, Tag, Button, Space, Modal, Input, Select, Form, message, Popconfirm, Avatar, InputNumber, Switch, Typography,
+  ConfigProvider,
+  theme as antdTheme,
+  Layout,
+  Menu,
+  Card,
+  Row,
+  Col,
+  Statistic,
+  Table,
+  Tag,
+  Button,
+  Space,
+  Modal,
+  Input,
+  Select,
+  Form,
+  message,
+  Popconfirm,
+  Avatar,
+  InputNumber,
+  Switch,
+  Typography,
 } from "antd";
 import {
-  DashboardOutlined, UserOutlined, BookOutlined, FlagOutlined, MessageOutlined,
-  TrophyOutlined, NotificationOutlined, SafetyOutlined, ArrowLeftOutlined,
-  BankOutlined, BarChartOutlined, CheckCircleOutlined,
+  DashboardOutlined,
+  UserOutlined,
+  BookOutlined,
+  FlagOutlined,
+  MessageOutlined,
+  TrophyOutlined,
+  NotificationOutlined,
+  SafetyOutlined,
+  ArrowLeftOutlined,
+  BankOutlined,
+  BarChartOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Legend } from "recharts";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  BarChart,
+  Bar,
+  Legend,
+} from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { RequireAuth } from "@/components/require-auth";
@@ -17,18 +57,31 @@ import { useTheme } from "@/providers/theme-provider";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Dashboard — Leatha" }] }),
-  component: () => (<RequireAuth><AdminGate /></RequireAuth>),
+  component: () => (
+    <RequireAuth>
+      <AdminGate />
+    </RequireAuth>
+  ),
 });
 
 const { Sider, Content, Header } = Layout;
 const { Title, Text } = Typography;
 
-async function logAdminAction(action: string, target_type?: string, target_id?: string, details: Record<string, unknown> = {}) {
-  const { data: { user } } = await supabase.auth.getUser();
+async function logAdminAction(
+  action: string,
+  target_type?: string,
+  target_id?: string,
+  details: Record<string, unknown> = {},
+) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return;
   await supabase.from("admin_logs").insert({
-    admin_id: user.id, action,
-    target_type: target_type ?? null, target_id: target_id ?? null,
+    admin_id: user.id,
+    action,
+    target_type: target_type ?? null,
+    target_id: target_id ?? null,
     details: details as never,
   });
 }
@@ -38,14 +91,23 @@ function AdminGate() {
   const { darkMode } = useTheme();
   const isDark = darkMode;
 
-  if (loading) return <div className="min-h-[60vh] grid place-items-center"><div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" /></div>;
+  if (loading)
+    return (
+      <div className="min-h-[60vh] grid place-items-center">
+        <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
   if (!isModOrAdmin) {
     return (
       <div className="max-w-md mx-auto py-20 text-center">
         <SafetyOutlined style={{ fontSize: 48 }} className="text-muted-foreground" />
         <h1 className="text-2xl font-display font-semibold mt-4">Admin access only</h1>
-        <p className="text-muted-foreground mt-2">You need moderator or admin role to view this page.</p>
-        <Link to="/" className="text-primary underline mt-4 inline-block">Back to feed</Link>
+        <p className="text-muted-foreground mt-2">
+          You need moderator or admin role to view this page.
+        </p>
+        <Link to="/" className="text-primary underline mt-4 inline-block">
+          Back to feed
+        </Link>
       </div>
     );
   }
@@ -61,19 +123,40 @@ function AdminGate() {
   );
 }
 
-type Section = "dashboard" | "users" | "lessons" | "reports" | "feedback" | "rewards" | "announcements" | "schools" | "analytics" | "logs";
+type Section =
+  | "dashboard"
+  | "users"
+  | "lessons"
+  | "reports"
+  | "feedback"
+  | "rewards"
+  | "announcements"
+  | "schools"
+  | "analytics"
+  | "logs";
 
 function AdminApp({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin: boolean }) {
   const [section, setSection] = useState<Section>("dashboard");
 
   return (
     <Layout style={{ minHeight: "calc(100vh - 64px)", background: "transparent" }}>
-      <Sider width={220} theme="light" style={{ background: "var(--surface)" }} breakpoint="lg" collapsedWidth={0}>
+      <Sider
+        width={220}
+        theme="light"
+        style={{ background: "var(--surface)" }}
+        breakpoint="lg"
+        collapsedWidth={0}
+      >
         <div className="p-4">
-          <Link to="/" className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+          <Link
+            to="/"
+            className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+          >
             <ArrowLeftOutlined /> Back to app
           </Link>
-          <Title level={4} style={{ margin: "12px 0 0" }}>Leatha Admin</Title>
+          <Title level={4} style={{ margin: "12px 0 0" }}>
+            Leatha Admin
+          </Title>
         </div>
         <Menu
           mode="inline"
@@ -122,24 +205,40 @@ function DashboardPanel() {
       const [u, l, r, f] = await Promise.all([
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("lessons").select("id", { count: "exact", head: true }),
-        supabase.from("reports").select("id", { count: "exact", head: true }).eq("status", "pending"),
+        supabase
+          .from("reports")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "pending"),
         supabase.from("feedback").select("id", { count: "exact", head: true }).eq("status", "open"),
       ]);
-      setStats({ users: u.count ?? 0, lessons: l.count ?? 0, reports: r.count ?? 0, feedback: f.count ?? 0 });
+      setStats({
+        users: u.count ?? 0,
+        lessons: l.count ?? 0,
+        reports: r.count ?? 0,
+        feedback: f.count ?? 0,
+      });
 
-      const since = new Date(); since.setDate(since.getDate() - 14);
+      const since = new Date();
+      since.setDate(since.getDate() - 14);
       const [{ data: ls }, { data: ps }] = await Promise.all([
         supabase.from("lessons").select("created_at").gte("created_at", since.toISOString()),
         supabase.from("profiles").select("created_at").gte("created_at", since.toISOString()),
       ]);
       const days: Record<string, { lessons: number; users: number }> = {};
       for (let i = 13; i >= 0; i--) {
-        const d = new Date(); d.setDate(d.getDate() - i);
+        const d = new Date();
+        d.setDate(d.getDate() - i);
         const k = d.toISOString().slice(5, 10);
         days[k] = { lessons: 0, users: 0 };
       }
-      (ls ?? []).forEach((x: { created_at: string }) => { const k = x.created_at.slice(5, 10); if (days[k]) days[k].lessons++; });
-      (ps ?? []).forEach((x: { created_at: string }) => { const k = x.created_at.slice(5, 10); if (days[k]) days[k].users++; });
+      (ls ?? []).forEach((x: { created_at: string }) => {
+        const k = x.created_at.slice(5, 10);
+        if (days[k]) days[k].lessons++;
+      });
+      (ps ?? []).forEach((x: { created_at: string }) => {
+        const k = x.created_at.slice(5, 10);
+        if (days[k]) days[k].users++;
+      });
       setActivity(Object.entries(days).map(([date, v]) => ({ date, ...v })));
     })();
   }, []);
@@ -148,20 +247,54 @@ function DashboardPanel() {
     <div>
       <Title level={3}>Overview</Title>
       <Row gutter={16}>
-        <Col xs={12} md={6}><Card><Statistic title="Users" value={stats.users} prefix={<UserOutlined />} /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Lessons" value={stats.lessons} prefix={<BookOutlined />} /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Open Reports" value={stats.reports} prefix={<FlagOutlined />} valueStyle={{ color: stats.reports > 0 ? "#f59e0b" : undefined }} /></Card></Col>
-        <Col xs={12} md={6}><Card><Statistic title="Open Feedback" value={stats.feedback} prefix={<MessageOutlined />} /></Card></Col>
+        <Col xs={12} md={6}>
+          <Card>
+            <Statistic title="Users" value={stats.users} prefix={<UserOutlined />} />
+          </Card>
+        </Col>
+        <Col xs={12} md={6}>
+          <Card>
+            <Statistic title="Lessons" value={stats.lessons} prefix={<BookOutlined />} />
+          </Card>
+        </Col>
+        <Col xs={12} md={6}>
+          <Card>
+            <Statistic
+              title="Open Reports"
+              value={stats.reports}
+              prefix={<FlagOutlined />}
+              valueStyle={{ color: stats.reports > 0 ? "#f59e0b" : undefined }}
+            />
+          </Card>
+        </Col>
+        <Col xs={12} md={6}>
+          <Card>
+            <Statistic title="Open Feedback" value={stats.feedback} prefix={<MessageOutlined />} />
+          </Card>
+        </Col>
       </Row>
       <Card style={{ marginTop: 16 }} title="Activity (last 14 days)">
         <div style={{ width: "100%", height: 280 }}>
           <ResponsiveContainer>
             <AreaChart data={activity}>
               <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-              <XAxis dataKey="date" /><YAxis allowDecimals={false} />
+              <XAxis dataKey="date" />
+              <YAxis allowDecimals={false} />
               <Tooltip />
-              <Area type="monotone" dataKey="lessons" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
-              <Area type="monotone" dataKey="users" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
+              <Area
+                type="monotone"
+                dataKey="lessons"
+                stroke="#3b82f6"
+                fill="#3b82f6"
+                fillOpacity={0.3}
+              />
+              <Area
+                type="monotone"
+                dataKey="users"
+                stroke="#10b981"
+                fill="#10b981"
+                fillOpacity={0.3}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -172,8 +305,14 @@ function DashboardPanel() {
 
 // ─────────────── Users ───────────────
 interface UserRow {
-  id: string; username: string; display_name: string | null; avatar_url: string | null;
-  account_type: string; points: number; lesson_count: number; created_at: string;
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  account_type: string;
+  points: number;
+  lesson_count: number;
+  created_at: string;
   roles: string[];
 }
 
@@ -184,34 +323,54 @@ function UsersPanel({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin:
 
   const load = async () => {
     setLoading(true);
-    const { data: profiles } = await supabase.from("profiles")
-      .select("id, username, display_name, avatar_url, account_type, points, lesson_count, created_at")
-      .order("created_at", { ascending: false }).limit(500);
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select(
+        "id, username, display_name, avatar_url, account_type, points, lesson_count, created_at",
+      )
+      .order("created_at", { ascending: false })
+      .limit(500);
     const { data: roles } = await supabase.from("user_roles").select("user_id, role");
     const byUser: Record<string, string[]> = {};
-    (roles ?? []).forEach((r) => { (byUser[r.user_id] = byUser[r.user_id] || []).push(r.role); });
+    (roles ?? []).forEach((r) => {
+      (byUser[r.user_id] = byUser[r.user_id] || []).push(r.role);
+    });
     setRows((profiles ?? []).map((p) => ({ ...p, roles: byUser[p.id] || ["user"] })));
     setLoading(false);
   };
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+  }, []);
 
   const toggleRole = async (userId: string, role: "moderator" | "admin", has: boolean) => {
     if (has) {
-      const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role);
-      if (error) { message.error(error.message); return; }
+      const { error } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", userId)
+        .eq("role", role);
+      if (error) {
+        message.error(error.message);
+        return;
+      }
       await logAdminAction("revoke_role", "user", userId, { role });
     } else {
       const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
-      if (error) { message.error(error.message); return; }
+      if (error) {
+        message.error(error.message);
+        return;
+      }
       await logAdminAction("grant_role", "user", userId, { role });
     }
     void load();
     message.success("Updated");
   };
 
-  const filtered = rows.filter((r) =>
-    !search || r.username.toLowerCase().includes(search.toLowerCase()) ||
-    (r.display_name ?? "").toLowerCase().includes(search.toLowerCase())
+  const filtered = rows.filter(
+    (r) =>
+      !search ||
+      r.username.toLowerCase().includes(search.toLowerCase()) ||
+      (r.display_name ?? "").toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -222,7 +381,14 @@ function UsersPanel({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin:
           {isSuperAdmin && <Tag color="gold">Master Admin</Tag>}
         </Space>
       }
-      extra={<Input.Search placeholder="Search…" allowClear style={{ width: 240 }} onChange={(e) => setSearch(e.target.value)} />}
+      extra={
+        <Input.Search
+          placeholder="Search…"
+          allowClear
+          style={{ width: 240 }}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      }
     >
       {!isSuperAdmin && isAdmin && (
         <Text type="secondary" style={{ display: "block", marginBottom: 12, fontSize: 12 }}>
@@ -230,78 +396,119 @@ function UsersPanel({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin:
         </Text>
       )}
       <Table
-        rowKey="id" loading={loading} dataSource={filtered} size="small" scroll={{ x: 800 }}
+        rowKey="id"
+        loading={loading}
+        dataSource={filtered}
+        size="small"
+        scroll={{ x: 800 }}
         pagination={{ pageSize: 20 }}
         columns={[
-          { title: "User", render: (_, r) => (
-            <Space><Avatar src={r.avatar_url} icon={<UserOutlined />} />
-              <div><div>{r.display_name ?? r.username}</div><Text type="secondary" style={{ fontSize: 12 }}>@{r.username}</Text></div>
-            </Space>
-          )},
+          {
+            title: "User",
+            render: (_, r) => (
+              <Space>
+                <Avatar src={r.avatar_url} icon={<UserOutlined />} />
+                <div>
+                  <div>{r.display_name ?? r.username}</div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    @{r.username}
+                  </Text>
+                </div>
+              </Space>
+            ),
+          },
           { title: "Type", dataIndex: "account_type", render: (v) => <Tag>{v}</Tag> },
-          { title: "Roles", dataIndex: "roles", render: (rs: string[]) => rs.map((r) => (
-            <Tag key={r} color={r === "super_admin" ? "gold" : r === "admin" ? "red" : r === "moderator" ? "blue" : undefined}>
-              {r === "super_admin" ? "master admin" : r}
-            </Tag>
-          )) },
+          {
+            title: "Roles",
+            dataIndex: "roles",
+            render: (rs: string[]) =>
+              rs.map((r) => (
+                <Tag
+                  key={r}
+                  color={
+                    r === "super_admin"
+                      ? "gold"
+                      : r === "admin"
+                        ? "red"
+                        : r === "moderator"
+                          ? "blue"
+                          : undefined
+                  }
+                >
+                  {r === "super_admin" ? "master admin" : r}
+                </Tag>
+              )),
+          },
           { title: "Points", dataIndex: "points", sorter: (a, b) => a.points - b.points },
           { title: "Lessons", dataIndex: "lesson_count" },
-          { title: "Joined", dataIndex: "created_at", render: (v) => new Date(v).toLocaleDateString() },
-          isAdmin ? {
-            title: "Actions",
-            render: (_, r) => {
-              const isSuper = r.roles.includes("super_admin");
-              const targetIsAdmin = r.roles.includes("admin");
-              if (isSuper) return <Tag color="gold">Protected</Tag>;
-              const canChangeAdmin = isSuperAdmin;
-              const canTouch = isSuperAdmin || !targetIsAdmin;
+          {
+            title: "Joined",
+            dataIndex: "created_at",
+            render: (v) => new Date(v).toLocaleDateString(),
+          },
+          isAdmin
+            ? {
+                title: "Actions",
+                render: (_, r) => {
+                  const isSuper = r.roles.includes("super_admin");
+                  const targetIsAdmin = r.roles.includes("admin");
+                  if (isSuper) return <Tag color="gold">Protected</Tag>;
+                  const canChangeAdmin = isSuperAdmin;
+                  const canTouch = isSuperAdmin || !targetIsAdmin;
 
-              const handleDeleteUser = async () => {
-                const { data: { session } } = await supabase.auth.getSession();
-                const token = session?.access_token;
-                const { data, error } = await supabase.functions.invoke("admin-delete-user", {
-                  body: { user_id: r.id },
-                  headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-                });
-                if (error || (data && (data as { error?: string }).error)) {
-                  message.error(error?.message ?? (data as { error?: string }).error ?? "Delete failed");
-                  return;
-                }
-                message.success("Account deleted");
-                void load();
-              };
+                  const handleDeleteUser = async () => {
+                    const {
+                      data: { session },
+                    } = await supabase.auth.getSession();
+                    const token = session?.access_token;
+                    const { data, error } = await supabase.functions.invoke("admin-delete-user", {
+                      body: { user_id: r.id },
+                      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+                    });
+                    if (error || (data && (data as { error?: string }).error)) {
+                      message.error(
+                        error?.message ?? (data as { error?: string }).error ?? "Delete failed",
+                      );
+                      return;
+                    }
+                    message.success("Account deleted");
+                    void load();
+                  };
 
-              return (
-                <Space size="small" wrap>
-                  <Button
-                    size="small"
-                    disabled={!canTouch}
-                    onClick={() => toggleRole(r.id, "moderator", r.roles.includes("moderator"))}
-                  >
-                    {r.roles.includes("moderator") ? "Unset Mod" : "Make Mod"}
-                  </Button>
-                  <Popconfirm
-                    title={targetIsAdmin ? "Revoke admin role?" : "Promote to admin?"}
-                    onConfirm={() => toggleRole(r.id, "admin", targetIsAdmin)}
-                    disabled={!canChangeAdmin}
-                  >
-                    <Button size="small" danger={targetIsAdmin} disabled={!canChangeAdmin}>
-                      {targetIsAdmin ? "Revoke Admin" : "Make Admin"}
-                    </Button>
-                  </Popconfirm>
-                  <Popconfirm
-                    title="Delete this account permanently?"
-                    description="This removes the user's auth, profile, and roles."
-                    okText="Delete"
-                    okButtonProps={{ danger: true }}
-                    onConfirm={handleDeleteUser}
-                  >
-                    <Button size="small" danger>Delete</Button>
-                  </Popconfirm>
-                </Space>
-              );
-            },
-          } : { title: "", render: () => null },
+                  return (
+                    <Space size="small" wrap>
+                      <Button
+                        size="small"
+                        disabled={!canTouch}
+                        onClick={() => toggleRole(r.id, "moderator", r.roles.includes("moderator"))}
+                      >
+                        {r.roles.includes("moderator") ? "Unset Mod" : "Make Mod"}
+                      </Button>
+                      <Popconfirm
+                        title={targetIsAdmin ? "Revoke admin role?" : "Promote to admin?"}
+                        onConfirm={() => toggleRole(r.id, "admin", targetIsAdmin)}
+                        disabled={!canChangeAdmin}
+                      >
+                        <Button size="small" danger={targetIsAdmin} disabled={!canChangeAdmin}>
+                          {targetIsAdmin ? "Revoke Admin" : "Make Admin"}
+                        </Button>
+                      </Popconfirm>
+                      <Popconfirm
+                        title="Delete this account permanently?"
+                        description="This removes the user's auth, profile, and roles."
+                        okText="Delete"
+                        okButtonProps={{ danger: true }}
+                        onConfirm={handleDeleteUser}
+                      >
+                        <Button size="small" danger>
+                          Delete
+                        </Button>
+                      </Popconfirm>
+                    </Space>
+                  );
+                },
+              }
+            : { title: "", render: () => null },
         ]}
       />
     </Card>
@@ -310,8 +517,16 @@ function UsersPanel({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin:
 
 // ─────────────── Lessons ───────────────
 interface LessonRow {
-  id: string; title: string; slug: string; author_id: string; like_count: number;
-  comment_count: number; fork_count: number; is_published: boolean; created_at: string; content_type?: string;
+  id: string;
+  title: string;
+  slug: string;
+  author_id: string;
+  like_count: number;
+  comment_count: number;
+  fork_count: number;
+  is_published: boolean;
+  created_at: string;
+  content_type?: string;
 }
 
 function LessonsPanel() {
@@ -321,47 +536,110 @@ function LessonsPanel() {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase.from("lessons")
-      .select("id, title, slug, author_id, like_count, comment_count, fork_count, is_published, created_at, content_type")
-      .order("created_at", { ascending: false }).limit(500);
+    const { data } = await supabase
+      .from("lessons")
+      .select(
+        "id, title, slug, author_id, like_count, comment_count, fork_count, is_published, created_at, content_type",
+      )
+      .order("created_at", { ascending: false })
+      .limit(500);
     setRows((data ?? []) as LessonRow[]);
     setLoading(false);
   };
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+  }, []);
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("lessons").delete().eq("id", id);
-    if (error) { message.error(error.message); return; }
+    if (error) {
+      message.error(error.message);
+      return;
+    }
     await logAdminAction("delete_lesson", "lesson", id);
-    message.success("Lesson deleted"); void load();
+    message.success("Lesson deleted");
+    void load();
   };
 
   const togglePublished = async (r: LessonRow) => {
-    const { error } = await supabase.from("lessons").update({ is_published: !r.is_published }).eq("id", r.id);
-    if (error) { message.error(error.message); return; }
+    const { error } = await supabase
+      .from("lessons")
+      .update({ is_published: !r.is_published })
+      .eq("id", r.id);
+    if (error) {
+      message.error(error.message);
+      return;
+    }
     await logAdminAction(r.is_published ? "unpublish_lesson" : "publish_lesson", "lesson", r.id);
     void load();
   };
 
-  const filtered = rows.filter((r) => !search || r.title.toLowerCase().includes(search.toLowerCase()));
+  const filtered = rows.filter(
+    (r) => !search || r.title.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
-    <Card title="Lessons" extra={<Input.Search placeholder="Search…" allowClear style={{ width: 240 }} onChange={(e) => setSearch(e.target.value)} />}>
+    <Card
+      title="Lessons"
+      extra={
+        <Input.Search
+          placeholder="Search…"
+          allowClear
+          style={{ width: 240 }}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      }
+    >
       <Table
-        rowKey="id" loading={loading} dataSource={filtered} size="small" scroll={{ x: 900 }} pagination={{ pageSize: 20 }}
+        rowKey="id"
+        loading={loading}
+        dataSource={filtered}
+        size="small"
+        scroll={{ x: 900 }}
+        pagination={{ pageSize: 20 }}
         columns={[
-          { title: "Title", render: (_, r) => <Link to="/lessons/$lessonId" params={{ lessonId: r.id }} className="text-primary hover:underline">{r.title}</Link> },
+          {
+            title: "Title",
+            render: (_, r) => (
+              <Link
+                to="/lessons/$lessonId"
+                params={{ lessonId: r.id }}
+                className="text-primary hover:underline"
+              >
+                {r.title}
+              </Link>
+            ),
+          },
           { title: "Type", dataIndex: "content_type", render: (v) => <Tag>{v ?? "text"}</Tag> },
-          { title: "❤ Likes", dataIndex: "like_count", sorter: (a, b) => a.like_count - b.like_count },
+          {
+            title: "❤ Likes",
+            dataIndex: "like_count",
+            sorter: (a, b) => a.like_count - b.like_count,
+          },
           { title: "💬 Comments", dataIndex: "comment_count" },
           { title: "🍴 Forks", dataIndex: "fork_count" },
-          { title: "Published", dataIndex: "is_published", render: (v, r) => <Switch checked={v} onChange={() => togglePublished(r)} size="small" /> },
-          { title: "Created", dataIndex: "created_at", render: (v) => new Date(v).toLocaleDateString() },
-          { title: "Actions", render: (_, r) => (
-            <Popconfirm title="Delete this lesson?" onConfirm={() => handleDelete(r.id)}>
-              <Button size="small" danger>Delete</Button>
-            </Popconfirm>
-          )},
+          {
+            title: "Published",
+            dataIndex: "is_published",
+            render: (v, r) => (
+              <Switch checked={v} onChange={() => togglePublished(r)} size="small" />
+            ),
+          },
+          {
+            title: "Created",
+            dataIndex: "created_at",
+            render: (v) => new Date(v).toLocaleDateString(),
+          },
+          {
+            title: "Actions",
+            render: (_, r) => (
+              <Popconfirm title="Delete this lesson?" onConfirm={() => handleDelete(r.id)}>
+                <Button size="small" danger>
+                  Delete
+                </Button>
+              </Popconfirm>
+            ),
+          },
         ]}
       />
     </Card>
@@ -370,25 +648,47 @@ function LessonsPanel() {
 
 // ─────────────── Reports ───────────────
 function ReportsPanel() {
-  const [rows, setRows] = useState<{ id: string; reason: string; status: string; target_type: string; target_id: string; created_at: string; reported_by: string }[]>([]);
+  const [rows, setRows] = useState<
+    {
+      id: string;
+      reason: string;
+      status: string;
+      target_type: string;
+      target_id: string;
+      created_at: string;
+      reported_by: string;
+    }[]
+  >([]);
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase.from("reports").select("*").order("created_at", { ascending: false }).limit(200);
+    const { data } = await supabase
+      .from("reports")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(200);
     setRows((data ?? []) as never);
     setLoading(false);
   };
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+  }, []);
 
   const resolve = async (id: string, action: "resolve" | "dismiss") => {
-    const { data: { user } } = await supabase.auth.getUser();
-    await supabase.from("reports").update({
-      status: action === "resolve" ? "resolved" : "dismissed",
-      resolved_by: user?.id ?? null,
-    }).eq("id", id);
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    await supabase
+      .from("reports")
+      .update({
+        status: action === "resolve" ? "resolved" : "dismissed",
+        resolved_by: user?.id ?? null,
+      })
+      .eq("id", id);
     await logAdminAction(`report_${action}`, "report", id);
-    message.success("Report updated"); void load();
+    message.success("Report updated");
+    void load();
   };
 
   const removeContent = async (r: { id: string; target_type: string; target_id: string }) => {
@@ -401,26 +701,64 @@ function ReportsPanel() {
   return (
     <Card title="Reports">
       <Table
-        rowKey="id" loading={loading} dataSource={rows} size="small" scroll={{ x: 800 }} pagination={{ pageSize: 20 }}
+        rowKey="id"
+        loading={loading}
+        dataSource={rows}
+        size="small"
+        scroll={{ x: 800 }}
+        pagination={{ pageSize: 20 }}
         columns={[
-          { title: "Status", dataIndex: "status", render: (v) => <Tag color={v === "pending" ? "orange" : v === "resolved" ? "green" : "default"}>{v}</Tag>,
-            filters: [{ text: "pending", value: "pending" }, { text: "resolved", value: "resolved" }, { text: "dismissed", value: "dismissed" }],
+          {
+            title: "Status",
+            dataIndex: "status",
+            render: (v) => (
+              <Tag color={v === "pending" ? "orange" : v === "resolved" ? "green" : "default"}>
+                {v}
+              </Tag>
+            ),
+            filters: [
+              { text: "pending", value: "pending" },
+              { text: "resolved", value: "resolved" },
+              { text: "dismissed", value: "dismissed" },
+            ],
             onFilter: (val, r) => r.status === val,
           },
           { title: "Target", dataIndex: "target_type" },
           { title: "Reason", dataIndex: "reason", ellipsis: true },
-          { title: "Date", dataIndex: "created_at", render: (v) => new Date(v).toLocaleDateString() },
-          { title: "Actions", render: (_, r) => (
-            <Space size="small">
-              {r.status === "pending" && <>
-                <Popconfirm title="Remove the reported content?" onConfirm={() => removeContent(r)}>
-                  <Button size="small" danger>Remove & Resolve</Button>
-                </Popconfirm>
-                <Button size="small" onClick={() => resolve(r.id, "dismiss")}>Dismiss</Button>
-              </>}
-              {r.target_type === "lesson" && <Link to="/lessons/$lessonId" params={{ lessonId: r.target_id }}><Button size="small" type="link">View</Button></Link>}
-            </Space>
-          )},
+          {
+            title: "Date",
+            dataIndex: "created_at",
+            render: (v) => new Date(v).toLocaleDateString(),
+          },
+          {
+            title: "Actions",
+            render: (_, r) => (
+              <Space size="small">
+                {r.status === "pending" && (
+                  <>
+                    <Popconfirm
+                      title="Remove the reported content?"
+                      onConfirm={() => removeContent(r)}
+                    >
+                      <Button size="small" danger>
+                        Remove & Resolve
+                      </Button>
+                    </Popconfirm>
+                    <Button size="small" onClick={() => resolve(r.id, "dismiss")}>
+                      Dismiss
+                    </Button>
+                  </>
+                )}
+                {r.target_type === "lesson" && (
+                  <Link to="/lessons/$lessonId" params={{ lessonId: r.target_id }}>
+                    <Button size="small" type="link">
+                      View
+                    </Button>
+                  </Link>
+                )}
+              </Space>
+            ),
+          },
         ]}
       />
     </Card>
@@ -429,20 +767,43 @@ function ReportsPanel() {
 
 // ─────────────── Feedback ───────────────
 function FeedbackPanel() {
-  const [rows, setRows] = useState<{ id: string; subject: string; body: string; category: string; status: string; rating: number | null; priority: boolean; created_at: string; admin_notes: string | null; response: string | null; user_id: string | null }[]>([]);
+  const [rows, setRows] = useState<
+    {
+      id: string;
+      subject: string;
+      body: string;
+      category: string;
+      status: string;
+      rating: number | null;
+      priority: boolean;
+      created_at: string;
+      admin_notes: string | null;
+      response: string | null;
+      user_id: string | null;
+    }[]
+  >([]);
   const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState<typeof rows[number] | null>(null);
+  const [open, setOpen] = useState<(typeof rows)[number] | null>(null);
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase.from("feedback").select("*").order("created_at", { ascending: false }).limit(300);
+    const { data } = await supabase
+      .from("feedback")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(300);
     setRows((data ?? []) as never);
     setLoading(false);
   };
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+  }, []);
 
   const update = async (id: string, patch: Record<string, unknown>) => {
-    await supabase.from("feedback").update(patch as never).eq("id", id);
+    await supabase
+      .from("feedback")
+      .update(patch as never)
+      .eq("id", id);
     await logAdminAction("feedback_update", "feedback", id, patch);
     void load();
   };
@@ -450,24 +811,71 @@ function FeedbackPanel() {
   return (
     <Card title="Feedback">
       <Table
-        rowKey="id" loading={loading} dataSource={rows} size="small" scroll={{ x: 900 }} pagination={{ pageSize: 20 }}
+        rowKey="id"
+        loading={loading}
+        dataSource={rows}
+        size="small"
+        scroll={{ x: 900 }}
+        pagination={{ pageSize: 20 }}
         columns={[
-          { title: "Status", dataIndex: "status", render: (v) => <Tag color={v === "open" ? "blue" : v === "in_review" ? "gold" : v === "resolved" ? "green" : "default"}>{v}</Tag> },
+          {
+            title: "Status",
+            dataIndex: "status",
+            render: (v) => (
+              <Tag
+                color={
+                  v === "open"
+                    ? "blue"
+                    : v === "in_review"
+                      ? "gold"
+                      : v === "resolved"
+                        ? "green"
+                        : "default"
+                }
+              >
+                {v}
+              </Tag>
+            ),
+          },
           { title: "Category", dataIndex: "category", render: (v) => <Tag>{v}</Tag> },
           { title: "Subject", dataIndex: "subject", ellipsis: true },
-          { title: "Rating", dataIndex: "rating", render: (v) => v ? "⭐".repeat(v) : "—" },
-          { title: "Priority", dataIndex: "priority", render: (v) => v ? <Tag color="red">High</Tag> : "—" },
-          { title: "Date", dataIndex: "created_at", render: (v) => new Date(v).toLocaleDateString() },
-          { title: "Actions", render: (_, r) => <Button size="small" onClick={() => setOpen(r)}>Manage</Button> },
+          { title: "Rating", dataIndex: "rating", render: (v) => (v ? "⭐".repeat(v) : "—") },
+          {
+            title: "Priority",
+            dataIndex: "priority",
+            render: (v) => (v ? <Tag color="red">High</Tag> : "—"),
+          },
+          {
+            title: "Date",
+            dataIndex: "created_at",
+            render: (v) => new Date(v).toLocaleDateString(),
+          },
+          {
+            title: "Actions",
+            render: (_, r) => (
+              <Button size="small" onClick={() => setOpen(r)}>
+                Manage
+              </Button>
+            ),
+          },
         ]}
       />
       <Modal
-        open={!!open} title={open?.subject} onCancel={() => setOpen(null)} footer={null} width={680} destroyOnClose
+        open={!!open}
+        title={open?.subject}
+        onCancel={() => setOpen(null)}
+        footer={null}
+        width={680}
+        destroyOnClose
       >
         {open && (
           <FeedbackForm
             row={open}
-            onSave={async (patch) => { await update(open.id, patch); setOpen(null); message.success("Saved"); }}
+            onSave={async (patch) => {
+              await update(open.id, patch);
+              setOpen(null);
+              message.success("Saved");
+            }}
           />
         )}
       </Modal>
@@ -475,50 +883,113 @@ function FeedbackPanel() {
   );
 }
 
-function FeedbackForm({ row, onSave }: { row: { body: string; status: string; priority: boolean; admin_notes: string | null; response: string | null }; onSave: (p: Record<string, unknown>) => void }) {
+function FeedbackForm({
+  row,
+  onSave,
+}: {
+  row: {
+    body: string;
+    status: string;
+    priority: boolean;
+    admin_notes: string | null;
+    response: string | null;
+  };
+  onSave: (p: Record<string, unknown>) => void;
+}) {
   const [form] = Form.useForm();
   return (
     <Form form={form} layout="vertical" initialValues={row} onFinish={onSave}>
-      <Card size="small" style={{ marginBottom: 16 }}><Text>{row.body}</Text></Card>
-      <Form.Item name="status" label="Status"><Select options={[{ value: "open", label: "Open" }, { value: "in_review", label: "In Review" }, { value: "resolved", label: "Resolved" }, { value: "dismissed", label: "Dismissed" }]} /></Form.Item>
-      <Form.Item name="priority" label="Priority" valuePropName="checked"><Switch /></Form.Item>
-      <Form.Item name="admin_notes" label="Internal Notes"><Input.TextArea rows={3} /></Form.Item>
-      <Form.Item name="response" label="Response to user"><Input.TextArea rows={3} /></Form.Item>
-      <Button type="primary" htmlType="submit">Save</Button>
+      <Card size="small" style={{ marginBottom: 16 }}>
+        <Text>{row.body}</Text>
+      </Card>
+      <Form.Item name="status" label="Status">
+        <Select
+          options={[
+            { value: "open", label: "Open" },
+            { value: "in_review", label: "In Review" },
+            { value: "resolved", label: "Resolved" },
+            { value: "dismissed", label: "Dismissed" },
+          ]}
+        />
+      </Form.Item>
+      <Form.Item name="priority" label="Priority" valuePropName="checked">
+        <Switch />
+      </Form.Item>
+      <Form.Item name="admin_notes" label="Internal Notes">
+        <Input.TextArea rows={3} />
+      </Form.Item>
+      <Form.Item name="response" label="Response to user">
+        <Input.TextArea rows={3} />
+      </Form.Item>
+      <Button type="primary" htmlType="submit">
+        Save
+      </Button>
     </Form>
   );
 }
 
 // ─────────────── Rewards ───────────────
 function RewardsPanel({ isAdmin }: { isAdmin: boolean }) {
-  const [rows, setRows] = useState<{ id: string; username: string; display_name: string | null; points: number }[]>([]);
+  const [rows, setRows] = useState<
+    { id: string; username: string; display_name: string | null; points: number }[]
+  >([]);
   const [loading, setLoading] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase.from("profiles").select("id, username, display_name, points").order("points", { ascending: false }).limit(200);
+    const { data } = await supabase
+      .from("profiles")
+      .select("id, username, display_name, points")
+      .order("points", { ascending: false })
+      .limit(200);
     setRows((data ?? []) as never);
     setLoading(false);
   };
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+  }, []);
 
   const adjust = async (id: string, points: number) => {
     await supabase.from("profiles").update({ points }).eq("id", id);
     await logAdminAction("adjust_points", "user", id, { points });
-    message.success("Updated"); void load();
+    message.success("Updated");
+    void load();
   };
 
   return (
     <Card title="Rewards / Points Leaderboard">
       <Table
-        rowKey="id" loading={loading} dataSource={rows} size="small" pagination={{ pageSize: 20 }}
+        rowKey="id"
+        loading={loading}
+        dataSource={rows}
+        size="small"
+        pagination={{ pageSize: 20 }}
         columns={[
           { title: "#", render: (_, __, i) => i + 1, width: 60 },
-          { title: "User", render: (_, r) => <span>{r.display_name ?? r.username} <Text type="secondary">@{r.username}</Text></span> },
-          { title: "Points", dataIndex: "points",
-            render: (v, r) => isAdmin
-              ? <InputNumber min={0} defaultValue={v} onBlur={(e) => { const n = Number(e.target.value); if (n !== v) void adjust(r.id, n); }} />
-              : v
+          {
+            title: "User",
+            render: (_, r) => (
+              <span>
+                {r.display_name ?? r.username} <Text type="secondary">@{r.username}</Text>
+              </span>
+            ),
+          },
+          {
+            title: "Points",
+            dataIndex: "points",
+            render: (v, r) =>
+              isAdmin ? (
+                <InputNumber
+                  min={0}
+                  defaultValue={v}
+                  onBlur={(e) => {
+                    const n = Number(e.target.value);
+                    if (n !== v) void adjust(r.id, n);
+                  }}
+                />
+              ) : (
+                v
+              ),
           },
         ]}
       />
@@ -528,23 +999,39 @@ function RewardsPanel({ isAdmin }: { isAdmin: boolean }) {
 
 // ─────────────── Announcements ───────────────
 function AnnouncementsPanel({ isAdmin }: { isAdmin: boolean }) {
-  const [rows, setRows] = useState<{ id: string; title: string; body: string; audience: string; created_at: string }[]>([]);
+  const [rows, setRows] = useState<
+    { id: string; title: string; body: string; audience: string; created_at: string }[]
+  >([]);
   const [open, setOpen] = useState(false);
   const [form] = Form.useForm();
 
   const load = async () => {
-    const { data } = await supabase.from("announcements").select("*").order("created_at", { ascending: false }).limit(100);
+    const { data } = await supabase
+      .from("announcements")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
     setRows((data ?? []) as never);
   };
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+  }, []);
 
   const submit = async (vals: { title: string; body: string; audience: string }) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
     const { error } = await supabase.from("announcements").insert({ ...vals, author_id: user.id });
-    if (error) { message.error(error.message); return; }
+    if (error) {
+      message.error(error.message);
+      return;
+    }
     await logAdminAction("create_announcement", "announcement", undefined, vals);
-    message.success("Posted"); setOpen(false); form.resetFields(); void load();
+    message.success("Posted");
+    setOpen(false);
+    form.resetFields();
+    void load();
   };
 
   const remove = async (id: string) => {
@@ -554,23 +1041,70 @@ function AnnouncementsPanel({ isAdmin }: { isAdmin: boolean }) {
   };
 
   return (
-    <Card title="Announcements" extra={isAdmin && <Button type="primary" onClick={() => setOpen(true)}>New</Button>}>
+    <Card
+      title="Announcements"
+      extra={
+        isAdmin && (
+          <Button type="primary" onClick={() => setOpen(true)}>
+            New
+          </Button>
+        )
+      }
+    >
       <Table
-        rowKey="id" dataSource={rows} size="small" pagination={{ pageSize: 20 }}
+        rowKey="id"
+        dataSource={rows}
+        size="small"
+        pagination={{ pageSize: 20 }}
         columns={[
           { title: "Title", dataIndex: "title" },
           { title: "Audience", dataIndex: "audience", render: (v) => <Tag>{v}</Tag> },
-          { title: "Date", dataIndex: "created_at", render: (v) => new Date(v).toLocaleDateString() },
+          {
+            title: "Date",
+            dataIndex: "created_at",
+            render: (v) => new Date(v).toLocaleDateString(),
+          },
           { title: "Body", dataIndex: "body", ellipsis: true },
-          isAdmin ? { title: "", render: (_, r) => <Popconfirm title="Delete?" onConfirm={() => remove(r.id)}><Button size="small" danger>Delete</Button></Popconfirm> } : { title: "", render: () => null },
+          isAdmin
+            ? {
+                title: "",
+                render: (_, r) => (
+                  <Popconfirm title="Delete?" onConfirm={() => remove(r.id)}>
+                    <Button size="small" danger>
+                      Delete
+                    </Button>
+                  </Popconfirm>
+                ),
+              }
+            : { title: "", render: () => null },
         ]}
       />
-      <Modal open={open} title="New Announcement" onCancel={() => setOpen(false)} footer={null} destroyOnClose>
+      <Modal
+        open={open}
+        title="New Announcement"
+        onCancel={() => setOpen(false)}
+        footer={null}
+        destroyOnClose
+      >
         <Form form={form} layout="vertical" onFinish={submit} initialValues={{ audience: "all" }}>
-          <Form.Item name="title" label="Title" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="audience" label="Audience"><Select options={[{ value: "all", label: "Everyone" }, { value: "student", label: "Students" }, { value: "teacher", label: "Teachers" }]} /></Form.Item>
-          <Form.Item name="body" label="Body" rules={[{ required: true }]}><Input.TextArea rows={5} /></Form.Item>
-          <Button type="primary" htmlType="submit">Post</Button>
+          <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="audience" label="Audience">
+            <Select
+              options={[
+                { value: "all", label: "Everyone" },
+                { value: "student", label: "Students" },
+                { value: "teacher", label: "Teachers" },
+              ]}
+            />
+          </Form.Item>
+          <Form.Item name="body" label="Body" rules={[{ required: true }]}>
+            <Input.TextArea rows={5} />
+          </Form.Item>
+          <Button type="primary" htmlType="submit">
+            Post
+          </Button>
         </Form>
       </Modal>
     </Card>
@@ -579,20 +1113,49 @@ function AnnouncementsPanel({ isAdmin }: { isAdmin: boolean }) {
 
 // ─────────────── Logs ───────────────
 function LogsPanel() {
-  const [rows, setRows] = useState<{ id: string; admin_id: string; action: string; target_type: string | null; target_id: string | null; created_at: string }[]>([]);
+  const [rows, setRows] = useState<
+    {
+      id: string;
+      admin_id: string;
+      action: string;
+      target_type: string | null;
+      target_id: string | null;
+      created_at: string;
+    }[]
+  >([]);
   useEffect(() => {
-    void supabase.from("admin_logs").select("*").order("created_at", { ascending: false }).limit(200)
+    void supabase
+      .from("admin_logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(200)
       .then(({ data }) => setRows((data ?? []) as never));
   }, []);
   return (
     <Card title="Audit Logs">
       <Table
-        rowKey="id" dataSource={rows} size="small" pagination={{ pageSize: 20 }} scroll={{ x: 700 }}
+        rowKey="id"
+        dataSource={rows}
+        size="small"
+        pagination={{ pageSize: 20 }}
+        scroll={{ x: 700 }}
         columns={[
           { title: "When", dataIndex: "created_at", render: (v) => new Date(v).toLocaleString() },
           { title: "Action", dataIndex: "action", render: (v) => <Tag>{v}</Tag> },
-          { title: "Target", render: (_, r) => r.target_type ? `${r.target_type}:${r.target_id?.slice(0, 8)}` : "—" },
-          { title: "Admin", dataIndex: "admin_id", render: (v: string) => <Text code style={{ fontSize: 11 }}>{v?.slice(0, 8)}</Text> },
+          {
+            title: "Target",
+            render: (_, r) =>
+              r.target_type ? `${r.target_type}:${r.target_id?.slice(0, 8)}` : "—",
+          },
+          {
+            title: "Admin",
+            dataIndex: "admin_id",
+            render: (v: string) => (
+              <Text code style={{ fontSize: 11 }}>
+                {v?.slice(0, 8)}
+              </Text>
+            ),
+          },
         ]}
       />
     </Card>
@@ -607,7 +1170,8 @@ function AnalyticsPanel() {
 
   useEffect(() => {
     void (async () => {
-      const since = new Date(); since.setDate(since.getDate() - 30);
+      const since = new Date();
+      since.setDate(since.getDate() - 30);
       const { data } = await supabase
         .from("analytics_events")
         .select("event_type, created_at")
@@ -616,10 +1180,12 @@ function AnalyticsPanel() {
       const days: Record<string, number> = {};
       const types: Record<string, number> = {};
       for (let i = 29; i >= 0; i--) {
-        const d = new Date(); d.setDate(d.getDate() - i);
+        const d = new Date();
+        d.setDate(d.getDate() - i);
         days[d.toISOString().slice(5, 10)] = 0;
       }
-      let voice = 0, text = 0;
+      let voice = 0,
+        text = 0;
       (data ?? []).forEach((e: { event_type: string; created_at: string }) => {
         const k = e.created_at.slice(5, 10);
         if (days[k] !== undefined) days[k]++;
@@ -637,18 +1203,37 @@ function AnalyticsPanel() {
     <div>
       <Title level={3}>Analytics (last 30 days)</Title>
       <Row gutter={16}>
-        <Col xs={12} md={8}><Card><Statistic title="Total events" value={totals.events} /></Card></Col>
-        <Col xs={12} md={8}><Card><Statistic title="Text messages" value={totals.text} /></Card></Col>
-        <Col xs={12} md={8}><Card><Statistic title="Voice notes" value={totals.voice} /></Card></Col>
+        <Col xs={12} md={8}>
+          <Card>
+            <Statistic title="Total events" value={totals.events} />
+          </Card>
+        </Col>
+        <Col xs={12} md={8}>
+          <Card>
+            <Statistic title="Text messages" value={totals.text} />
+          </Card>
+        </Col>
+        <Col xs={12} md={8}>
+          <Card>
+            <Statistic title="Voice notes" value={totals.voice} />
+          </Card>
+        </Col>
       </Row>
       <Card style={{ marginTop: 16 }} title="Daily activity">
         <div style={{ width: "100%", height: 280 }}>
           <ResponsiveContainer>
             <AreaChart data={byDay}>
               <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-              <XAxis dataKey="date" /><YAxis allowDecimals={false} />
+              <XAxis dataKey="date" />
+              <YAxis allowDecimals={false} />
               <Tooltip />
-              <Area type="monotone" dataKey="total" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.3} />
+              <Area
+                type="monotone"
+                dataKey="total"
+                stroke="#3b82f6"
+                fill="#3b82f6"
+                fillOpacity={0.3}
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -672,8 +1257,22 @@ function AnalyticsPanel() {
 }
 
 // ─────────────── Schools ───────────────
-interface SchoolRow { id: string; name: string; code: string; admin_id: string; created_at: string; }
-interface PendingTeacher { id: string; teacher_id: string; school_id: string; status: string; created_at: string; school?: { name: string } | null; teacher?: { username: string; display_name: string | null } | null; }
+interface SchoolRow {
+  id: string;
+  name: string;
+  code: string;
+  admin_id: string;
+  created_at: string;
+}
+interface PendingTeacher {
+  id: string;
+  teacher_id: string;
+  school_id: string;
+  status: string;
+  created_at: string;
+  school?: { name: string } | null;
+  teacher?: { username: string; display_name: string | null } | null;
+}
 
 function SchoolsPanel({ isAdmin }: { isAdmin: boolean }) {
   const [schools, setSchools] = useState<SchoolRow[]>([]);
@@ -684,7 +1283,11 @@ function SchoolsPanel({ isAdmin }: { isAdmin: boolean }) {
   const load = async () => {
     const [{ data: s }, { data: p }] = await Promise.all([
       supabase.from("schools").select("*").order("created_at", { ascending: false }),
-      supabase.from("teacher_schools").select("*").order("created_at", { ascending: false }).limit(200),
+      supabase
+        .from("teacher_schools")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200),
     ]);
     setSchools((s ?? []) as SchoolRow[]);
     const rows = (p ?? []) as PendingTeacher[];
@@ -704,15 +1307,25 @@ function SchoolsPanel({ isAdmin }: { isAdmin: boolean }) {
     }
     setPending(rows);
   };
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+  }, []);
 
   const create = async (vals: { name: string; code: string }) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
     const { error } = await supabase.from("schools").insert({ ...vals, admin_id: user.id });
-    if (error) { message.error(error.message); return; }
+    if (error) {
+      message.error(error.message);
+      return;
+    }
     await logAdminAction("create_school", "school", undefined, vals);
-    message.success("School created"); setOpen(false); form.resetFields(); void load();
+    message.success("School created");
+    setOpen(false);
+    form.resetFields();
+    void load();
   };
 
   const setStatus = async (id: string, status: "approved" | "rejected") => {
@@ -723,38 +1336,100 @@ function SchoolsPanel({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <div>
-      <Card title="Schools" extra={isAdmin && <Button type="primary" onClick={() => setOpen(true)}>New school</Button>}>
+      <Card
+        title="Schools"
+        extra={
+          isAdmin && (
+            <Button type="primary" onClick={() => setOpen(true)}>
+              New school
+            </Button>
+          )
+        }
+      >
         <Table
-          rowKey="id" dataSource={schools} size="small" pagination={{ pageSize: 10 }}
+          rowKey="id"
+          dataSource={schools}
+          size="small"
+          pagination={{ pageSize: 10 }}
           columns={[
             { title: "Name", dataIndex: "name" },
             { title: "Join code", dataIndex: "code", render: (v) => <Text code>{v}</Text> },
-            { title: "Created", dataIndex: "created_at", render: (v) => new Date(v).toLocaleDateString() },
+            {
+              title: "Created",
+              dataIndex: "created_at",
+              render: (v) => new Date(v).toLocaleDateString(),
+            },
           ]}
         />
       </Card>
       <Card style={{ marginTop: 16 }} title="Teacher membership requests">
         <Table
-          rowKey="id" dataSource={pending} size="small" pagination={{ pageSize: 20 }}
+          rowKey="id"
+          dataSource={pending}
+          size="small"
+          pagination={{ pageSize: 20 }}
           columns={[
-            { title: "Teacher", render: (_, r) => r.teacher ? `${r.teacher.display_name ?? r.teacher.username} (@${r.teacher.username})` : r.teacher_id.slice(0, 8) },
+            {
+              title: "Teacher",
+              render: (_, r) =>
+                r.teacher
+                  ? `${r.teacher.display_name ?? r.teacher.username} (@${r.teacher.username})`
+                  : r.teacher_id.slice(0, 8),
+            },
             { title: "School", render: (_, r) => r.school?.name ?? r.school_id.slice(0, 8) },
-            { title: "Status", dataIndex: "status", render: (v) => <Tag color={v === "approved" ? "green" : v === "rejected" ? "red" : "gold"}>{v}</Tag> },
-            { title: "Date", dataIndex: "created_at", render: (v) => new Date(v).toLocaleDateString() },
-            { title: "Actions", render: (_, r) => r.status === "pending" ? (
-              <Space size="small">
-                <Button size="small" type="primary" icon={<CheckCircleOutlined />} onClick={() => setStatus(r.id, "approved")}>Approve</Button>
-                <Button size="small" danger onClick={() => setStatus(r.id, "rejected")}>Reject</Button>
-              </Space>
-            ) : null },
+            {
+              title: "Status",
+              dataIndex: "status",
+              render: (v) => (
+                <Tag color={v === "approved" ? "green" : v === "rejected" ? "red" : "gold"}>
+                  {v}
+                </Tag>
+              ),
+            },
+            {
+              title: "Date",
+              dataIndex: "created_at",
+              render: (v) => new Date(v).toLocaleDateString(),
+            },
+            {
+              title: "Actions",
+              render: (_, r) =>
+                r.status === "pending" ? (
+                  <Space size="small">
+                    <Button
+                      size="small"
+                      type="primary"
+                      icon={<CheckCircleOutlined />}
+                      onClick={() => setStatus(r.id, "approved")}
+                    >
+                      Approve
+                    </Button>
+                    <Button size="small" danger onClick={() => setStatus(r.id, "rejected")}>
+                      Reject
+                    </Button>
+                  </Space>
+                ) : null,
+            },
           ]}
         />
       </Card>
-      <Modal open={open} title="Create school" onCancel={() => setOpen(false)} footer={null} destroyOnClose>
+      <Modal
+        open={open}
+        title="Create school"
+        onCancel={() => setOpen(false)}
+        footer={null}
+        destroyOnClose
+      >
         <Form form={form} layout="vertical" onFinish={create}>
-          <Form.Item name="name" label="Name" rules={[{ required: true, max: 120 }]}><Input /></Form.Item>
-          <Form.Item name="code" label="Unique join code" rules={[{ required: true, max: 24 }]}><Input placeholder="e.g. SKILL-2026" /></Form.Item>
-          <Button type="primary" htmlType="submit">Create</Button>
+          <Form.Item name="name" label="Name" rules={[{ required: true, max: 120 }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="code" label="Unique join code" rules={[{ required: true, max: 24 }]}>
+            <Input placeholder="e.g. SKILL-2026" />
+          </Form.Item>
+          <Button type="primary" htmlType="submit">
+            Create
+          </Button>
         </Form>
       </Modal>
     </div>

@@ -8,10 +8,7 @@ import type { SVGProps } from "react";
  *
  * Usage: <LeathaLogo size={32} className="text-primary" />
  */
-export function LeathaLogo({
-  size = 32,
-  ...props
-}: SVGProps<SVGSVGElement> & { size?: number }) {
+export function LeathaLogo({ size = 32, ...props }: SVGProps<SVGSVGElement> & { size?: number }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -23,14 +20,7 @@ export function LeathaLogo({
       {...props}
     >
       {/* outer ring */}
-      <circle
-        cx="50"
-        cy="50"
-        r="44"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="6"
-      />
+      <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" strokeWidth="6" />
 
       {/* Left "A" rotated 90° CW — apex points right.
           Outer triangle minus inner triangle (counter) via evenodd. */}

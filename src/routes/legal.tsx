@@ -12,10 +12,30 @@ export const Route = createFileRoute("/legal")({
 });
 
 const sections = [
-  { to: "/terms" as const, icon: FileText, title: "Terms of Service", desc: "The rules that govern your use of Leatha." },
-  { to: "/privacy" as const, icon: Shield, title: "Privacy Policy", desc: "How we collect, use, and protect your data." },
-  { to: "/cookies" as const, icon: Cookie, title: "Cookie Policy", desc: "How we use cookies and local storage." },
-  { to: "/feedback" as const, icon: Mail, title: "Contact / Feedback", desc: "Reach out with questions or concerns." },
+  {
+    to: "/terms" as const,
+    icon: FileText,
+    title: "Terms of Service",
+    desc: "The rules that govern your use of Leatha.",
+  },
+  {
+    to: "/privacy" as const,
+    icon: Shield,
+    title: "Privacy Policy",
+    desc: "How we collect, use, and protect your data.",
+  },
+  {
+    to: "/cookies" as const,
+    icon: Cookie,
+    title: "Cookie Policy",
+    desc: "How we use cookies and local storage.",
+  },
+  {
+    to: "/feedback" as const,
+    icon: Mail,
+    title: "Contact / Feedback",
+    desc: "Reach out with questions or concerns.",
+  },
 ];
 
 function LegalPage() {
@@ -47,7 +67,8 @@ function LegalPage() {
       </div>
 
       <div className="mt-10 text-xs text-muted-foreground">
-        © 2026{new Date().getFullYear() > 2026 ? `–${new Date().getFullYear()}` : ""} Leatha. All rights reserved.
+        © 2026{new Date().getFullYear() > 2026 ? `–${new Date().getFullYear()}` : ""} Leatha. All
+        rights reserved.
       </div>
     </div>
   );
