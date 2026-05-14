@@ -7,8 +7,8 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 
 export default defineConfig({
   plugins: [
-    cloudflare({ viteEnvironment: { name: "ssr" } }),
     tanstackStart(),
+    cloudflare({ viteEnvironment: { name: "ssr" } }),
     react(),
     tailwindcss(),
     tsconfigPaths(),
