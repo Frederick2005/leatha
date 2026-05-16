@@ -54,6 +54,150 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { RequireAuth } from "@/components/require-auth";
 import { useTheme } from "@/providers/theme-provider";
+import { toast } from "sonner";
+
+export function InviteLinksPanel() {
+  const { isSuperAdmin } = useAuth();
+  const [links, setLinks] = useState<any[]>([]);
+  const [label, setLabel] = useState("");
+  const [loading, setLoading] = useState(false);
+
+const fetchLinks = async () => {
+  const { data, error } = await supabase
+    .from("invite_links")
+    .select("id, code, label, created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) { console.error(error); return; }
+
+  // Fetch use counts separately
+  const withCounts = await Promise.all(
+    (data ?? []).map(async (link) => {
+      const { data: uses } = await supabase
+        .from("invite_uses")
+        .select("id, used_at, used_by")
+        .eq("invite_code", link.code);
+      return { ...link, invite_uses: uses ?? [] };
+    })
+  );
+  setLinks(withCounts);
+};
+  useEffect(() => { fetchLinks(); }, []);
+
+  const createLink = async () => {
+    setLoading(true);
+    const { error } = await supabase
+      .from("invite_links")
+      .insert({ label: label.trim() || null });
+    setLoading(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Invite link created");
+    setLabel("");
+    fetchLinks();
+  };
+
+  const deleteLink = async (id: string) => {
+    const { error } = await supabase.from("invite_links").delete().eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Link deleted");
+    fetchLinks();
+  };
+
+  if (!isSuperAdmin) return null;
+
+  return (
+    <div className="space-y-6">
+      <h2 className="text-xl font-bold">Invite Links</h2>
+
+      {/* Create new link */}
+      <div className="flex gap-2">
+        <Input
+          placeholder="Label (optional, e.g. 'School A batch')"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          className="max-w-sm"
+        />
+        <Button onClick={createLink} disabled={loading}>
+          Generate link
+        </Button>
+      </div>
+
+      {/* Links list */}
+      <div className="space-y-4">
+        {links.length === 0 && (
+          <p className="text-sm text-muted-foreground">No invite links yet.</p>
+        )}
+        {links.map((link) => (
+          <div key={link.id} className="rounded-lg border border-border p-4 space-y-3">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                {link.label && (
+                  <p className="font-medium text-sm">{link.label}</p>
+                )}
+                <p className="text-xs text-muted-foreground font-mono mt-1">
+                  {window.location.origin}/join?ref={link.code}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Created {new Date(link.created_at).toLocaleDateString()} ·{" "}
+                  <span className="font-medium text-foreground">
+                    {link.invite_uses?.length ?? 0} signups
+                  </span>
+                </p>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      `${window.location.origin}/join?ref=${link.code}`
+                    );
+                    toast.success("Link copied!");
+                  }}
+                >
+                  Copy
+                </Button>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  onClick={() => deleteLink(link.id)}
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+
+            {/* Who signed up */}
+            {link.invite_uses?.length > 0 && (
+              <div className="border-t border-border pt-3">
+                <p className="text-xs font-medium text-muted-foreground mb-2">
+                  Signed up via this link:
+                </p>
+                <div className="space-y-1">
+                  {link.invite_uses.map((use: any) => (
+                    <div key={use.id} className="flex items-center justify-between text-xs">
+                      <span>
+                        {use.profiles?.display_name || use.profiles?.username || "Unknown"}
+                        {use.profiles?.username && (
+                          <span className="text-muted-foreground ml-1">
+                            @{use.profiles.username}
+                          </span>
+                        )}
+                      </span>
+                      <span className="text-muted-foreground">
+                        {new Date(use.used_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin Dashboard — Leatha" }] }),
@@ -133,7 +277,8 @@ type Section =
   | "announcements"
   | "schools"
   | "analytics"
-  | "logs";
+  | "logs"
+  | "invites";
 
 function AdminApp({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin: boolean }) {
   const [section, setSection] = useState<Section>("dashboard");
@@ -174,6 +319,7 @@ function AdminApp({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin: b
             { key: "rewards", icon: <TrophyOutlined />, label: "Rewards" },
             { key: "announcements", icon: <NotificationOutlined />, label: "Announcements" },
             { key: "logs", icon: <SafetyOutlined />, label: "Audit Logs" },
+...(isSuperAdmin ? [{ key: "invites", icon: <CheckCircleOutlined />, label: "Invite Links" }] : []),
           ]}
         />
       </Sider>
@@ -189,6 +335,7 @@ function AdminApp({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin: b
           {section === "rewards" && <RewardsPanel isAdmin={isAdmin} />}
           {section === "announcements" && <AnnouncementsPanel isAdmin={isAdmin} />}
           {section === "logs" && <LogsPanel />}
+          {section === "invites" && isSuperAdmin && <InviteLinksPanel />}
         </Content>
       </Layout>
     </Layout>
