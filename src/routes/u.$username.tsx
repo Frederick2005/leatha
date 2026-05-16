@@ -104,31 +104,39 @@ function ProfilePage() {
 
   useEffect(() => {
     if (!profile) return;
-    if (tab === "followers") {
-      void supabase
-        .from("follows")
-        .select("profile:profiles!follows_follower_id_fkey(*)")
-        .eq("followee_id", profile.id)
-        .then(({ data }) =>
-          setFollowers(
-            ((data ?? []) as unknown as { profile: ProfileFull }[])
-              .map((r) => r.profile)
-              .filter(Boolean),
-          ),
-        );
-    } else if (tab === "following") {
-      void supabase
-        .from("follows")
-        .select("profile:profiles!follows_followee_id_fkey(*)")
-        .eq("follower_id", profile.id)
-        .then(({ data }) =>
-          setFollowingList(
-            ((data ?? []) as unknown as { profile: ProfileFull }[])
-              .map((r) => r.profile)
-              .filter(Boolean),
-          ),
-        );
-    }
+    void (async () => {
+      if (tab === "followers") {
+        const { data } = await supabase
+          .from("follows")
+          .select("follower_id")
+          .eq("followee_id", profile.id);
+        if (data && data.length > 0) {
+          const ids = data.map((r) => r.follower_id);
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("*")
+            .in("id", ids);
+          setFollowers((profiles as ProfileFull[]) ?? []);
+        } else {
+          setFollowers([]);
+        }
+      } else if (tab === "following") {
+        const { data } = await supabase
+          .from("follows")
+          .select("followee_id")
+          .eq("follower_id", profile.id);
+        if (data && data.length > 0) {
+          const ids = data.map((r) => r.followee_id);
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("*")
+            .in("id", ids);
+          setFollowingList((profiles as ProfileFull[]) ?? []);
+        } else {
+          setFollowingList([]);
+        }
+      }
+    })();
   }, [tab, profile]);
 
   const toggleFollow = async () => {
