@@ -1,10 +1,9 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tanstack-start-app",
-  "compatibility_date": "2025-09-24",
+  "name": "leatha",
+  "compatibility_date": "2026-05-15",
   "compatibility_flags": ["nodejs_compat"],
-  
-
+  "main": "@tanstack/react-start/server-entry",
   "vars": {
     "SUPABASE_URL": "https://hpiwsqigqqqrfxuqmfkj.supabase.co",
     "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_ImRBdEGTPgO-kIk0ibB7hQ_z6dlgraH"
