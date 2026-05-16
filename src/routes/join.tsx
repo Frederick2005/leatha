@@ -31,16 +31,13 @@ function JoinPage() {
   }, [ref]);
 
   // Record use when logged-in user lands with a valid code
-  useEffect(() => {
-    if (!user || !ref || valid !== true || recording) return;
-    setRecording(true);
-    supabase
-      .from("invite_uses")
-      .upsert({ invite_code: ref, used_by: user.id }, { onConflict: "invite_code,used_by" })
-      .then(({ error }) => {
-        if (error) console.error("Failed to record invite use", error);
-      });
-  }, [user, ref, valid, recording]);
+ // Only store ref for new signups
+useEffect(() => {
+  if (!ref || valid !== true) return;
+  if (!user) {
+    sessionStorage.setItem("invite_ref", ref);
+  }
+}, [user, ref, valid]);
 
   const handleJoin = () => {
     // Store ref in sessionStorage so auth page can pick it up after signup
