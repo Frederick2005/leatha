@@ -139,7 +139,21 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
-    toast.success("Account created — you're in!");
+    toast.success("Account created — Please verify your acount through your email before login!");
+    // Record invite use if user came from an invite link
+const inviteRef = sessionStorage.getItem("invite_ref");
+if (inviteRef) {
+  const { data: { user: newUser } } = await supabase.auth.getUser();
+  if (newUser) {
+    await supabase
+      .from("invite_uses")
+      .upsert(
+        { invite_code: inviteRef, used_by: newUser.id },
+        { onConflict: "invite_code,used_by" }
+      );
+    sessionStorage.removeItem("invite_ref");
+  }
+}
     navigate({ to: dest, replace: true });
   };
 
