@@ -111,76 +111,77 @@ function LessonPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const reload = async () => {
-    setErrorMsg(null);
-    const { data, error } = await supabase
+  setErrorMsg(null);
+
+  // Run all queries in parallel
+  const [
+    { data, error },
+    { data: cs },
+    { data: fs },
+    { data: contribs },
+    { data: like },
+  ] = await Promise.all([
+    supabase
       .from("lessons")
-      .select(
-        `*,
-        author:profiles!lessons_author_profile_fkey(id, username, display_name, avatar_url)`,
-      )
+      .select(`*, author:profiles!lessons_author_profile_fkey(id, username, display_name, avatar_url)`)
       .eq("id", lessonId)
-      .maybeSingle();
-    if (error) {
-      setErrorMsg(error.message);
-      setLesson(null);
-      setLoading(false);
-      return;
-    }
-    if (!data) {
-      setErrorMsg("This lesson does not exist or has been removed.");
-      setLesson(null);
-      setLoading(false);
-      return;
-    }
+      .maybeSingle(),
+    supabase
+      .from("comments")
+      .select(`id, body, created_at, author_id, author:profiles!comments_author_profile_fkey(username, display_name, avatar_url)`)
+      .eq("lesson_id", lessonId)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("lessons")
+      .select(`id, title, author:profiles!lessons_author_profile_fkey(username)`)
+      .eq("parent_lesson_id", lessonId)
+      .limit(20),
+    supabase
+      .from("lesson_contributors")
+      .select(`user_id, profile:profiles!lesson_contributors_user_profile_fkey(username, display_name, avatar_url)`)
+      .eq("lesson_id", lessonId),
+    user
+      ? supabase
+          .from("lesson_likes")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .eq("lesson_id", lessonId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
 
-    // Fetch parent separately to avoid PostgREST self-join hint issues
-    let parent: LessonRow["parent"] = null;
-    if (data.parent_lesson_id) {
-      const { data: p } = await supabase
-        .from("lessons")
-        .select(`id, title, author:profiles!lessons_author_profile_fkey(username)`)
-        .eq("id", data.parent_lesson_id)
-        .maybeSingle();
-      if (p) parent = p as unknown as LessonRow["parent"];
-    }
-    setLesson({ ...(data as unknown as LessonRow), parent });
-
-    const [{ data: cs }, { data: fs }, { data: contribs }] = await Promise.all([
-      supabase
-        .from("comments")
-        .select(
-          `id, body, created_at, author_id,
-        author:profiles!comments_author_profile_fkey(username, display_name, avatar_url)`,
-        )
-        .eq("lesson_id", lessonId)
-        .order("created_at", { ascending: true }),
-      supabase
-        .from("lessons")
-        .select(`id, title, author:profiles!lessons_author_profile_fkey(username)`)
-        .eq("parent_lesson_id", lessonId)
-        .limit(20),
-      supabase
-        .from("lesson_contributors")
-        .select(
-          `user_id, profile:profiles!lesson_contributors_user_profile_fkey(username, display_name, avatar_url)`,
-        )
-        .eq("lesson_id", lessonId),
-    ]);
-    setComments((cs as unknown as CommentRow[]) ?? []);
-    setForks((fs as unknown as typeof forks) ?? []);
-    setContributors((contribs as unknown as typeof contributors) ?? []);
-
-    if (user) {
-      const { data: like } = await supabase
-        .from("lesson_likes")
-        .select("user_id")
-        .eq("user_id", user.id)
-        .eq("lesson_id", lessonId)
-        .maybeSingle();
-      setLiked(!!like);
-    }
+  if (error) {
+    setErrorMsg(error.message);
+    setLesson(null);
     setLoading(false);
-  };
+    return;
+  }
+
+  if (!data) {
+    setErrorMsg("This lesson does not exist or has been removed.");
+    setLesson(null);
+    setLoading(false);
+    return;
+  }
+
+  // Fetch parent separately only if needed
+  let parent: LessonRow["parent"] = null;
+  if (data.parent_lesson_id) {
+    const { data: p } = await supabase
+      .from("lessons")
+      .select(`id, title, author:profiles!lessons_author_profile_fkey(username)`)
+      .eq("id", data.parent_lesson_id)
+      .maybeSingle();
+    if (p) parent = p as unknown as LessonRow["parent"];
+  }
+
+  setLesson({ ...(data as unknown as LessonRow), parent });
+  setComments((cs as unknown as CommentRow[]) ?? []);
+  setForks((fs as unknown as typeof forks) ?? []);
+  setContributors((contribs as unknown as typeof contributors) ?? []);
+  setLiked(!!like);
+  setLoading(false);
+};
 
   useEffect(() => {
     void reload(); /* eslint-disable-next-line react-hooks/exhaustive-deps */
