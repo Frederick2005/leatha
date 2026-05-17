@@ -56,7 +56,7 @@ function FeedbackPage() {
       : `${message.trim()}${contact.trim() ? `\n\nContact: ${contact.trim()}` : ""}`;
     const { error } = await supabase.from("feedback").insert({
       subject: subject.trim(),
-      body: bodyText,
+      message: bodyText,
       user_id: user?.id ?? null,
       category,
       rating,

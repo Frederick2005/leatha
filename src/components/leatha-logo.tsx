@@ -1,5 +1,5 @@
 import type { ImgHTMLAttributes } from "react";
-import leathaLogoImage from "@/assets/leatha-logo.png";
+import leathaLogoImage from "@/assets/leatha-logo.jpg";
 
 /**
  * Leatha brand mark — displays the Leatha logo from the assets folder.
