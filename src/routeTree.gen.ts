@@ -15,6 +15,7 @@ import { Route as SchoolsRouteImport } from './routes/schools'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
@@ -63,6 +64,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OfflineRoute = OfflineRouteImport.update({
+  id: '/offline',
+  path: '/offline',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MessagesRoute = MessagesRouteImport.update({
@@ -175,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/leaderboard': typeof LeaderboardRoute
   '/legal': typeof LegalRoute
   '/messages': typeof MessagesRouteWithChildren
+  '/offline': typeof OfflineRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/leaderboard': typeof LeaderboardRoute
   '/legal': typeof LegalRoute
   '/messages': typeof MessagesRouteWithChildren
+  '/offline': typeof OfflineRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/leaderboard': typeof LeaderboardRoute
   '/legal': typeof LegalRoute
   '/messages': typeof MessagesRouteWithChildren
+  '/offline': typeof OfflineRoute
   '/onboarding': typeof OnboardingRoute
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -259,6 +268,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/legal'
     | '/messages'
+    | '/offline'
     | '/onboarding'
     | '/privacy'
     | '/reset-password'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/legal'
     | '/messages'
+    | '/offline'
     | '/onboarding'
     | '/privacy'
     | '/reset-password'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/legal'
     | '/messages'
+    | '/offline'
     | '/onboarding'
     | '/privacy'
     | '/reset-password'
@@ -341,6 +353,7 @@ export interface RootRouteChildren {
   LeaderboardRoute: typeof LeaderboardRoute
   LegalRoute: typeof LegalRoute
   MessagesRoute: typeof MessagesRouteWithChildren
+  OfflineRoute: typeof OfflineRoute
   OnboardingRoute: typeof OnboardingRoute
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -394,6 +407,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offline': {
+      id: '/offline'
+      path: '/offline'
+      fullPath: '/offline'
+      preLoaderRoute: typeof OfflineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/messages': {
@@ -572,6 +592,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeaderboardRoute: LeaderboardRoute,
   LegalRoute: LegalRoute,
   MessagesRoute: MessagesRouteWithChildren,
+  OfflineRoute: OfflineRoute,
   OnboardingRoute: OnboardingRoute,
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,

@@ -1,4 +1,5 @@
 import { Outlet, createRootRoute, HeadContent, Scripts, Link } from "@tanstack/react-router";
+import { useEffect } from "react";
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
@@ -41,18 +42,25 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Leatha — Fork knowledge. Build skills together." },
+      { title: "Leatha – Fork knowledge. Build skills together." },
       {
         name: "description",
-        content:
-          "Social learning platform where lessons can be forked, remixed, and improved by everyone.",
+        content: "Social learning platform where lessons can be forked, remixed, and improved by everyone.",
       },
       { property: "og:title", content: "Leatha" },
       { property: "og:description", content: "Fork knowledge. Build skills together." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "theme-color", content: "#3b82f6" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Leatha" },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "apple-touch-icon", href: "/icons/icon-192x192.png" },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -74,6 +82,17 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("/sw.js")
+          .then((reg) => console.log("SW registered:", reg.scope))
+          .catch((err) => console.log("SW failed:", err));
+      });
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <ThemeProvider>
