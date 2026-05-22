@@ -83,6 +83,22 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   useEffect(() => {
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((reg) => {
+          console.log("SW registered:", reg.scope);
+          // Trim caches every hour
+          setInterval(() => {
+            reg.active?.postMessage('TRIM_CACHES');
+          }, 60 * 60 * 1000);
+        })
+        .catch((err) => console.log("SW failed:", err));
+    });
+  }
+}, []);
+  useEffect(() => {
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
         navigator.serviceWorker
