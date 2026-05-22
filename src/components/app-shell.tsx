@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { WifiOff } from "lucide-react";
-
-function OfflineIndicator() {
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+// Add this component inside app-shell.tsx
+function OfflineBanner() {
+  const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
+    setIsOffline(!navigator.onLine);
     const goOffline = () => setIsOffline(true);
     const goOnline = () => setIsOffline(false);
     window.addEventListener("offline", goOffline);
@@ -18,9 +19,9 @@ function OfflineIndicator() {
   if (!isOffline) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-amber-950 text-xs font-medium py-1.5 text-center flex items-center justify-center gap-2">
+    <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500 text-amber-950 text-xs font-medium py-2 text-center flex items-center justify-center gap-2">
       <WifiOff className="h-3 w-3" />
-      You are offline — viewing cached content
+      You are offline — showing cached content
     </div>
   );
 }
