@@ -5,6 +5,8 @@ import { useAuth } from "@/providers/auth-provider";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { LeathaCall } from "@/components/leatha-call";
+import { Phone, Video } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import {
   Send,
@@ -93,6 +95,12 @@ function ThreadPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [callState, setCallState] = useState<{
+    roomName: string;
+    type: "audio" | "video";
+    status: "idle" | "calling" | "in-call";
+    hostId: string;
+  } | null>(null);
 
   // Initial load
   useEffect(() => {
@@ -224,6 +232,7 @@ function ThreadPage() {
       name: file.name,
       size: file.size,
       type: file.type || "application/octet-stream",
+      
     };
   };
 
@@ -332,6 +341,127 @@ function ThreadPage() {
     }
   };
 
+  const startCall = async (type: "audio" | "video") => {
+    if (!user || !other) return;
+
+    const roomName = `dm-${[user.id, other.id].sort().join("-")}`;
+
+    await supabase.from("calls").upsert({
+      room_name: roomName,
+      room_type: "tutoring",
+      title: `Call with ${other.username}`,
+      host_id: user.id,
+      status: "calling",
+    });
+
+    await supabase.from("notifications").insert({
+      user_id: other.id,
+      type: "incoming_call",
+      title: `Incoming ${type} call`,
+      message: `${user.email} is calling you`,
+      link: `/messages/${other.username}?call=${roomName}`,
+      actor_id: user.id,
+    });
+
+    setCallState({ roomName, type, status: "calling", hostId: user.id });
+  };
+
+  const acceptCall = async () => {
+    if (!user || !other || !callState) return;
+
+    const { error } = await supabase
+      .from("calls")
+      .update({ status: "active" })
+      .eq("room_name", callState.roomName);
+
+    if (error) return toast.error(error.message);
+
+    setCallState({ ...callState, status: "in-call" });
+  };
+
+  const declineCall = async () => {
+    if (!callState) return;
+
+    await supabase
+      .from("calls")
+      .update({ status: "idle" })
+      .eq("room_name", callState.roomName);
+
+    setCallState(null);
+  };
+
+  useEffect(() => {
+    if (!user || !other) return;
+    const roomName = `dm-${[user.id, other.id].sort().join("-")}`;
+    let cancelled = false;
+
+    void (async () => {
+      const { data, error } = await supabase
+        .from("calls")
+        .select("host_id, status")
+        .eq("room_name", roomName)
+        .maybeSingle();
+
+      if (cancelled || error || !data) return;
+      if (data.status === "calling") {
+        setCallState({ roomName, type: "audio", status: "calling", hostId: data.host_id });
+      } else if (data.status === "active") {
+        setCallState({ roomName, type: "audio", status: "in-call", hostId: data.host_id });
+      }
+    })();
+
+    const channel = supabase
+      .channel(`call-${roomName}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "calls",
+          filter: `room_name=eq.${roomName}`,
+        },
+        (payload) => {
+          const row = payload.new as { host_id: string; status: string };
+          if (row.status === "calling") {
+            setCallState((prev) =>
+              prev ?? { roomName, type: "audio", status: "calling", hostId: row.host_id },
+            );
+          } else if (row.status === "active") {
+            setCallState((prev) =>
+              prev ? { ...prev, status: "in-call" } : { roomName, type: "audio", status: "in-call", hostId: row.host_id },
+            );
+          }
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "calls",
+          filter: `room_name=eq.${roomName}`,
+        },
+        (payload) => {
+          const row = payload.new as { host_id: string; status: string };
+          if (row.status === "active") {
+            setCallState((prev) =>
+              prev ? { ...prev, status: "in-call" } : { roomName, type: "audio", status: "in-call", hostId: row.host_id },
+            );
+          } else if (row.status === "calling") {
+            setCallState((prev) =>
+              prev ?? { roomName, type: "audio", status: "calling", hostId: row.host_id },
+            );
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      void supabase.removeChannel(channel);
+    };
+  }, [user, other]);
+
   if (!user) return null;
   if (loading)
     return (
@@ -364,6 +494,21 @@ function ThreadPage() {
     <div className="flex-1 flex flex-col min-w-0 h-full bg-[hsl(var(--chat-bg,210_15%_15%))]">
       {/* WhatsApp-style header */}
       <header className="border-b border-border px-3 py-2.5 flex items-center gap-3 bg-card">
+        <Button
+   size="icon"
+   variant="ghost"
+   onClick={() => startCall("audio")}
+   >
+   <Phone className="h-4 w-4" />
+</Button>
+
+<Button
+  size="icon"
+  variant="ghost"
+  onClick={() => startCall("video")}
+>
+  <Video className="h-4 w-4" />
+</Button>
         <button
           onClick={() => navigate({ to: "/messages" })}
           className="md:hidden p-1 -ml-1 rounded hover:bg-accent"
@@ -435,8 +580,42 @@ function ThreadPage() {
             })}
           </div>
         ))}
+        {callState?.status === "calling" && (
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm mb-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-semibold">
+                  {callState.hostId === user.id ? "Calling…" : "Incoming call…"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {callState.hostId === user.id
+                    ? `Waiting for ${other.username} to answer.`
+                    : `${other.username} is calling you.`}
+                </p>
+              </div>
+              {callState.hostId !== user.id ? (
+                <div className="flex gap-2">
+                  <Button onClick={acceptCall} size="sm">
+                    Accept
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={declineCall}>
+                    Decline
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
+        {callState?.status === "in-call" && (
+          <LeathaCall
+            roomName={callState.roomName}
+            roomType="tutoring"
+            isHost={callState.hostId === user.id}
+            title={`Call with ${other.username}`}
+            onLeave={() => setCallState(null)}
+          />
+        )}
       </div>
-
       {/* Composer */}
       <div className="border-t border-border bg-card px-2 py-2">
         {blocked ? (

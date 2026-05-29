@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { WifiOff } from "lucide-react";
 // Add this component inside app-shell.tsx
 function OfflineBanner() {

@@ -390,7 +390,11 @@ if (inviteRef) {
           </Button>
 
           <p className="text-xs text-center text-muted-foreground mt-4">
-            By continuing, you agree to be a kind and curious citizen of Leatha.
+            By continuing, you agree to
+            <Link to="/legal" className="hover:text-primary">
+              ..terms and conditions..
+            </Link>
+            of Leatha.
           </p>
         </div>
 
