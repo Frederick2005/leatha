@@ -32,3 +32,4 @@ dist-ssr
 *.sw?
 .env
 config.toml
+wrangler.jsonc

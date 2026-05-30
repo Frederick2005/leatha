@@ -6,7 +6,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { LeathaCall } from "@/components/leatha-call";
-import { Phone, Video } from "lucide-react";
+import { Phone, Video, BookOpen, Sword } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import {
   Send,
@@ -378,15 +378,12 @@ function ThreadPage() {
 
     setCallState({ ...callState, status: "in-call" });
   };
-
-  const declineCall = async () => {
+const declineCall = async () => {
     if (!callState) return;
-
     await supabase
       .from("calls")
-      .update({ status: "idle" })
+      .update({ status: "ended", ended_at: new Date().toISOString() })
       .eq("room_name", callState.roomName);
-
     setCallState(null);
   };
 
@@ -403,6 +400,18 @@ function ThreadPage() {
         .maybeSingle();
 
       if (cancelled || error || !data) return;
+
+      const callAge = Date.now() - new Date(data.created_at).getTime();
+      const isRecent = callAge < 60_000;
+
+      if (!isRecent) {
+        await supabase
+          .from("calls")
+          .update({ status: "ended" })
+          .eq("room_name", roomName);
+        return;
+      }
+
       if (data.status === "calling") {
         setCallState({ roomName, type: "audio", status: "calling", hostId: data.host_id });
       } else if (data.status === "active") {
@@ -494,21 +503,7 @@ function ThreadPage() {
     <div className="flex-1 flex flex-col min-w-0 h-full bg-[hsl(var(--chat-bg,210_15%_15%))]">
       {/* WhatsApp-style header */}
       <header className="border-b border-border px-3 py-2.5 flex items-center gap-3 bg-card">
-        <Button
-   size="icon"
-   variant="ghost"
-   onClick={() => startCall("audio")}
-   >
-   <Phone className="h-4 w-4" />
-</Button>
-
-<Button
-  size="icon"
-  variant="ghost"
-  onClick={() => startCall("video")}
->
-  <Video className="h-4 w-4" />
-</Button>
+       <CallTypeSelector onSelect={startCall} />
         <button
           onClick={() => navigate({ to: "/messages" })}
           className="md:hidden p-1 -ml-1 rounded hover:bg-accent"
@@ -612,7 +607,13 @@ function ThreadPage() {
             roomType="tutoring"
             isHost={callState.hostId === user.id}
             title={`Call with ${other.username}`}
-            onLeave={() => setCallState(null)}
+           onLeave={async () => {
+  await supabase
+    .from("calls")
+    .update({ status: "ended", ended_at: new Date().toISOString() })
+    .eq("room_name", callState!.roomName);
+  setCallState(null);
+}}
           />
         )}
       </div>
@@ -933,4 +934,91 @@ function VoicePlayer({ url, mine }: { url: string; mine: boolean }) {
       <audio ref={audioRef} src={url} preload="metadata" className="hidden" />
     </div>
   );
+  function CallTypeSelector({ onSelect }: { onSelect: (type: "audio" | "video") => void }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <Phone className="h-4 w-4" />
+      </Button>
+
+      {open && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setOpen(false)}
+          />
+          {/* Dropdown */}
+          <div className="absolute right-0 top-10 z-50 w-56 rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+            <div className="px-3 py-2 border-b border-border">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Start a call
+              </p>
+            </div>
+            <button
+              className="w-full flex items-center gap-3 px-3 py-3 hover:bg-muted transition-colors text-left"
+              onClick={() => { setOpen(false); onSelect("audio"); }}
+            >
+              <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
+                <Phone className="h-4 w-4 text-green-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Voice call</p>
+                <p className="text-xs text-muted-foreground">Audio only</p>
+              </div>
+            </button>
+            <button
+              className="w-full flex items-center gap-3 px-3 py-3 hover:bg-muted transition-colors text-left"
+              onClick={() => { setOpen(false); onSelect("video"); }}
+            >
+              <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+                <Video className="h-4 w-4 text-blue-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Video call</p>
+                <p className="text-xs text-muted-foreground">Camera + audio</p>
+              </div>
+            </button>
+            <div className="px-3 py-2 border-t border-border">
+              <p className="text-xs text-muted-foreground">Coming soon</p>
+            </div>
+            <button disabled className="w-full flex items-center gap-3 px-3 py-3 opacity-40 cursor-not-allowed text-left">
+              <div className="h-8 w-8 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
+                <BookOpen className="h-4 w-4 text-purple-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Tutoring session</p>
+                <p className="text-xs text-muted-foreground">Scheduled 1-on-1</p>
+              </div>
+            </button>
+            <button disabled className="w-full flex items-center gap-3 px-3 py-3 opacity-40 cursor-not-allowed text-left">
+              <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                <Sword className="h-4 w-4 text-amber-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Arena battle</p>
+                <p className="text-xs text-muted-foreground">Compete on challenges</p>
+              </div>
+            </button>
+            <button disabled className="w-full flex items-center gap-3 px-3 py-3 opacity-40 cursor-not-allowed text-left">
+              <div className="h-8 w-8 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
+                <Users className="h-4 w-4 text-teal-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Group session</p>
+                <p className="text-xs text-muted-foreground">Invite multiple people</p>
+              </div>
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 }
