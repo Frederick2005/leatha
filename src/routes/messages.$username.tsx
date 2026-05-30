@@ -934,7 +934,9 @@ function VoicePlayer({ url, mine }: { url: string; mine: boolean }) {
       <audio ref={audioRef} src={url} preload="metadata" className="hidden" />
     </div>
   );
-  function CallTypeSelector({ onSelect }: { onSelect: (type: "audio" | "video") => void }) {
+}
+
+function CallTypeSelector({ onSelect }: { onSelect: (type: "audio" | "video") => void }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -1020,5 +1022,4 @@ function VoicePlayer({ url, mine }: { url: string; mine: boolean }) {
       )}
     </div>
   );
-}
 }
