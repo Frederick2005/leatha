@@ -479,6 +479,43 @@ const declineCall = async () => {
         },
       )
       .subscribe();
+      // Also listen for incoming call notifications
+const notifChannel = supabase
+  .channel(`notif-${user.id}`)
+  .on(
+    "postgres_changes",
+    {
+      event: "INSERT",
+      schema: "public",
+      table: "notifications",
+      filter: `user_id=eq.${user.id}`,
+    },
+    (payload) => {
+      const notif = payload.new as {
+        type: string;
+        link: string;
+        actor_id: string;
+      };
+      if (notif.type === "incoming_call" && notif.actor_id === other.id) {
+        // Extract room name from link
+        const match = notif.link.match(/call=([^&]+)/);
+        if (match) {
+          setCallState({
+            roomName: match[1],
+            type: "audio",
+            status: "calling",
+            hostId: notif.actor_id,
+          });
+        }
+      }
+    }
+  )
+  .subscribe();
+  return () => {
+  cancelled = true;
+  void supabase.removeChannel(channel);
+  void supabase.removeChannel(notifChannel); // add this line
+};
 
     return () => {
       cancelled = true;
@@ -518,44 +555,44 @@ const declineCall = async () => {
     <div className="flex-1 flex flex-col min-w-0 h-full bg-[hsl(var(--chat-bg,210_15%_15%))]">
       {/* WhatsApp-style header */}
       <header className="border-b border-border px-3 py-2.5 flex items-center gap-3 bg-card">
-       <CallTypeSelector onSelect={startCall} />
-        <button
-          onClick={() => navigate({ to: "/messages" })}
-          className="md:hidden p-1 -ml-1 rounded hover:bg-accent"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <Link
-          to="/u/$username"
-          params={{ username: other.username }}
-          className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80"
-        >
-          <UserAvatar
-            name={other.display_name ?? other.username}
-            url={other.avatar_url}
-            size="md"
-          />
-          <div className="min-w-0">
-            <div className="font-semibold truncate leading-tight">
-              {other.display_name ?? other.username}
-            </div>
-            <div className="text-[11px] text-muted-foreground font-mono truncate">
-              @{other.username}
-            </div>
-          </div>
-        </Link>
-        <Button variant="ghost" size="sm" onClick={toggleBlock} className="gap-2">
-          {blocked ? (
-            <>
-              <ShieldOff className="h-4 w-4" /> Unblock
-            </>
-          ) : (
-            <>
-              <Ban className="h-4 w-4" />
-            </>
-          )}
-        </Button>
-      </header>
+  <button
+    onClick={() => navigate({ to: "/messages" })}
+    className="md:hidden p-1 -ml-1 rounded hover:bg-accent"
+  >
+    <ArrowLeft className="h-5 w-5" />
+  </button>
+  <CallTypeSelector onSelect={startCall} />
+  <Link
+    to="/u/$username"
+    params={{ username: other.username }}
+    className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80"
+  >
+    <UserAvatar
+      name={other.display_name ?? other.username}
+      url={other.avatar_url}
+      size="md"
+    />
+    <div className="min-w-0">
+      <div className="font-semibold truncate leading-tight">
+        {other.display_name ?? other.username}
+      </div>
+      <div className="text-[11px] text-muted-foreground font-mono truncate">
+        @{other.username}
+      </div>
+    </div>
+  </Link>
+  <Button variant="ghost" size="sm" onClick={toggleBlock} className="gap-2">
+    {blocked ? (
+      <>
+        <ShieldOff className="h-4 w-4" /> Unblock
+      </>
+    ) : (
+      <>
+        <Ban className="h-4 w-4" />
+      </>
+    )}
+  </Button>
+</header>
 
       {/* Messages */}
       <div
