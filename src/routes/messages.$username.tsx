@@ -554,14 +554,14 @@ const notifChannel = supabase
   return (
     <div className="flex-1 flex flex-col min-w-0 h-full bg-[hsl(var(--chat-bg,210_15%_15%))]">
       {/* WhatsApp-style header */}
-      <header className="border-b border-border px-3 py-2.5 flex items-center gap-3 bg-card">
+      < className="border-b border-border px-3 py-2.5 flex items-center gap-3 bg-card">
   <button
     onClick={() => navigate({ to: "/messages" })}
     className="md:hidden p-1 -ml-1 rounded hover:bg-accent"
   >
     <ArrowLeft className="h-5 w-5" />
   </button>
-  <CallTypeSelector onSelect={startCall} />
+  
   <Link
     to="/u/$username"
     params={{ username: other.username }}
@@ -582,16 +582,17 @@ const notifChannel = supabase
     </div>
   </Link>
   <Button variant="ghost" size="sm" onClick={toggleBlock} className="gap-2">
-    {blocked ? (
-      <>
-        <ShieldOff className="h-4 w-4" /> Unblock
-      </>
-    ) : (
-      <>
-        <Ban className="h-4 w-4" />
-      </>
-    )}
-  </Button>
+          {blocked ? (
+            <>
+              <ShieldOff className="h-4 w-4" /> Unblock
+            </>
+          ) : (
+            <>
+              <Ban className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+        <CallTypeSelector onSelect={startCall} />
 </header>
 
       {/* Messages */}
