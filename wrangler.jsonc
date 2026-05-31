@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "leatha",
+  "compatibility_date": "2026-05-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "vars": {
+    "SUPABASE_URL": "https://hpiwsqigqqqrfxuqmfkj.supabase.co",
+    "SUPABASE_PUBLISHABLE_KEY": "sb_publishable_ImRBdEGTPgO-kIk0ibB7hQ_z6dlgraH",
+   "LIVEKIT_URL": "wss://leatha-7cujmmc4.livekit.cloud",
+   "LIVEKIT_API_KEY": "APIAAZnBudQmciQ",
+   "LIVEKIT_API_SECRET": "yXe8Z9AAEifgZt2B0EAhf8lZfKnWdAI6QlBm22asjPnC"
+  }
+}
