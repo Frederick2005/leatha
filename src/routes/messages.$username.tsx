@@ -6,7 +6,7 @@ import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { LeathaCall } from "@/components/leatha-call";
-import { Phone, Video, BookOpen, Sword, Users } from "lucide-react";
+import { Phone, Video, BookOpen, Sword } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import {
   Send,
@@ -346,14 +346,13 @@ function ThreadPage() {
 
     const roomName = `dm-${[user.id, other.id].sort().join("-")}`;
 
-   await supabase.from("calls").upsert({
-  room_name: roomName,
-  room_type: type,
-  title: `Call with ${other.username}`,
-  host_id: user.id,
-  status: "calling",
-  created_at: new Date().toISOString(),
-}, { onConflict: "room_name" });
+    await supabase.from("calls").upsert({
+      room_name: roomName,
+      room_type: "tutoring",
+      title: `Call with ${other.username}`,
+      host_id: user.id,
+      status: "calling",
+    });
 
     await supabase.from("notifications").insert({
       user_id: other.id,
@@ -394,11 +393,11 @@ const declineCall = async () => {
     let cancelled = false;
 
     void (async () => {
-     const { data, error } = await supabase
-  .from("calls")
-  .select("host_id, status, room_type, created_at")
-  .eq("room_name", roomName)
-  .maybeSingle();
+      const { data, error } = await supabase
+        .from("calls")
+        .select("host_id, status")
+        .eq("room_name", roomName)
+        .maybeSingle();
 
       if (cancelled || error || !data) return;
 
@@ -416,13 +415,8 @@ const declineCall = async () => {
       if (data.status === "calling") {
         setCallState({ roomName, type: "audio", status: "calling", hostId: data.host_id });
       } else if (data.status === "active") {
-  setCallState({
-    roomName,
-    type: data.room_type as "audio" | "video",
-    status: "in-call",
-    hostId: data.host_id,
-  });
-}
+        setCallState({ roomName, type: "audio", status: "in-call", hostId: data.host_id });
+      }
     })();
 
     const channel = supabase
@@ -436,19 +430,10 @@ const declineCall = async () => {
           filter: `room_name=eq.${roomName}`,
         },
         (payload) => {
-         const row = payload.new as {
-  host_id: string;
-  status: string;
-  room_type: "audio" | "video";
-};
+          const row = payload.new as { host_id: string; status: string };
           if (row.status === "calling") {
             setCallState((prev) =>
-              prev ?? {
-  roomName,
-  type: row.room_type,
-  status: "calling",
-  hostId: row.host_id,
-},
+              prev ?? { roomName, type: "audio", status: "calling", hostId: row.host_id },
             );
           } else if (row.status === "active") {
             setCallState((prev) =>
@@ -479,43 +464,6 @@ const declineCall = async () => {
         },
       )
       .subscribe();
-      // Also listen for incoming call notifications
-const notifChannel = supabase
-  .channel(`notif-${user.id}`)
-  .on(
-    "postgres_changes",
-    {
-      event: "INSERT",
-      schema: "public",
-      table: "notifications",
-      filter: `user_id=eq.${user.id}`,
-    },
-    (payload) => {
-      const notif = payload.new as {
-        type: string;
-        link: string;
-        actor_id: string;
-      };
-      if (notif.type === "incoming_call" && notif.actor_id === other.id) {
-        // Extract room name from link
-        const match = notif.link.match(/call=([^&]+)/);
-        if (match) {
-          setCallState({
-            roomName: match[1],
-            type: "audio",
-            status: "calling",
-            hostId: notif.actor_id,
-          });
-        }
-      }
-    }
-  )
-  .subscribe();
-  return () => {
-  cancelled = true;
-  void supabase.removeChannel(channel);
-  void supabase.removeChannel(notifChannel); // add this line
-};
 
     return () => {
       cancelled = true;
@@ -554,34 +502,34 @@ const notifChannel = supabase
   return (
     <div className="flex-1 flex flex-col min-w-0 h-full bg-[hsl(var(--chat-bg,210_15%_15%))]">
       {/* WhatsApp-style header */}
-      < className="border-b border-border px-3 py-2.5 flex items-center gap-3 bg-card">
-  <button
-    onClick={() => navigate({ to: "/messages" })}
-    className="md:hidden p-1 -ml-1 rounded hover:bg-accent"
-  >
-    <ArrowLeft className="h-5 w-5" />
-  </button>
-  
-  <Link
-    to="/u/$username"
-    params={{ username: other.username }}
-    className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80"
-  >
-    <UserAvatar
-      name={other.display_name ?? other.username}
-      url={other.avatar_url}
-      size="md"
-    />
-    <div className="min-w-0">
-      <div className="font-semibold truncate leading-tight">
-        {other.display_name ?? other.username}
-      </div>
-      <div className="text-[11px] text-muted-foreground font-mono truncate">
-        @{other.username}
-      </div>
-    </div>
-  </Link>
-  <Button variant="ghost" size="sm" onClick={toggleBlock} className="gap-2">
+      <header className="border-b border-border px-3 py-2.5 flex items-center gap-3 bg-card">
+       <CallTypeSelector onSelect={startCall} />
+        <button
+          onClick={() => navigate({ to: "/messages" })}
+          className="md:hidden p-1 -ml-1 rounded hover:bg-accent"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <Link
+          to="/u/$username"
+          params={{ username: other.username }}
+          className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80"
+        >
+          <UserAvatar
+            name={other.display_name ?? other.username}
+            url={other.avatar_url}
+            size="md"
+          />
+          <div className="min-w-0">
+            <div className="font-semibold truncate leading-tight">
+              {other.display_name ?? other.username}
+            </div>
+            <div className="text-[11px] text-muted-foreground font-mono truncate">
+              @{other.username}
+            </div>
+          </div>
+        </Link>
+        <Button variant="ghost" size="sm" onClick={toggleBlock} className="gap-2">
           {blocked ? (
             <>
               <ShieldOff className="h-4 w-4" /> Unblock
@@ -592,8 +540,7 @@ const notifChannel = supabase
             </>
           )}
         </Button>
-        <CallTypeSelector onSelect={startCall} />
-</header>
+      </header>
 
       {/* Messages */}
       <div
@@ -655,20 +602,20 @@ const notifChannel = supabase
           </div>
         )}
         {callState?.status === "in-call" && (
-  <LeathaCall
-    roomName={callState.roomName}
-    roomType={callState.type}
-    isHost={callState.hostId === user.id}
-    title={`Call with ${other.username}`}
-    onLeave={async () => {
-      await supabase
-        .from("calls")
-        .update({ status: "ended", ended_at: new Date().toISOString() })
-        .eq("room_name", callState!.roomName);
-      setCallState(null);
-    }}
-  />
-)}
+          <LeathaCall
+            roomName={callState.roomName}
+            roomType="tutoring"
+            isHost={callState.hostId === user.id}
+            title={`Call with ${other.username}`}
+           onLeave={async () => {
+  await supabase
+    .from("calls")
+    .update({ status: "ended", ended_at: new Date().toISOString() })
+    .eq("room_name", callState!.roomName);
+  setCallState(null);
+}}
+          />
+        )}
       </div>
       {/* Composer */}
       <div className="border-t border-border bg-card px-2 py-2">

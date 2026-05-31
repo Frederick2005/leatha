@@ -100,57 +100,44 @@ export function LeathaCall({
     );
   }
 
- return (
-  <div className="fixed inset-0 z-50 bg-background flex flex-col">
-    {/* Header — always on top */}
-    <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0 bg-card z-10">
-      <div>
-        <p className="font-semibold text-sm">{title ?? roomName}</p>
-        <p className="text-xs text-muted-foreground capitalize">{roomType} session</p>
+  return (
+    <div className="fixed inset-0 z-50 bg-background flex flex-col">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+        <div>
+          <p className="font-semibold text-sm">{title ?? roomName}</p>
+          <p className="text-xs text-muted-foreground capitalize">{roomType} session</p>
+        </div>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={onLeave}
+          className="gap-2"
+        >
+          <PhoneOff className="h-4 w-4" />
+          Leave
+        </Button>
       </div>
-      <Button
-        variant="destructive"
-        size="sm"
-        onClick={onLeave}
-        className="gap-2"
-      >
-        <PhoneOff className="h-4 w-4" />
-        End call
-      </Button>
-    </div>
 
-    {/* LiveKit Room */}
-    <div className="flex-1 overflow-hidden">
-      <LiveKitRoom
-        video={roomType === "tutoring" || roomType === "group" || isHost}
-        audio={true}
-        token={token}
-        serverUrl={liveKitUrl}
-        onDisconnected={onLeave}
-        onError={(err) => {
-          toast.error("Call error: " + err.message);
-          onLeave();
-        }}
-        style={{ height: "100%", background: "var(--background)" }}
-        data-lk-theme="default"
-      >
-        <VideoConference />
-        <RoomAudioRenderer />
-      </LiveKitRoom>
+      {/* LiveKit Room */}
+      <div className="flex-1 overflow-hidden">
+        <LiveKitRoom
+          video={roomType === "tutoring" || roomType === "group" || isHost}
+          audio={true}
+          token={token}
+          serverUrl={liveKitUrl}
+          onDisconnected={onLeave}
+          onError={(err) => {
+            toast.error("Call error: " + err.message);
+            onLeave();
+          }}
+          style={{ height: "100%", background: "var(--background)" }}
+          data-lk-theme="default"
+        >
+          <VideoConference />
+          <RoomAudioRenderer />
+        </LiveKitRoom>
+      </div>
     </div>
-
-    {/* Floating end call button — always visible */}
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
-      <Button
-        variant="destructive"
-        size="lg"
-        onClick={onLeave}
-        className="rounded-full px-8 gap-2 shadow-lg"
-      >
-        <PhoneOff className="h-5 w-5" />
-        End call
-      </Button>
-    </div>
-  </div>
-);
+  );
 }
