@@ -30,7 +30,7 @@ function BattlesPage() {
 
   async function createBattle() {
     if (!user) return;
-    const { data, error } = await supabase.from("arena_battles").insert({ host_id: user.id, mode, duration_seconds: 600 }).select().maybeSingle();
+    const { data, error } = await supabase.from("arena_battles").insert([{ host_id: user.id, mode: mode as "1v1", duration_seconds: 600 }]).select().maybeSingle();
     if (error || !data) return toast.error(error?.message ?? "Failed");
     await supabase.from("arena_battle_participants").insert({ battle_id: data.id, user_id: user.id });
     toast.success("Battle created — waiting for opponent");
