@@ -80,6 +80,7 @@ export type Database = {
           title: string;
         };
         Update: {
+<<<<<<< HEAD
           audience?: string;
           author_id?: string;
           body?: string;
@@ -89,6 +90,700 @@ export type Database = {
         };
         Relationships: [];
       };
+=======
+          audience?: string
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      arena_attempts: {
+        Row: {
+          challenge_id: string
+          completed_at: string | null
+          created_at: string
+          hints_used: number
+          id: string
+          memory_kb: number | null
+          runtime_ms: number | null
+          score: number
+          status: Database["public"]["Enums"]["arena_attempt_status"]
+          submitted_answer: Json | null
+          submitted_code: string | null
+          tests_passed: number
+          tests_total: number
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string | null
+          created_at?: string
+          hints_used?: number
+          id?: string
+          memory_kb?: number | null
+          runtime_ms?: number | null
+          score?: number
+          status?: Database["public"]["Enums"]["arena_attempt_status"]
+          submitted_answer?: Json | null
+          submitted_code?: string | null
+          tests_passed?: number
+          tests_total?: number
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string | null
+          created_at?: string
+          hints_used?: number
+          id?: string
+          memory_kb?: number | null
+          runtime_ms?: number | null
+          score?: number
+          status?: Database["public"]["Enums"]["arena_attempt_status"]
+          submitted_answer?: Json | null
+          submitted_code?: string | null
+          tests_passed?: number
+          tests_total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arena_attempts_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "arena_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      arena_battle_participants: {
+        Row: {
+          battle_id: string
+          id: string
+          joined_at: string
+          score: number
+          status: string
+          team: string | null
+          user_id: string
+        }
+        Insert: {
+          battle_id: string
+          id?: string
+          joined_at?: string
+          score?: number
+          status?: string
+          team?: string | null
+          user_id: string
+        }
+        Update: {
+          battle_id?: string
+          id?: string
+          joined_at?: string
+          score?: number
+          status?: string
+          team?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arena_battle_participants_battle_id_fkey"
+            columns: ["battle_id"]
+            isOneToOne: false
+            referencedRelation: "arena_battles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      arena_battles: {
+        Row: {
+          challenge_id: string | null
+          created_at: string
+          duration_seconds: number
+          ends_at: string | null
+          host_id: string
+          id: string
+          mode: Database["public"]["Enums"]["arena_battle_mode"]
+          school_id: string | null
+          starts_at: string | null
+          state: Database["public"]["Enums"]["arena_battle_state"]
+          winner_id: string | null
+        }
+        Insert: {
+          challenge_id?: string | null
+          created_at?: string
+          duration_seconds?: number
+          ends_at?: string | null
+          host_id: string
+          id?: string
+          mode?: Database["public"]["Enums"]["arena_battle_mode"]
+          school_id?: string | null
+          starts_at?: string | null
+          state?: Database["public"]["Enums"]["arena_battle_state"]
+          winner_id?: string | null
+        }
+        Update: {
+          challenge_id?: string | null
+          created_at?: string
+          duration_seconds?: number
+          ends_at?: string | null
+          host_id?: string
+          id?: string
+          mode?: Database["public"]["Enums"]["arena_battle_mode"]
+          school_id?: string | null
+          starts_at?: string | null
+          state?: Database["public"]["Enums"]["arena_battle_state"]
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arena_battles_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "arena_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      arena_challenge_questions: {
+        Row: {
+          challenge_id: string
+          correct_indexes: number[]
+          created_at: string
+          explanation: string | null
+          id: string
+          options: Json
+          position: number
+          prompt: string
+        }
+        Insert: {
+          challenge_id: string
+          correct_indexes?: number[]
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          position?: number
+          prompt: string
+        }
+        Update: {
+          challenge_id?: string
+          correct_indexes?: number[]
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          options?: Json
+          position?: number
+          prompt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arena_challenge_questions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "arena_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      arena_challenges: {
+        Row: {
+          attempt_count: number
+          avg_rating: number
+          coin_reward: number
+          created_at: string
+          creator_id: string
+          description: string
+          difficulty: Database["public"]["Enums"]["arena_difficulty"]
+          estimated_minutes: number
+          hidden_test_cases: Json
+          id: string
+          language: string | null
+          linked_lesson_id: string | null
+          points_reward: number
+          slug: string
+          solve_count: number
+          starter_code: string | null
+          status: Database["public"]["Enums"]["arena_challenge_status"]
+          tags: string[]
+          test_cases: Json
+          title: string
+          type: Database["public"]["Enums"]["arena_challenge_type"]
+          updated_at: string
+        }
+        Insert: {
+          attempt_count?: number
+          avg_rating?: number
+          coin_reward?: number
+          created_at?: string
+          creator_id: string
+          description?: string
+          difficulty?: Database["public"]["Enums"]["arena_difficulty"]
+          estimated_minutes?: number
+          hidden_test_cases?: Json
+          id?: string
+          language?: string | null
+          linked_lesson_id?: string | null
+          points_reward?: number
+          slug: string
+          solve_count?: number
+          starter_code?: string | null
+          status?: Database["public"]["Enums"]["arena_challenge_status"]
+          tags?: string[]
+          test_cases?: Json
+          title: string
+          type: Database["public"]["Enums"]["arena_challenge_type"]
+          updated_at?: string
+        }
+        Update: {
+          attempt_count?: number
+          avg_rating?: number
+          coin_reward?: number
+          created_at?: string
+          creator_id?: string
+          description?: string
+          difficulty?: Database["public"]["Enums"]["arena_difficulty"]
+          estimated_minutes?: number
+          hidden_test_cases?: Json
+          id?: string
+          language?: string | null
+          linked_lesson_id?: string | null
+          points_reward?: number
+          slug?: string
+          solve_count?: number
+          starter_code?: string | null
+          status?: Database["public"]["Enums"]["arena_challenge_status"]
+          tags?: string[]
+          test_cases?: Json
+          title?: string
+          type?: Database["public"]["Enums"]["arena_challenge_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      arena_comments: {
+        Row: {
+          author_id: string
+          body: string
+          challenge_id: string
+          created_at: string
+          id: string
+          parent_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          challenge_id: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          challenge_id?: string
+          created_at?: string
+          id?: string
+          parent_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arena_comments_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "arena_challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "arena_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "arena_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      arena_daily_challenges: {
+        Row: {
+          bonus_points: number
+          challenge_id: string
+          created_at: string
+          for_date: string
+          id: string
+        }
+        Insert: {
+          bonus_points?: number
+          challenge_id: string
+          created_at?: string
+          for_date: string
+          id?: string
+        }
+        Update: {
+          bonus_points?: number
+          challenge_id?: string
+          created_at?: string
+          for_date?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arena_daily_challenges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "arena_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      arena_hints: {
+        Row: {
+          body: string
+          challenge_id: string
+          created_at: string
+          id: string
+          point_penalty: number
+          position: number
+        }
+        Insert: {
+          body: string
+          challenge_id: string
+          created_at?: string
+          id?: string
+          point_penalty?: number
+          position?: number
+        }
+        Update: {
+          body?: string
+          challenge_id?: string
+          created_at?: string
+          id?: string
+          point_penalty?: number
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arena_hints_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "arena_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      arena_profiles: {
+        Row: {
+          coins: number
+          created_at: string
+          last_active: string | null
+          longest_streak: number
+          multiplier: number
+          rank: string
+          reputation: number
+          shields: number
+          streak: number
+          total_attempts: number
+          total_solves: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          coins?: number
+          created_at?: string
+          last_active?: string | null
+          longest_streak?: number
+          multiplier?: number
+          rank?: string
+          reputation?: number
+          shields?: number
+          streak?: number
+          total_attempts?: number
+          total_solves?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          coins?: number
+          created_at?: string
+          last_active?: string | null
+          longest_streak?: number
+          multiplier?: number
+          rank?: string
+          reputation?: number
+          shields?: number
+          streak?: number
+          total_attempts?: number
+          total_solves?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
+      arena_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          target_id?: string
+          target_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      arena_replays: {
+        Row: {
+          attempt_id: string
+          created_at: string
+          id: string
+          timeline: Json
+          user_id: string
+        }
+        Insert: {
+          attempt_id: string
+          created_at?: string
+          id?: string
+          timeline?: Json
+          user_id: string
+        }
+        Update: {
+          attempt_id?: string
+          created_at?: string
+          id?: string
+          timeline?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arena_replays_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "arena_attempts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      arena_rewards: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          kind: string
+          rarity: Database["public"]["Enums"]["arena_reward_rarity"]
+          reason: string | null
+          related_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind: string
+          rarity?: Database["public"]["Enums"]["arena_reward_rarity"]
+          reason?: string | null
+          related_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          rarity?: Database["public"]["Enums"]["arena_reward_rarity"]
+          reason?: string | null
+          related_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      arena_school_rankings: {
+        Row: {
+          id: string
+          rank: number | null
+          school_id: string
+          score: number
+          season_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          rank?: number | null
+          school_id: string
+          score?: number
+          season_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          rank?: number | null
+          school_id?: string
+          score?: number
+          season_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arena_school_rankings_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "arena_seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      arena_seasons: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          ends_at: string
+          id: string
+          name: string
+          starts_at: string
+          theme: string | null
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          ends_at: string
+          id?: string
+          name: string
+          starts_at: string
+          theme?: string | null
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          ends_at?: string
+          id?: string
+          name?: string
+          starts_at?: string
+          theme?: string | null
+        }
+        Relationships: []
+      }
+      arena_shared_solutions: {
+        Row: {
+          author_id: string
+          body: string
+          challenge_id: string
+          created_at: string
+          id: string
+          language: string | null
+          title: string
+          upvotes: number
+        }
+        Insert: {
+          author_id: string
+          body?: string
+          challenge_id: string
+          created_at?: string
+          id?: string
+          language?: string | null
+          title?: string
+          upvotes?: number
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          challenge_id?: string
+          created_at?: string
+          id?: string
+          language?: string | null
+          title?: string
+          upvotes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arena_shared_solutions_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "arena_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      arena_teacher_insights: {
+        Row: {
+          challenge_id: string | null
+          computed_at: string
+          id: string
+          metric: string
+          teacher_id: string
+          value: Json
+        }
+        Insert: {
+          challenge_id?: string | null
+          computed_at?: string
+          id?: string
+          metric: string
+          teacher_id: string
+          value?: Json
+        }
+        Update: {
+          challenge_id?: string | null
+          computed_at?: string
+          id?: string
+          metric?: string
+          teacher_id?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "arena_teacher_insights_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "arena_challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      arena_titles: {
+        Row: {
+          description: string | null
+          earned_at: string
+          id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          description?: string | null
+          earned_at?: string
+          id?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          description?: string | null
+          earned_at?: string
+          id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+>>>>>>> skillchain/main
       blocks: {
         Row: {
           blocked_id: string;
@@ -720,10 +1415,43 @@ export type Database = {
       is_super_admin: { Args: { _user_id: string }; Returns: boolean };
     };
     Enums: {
+<<<<<<< HEAD
       app_role: "user" | "moderator" | "admin" | "super_admin";
       report_status: "pending" | "reviewed" | "resolved" | "dismissed";
       report_target_type: "lesson" | "comment" | "chat_message" | "user" | "direct_message";
     };
+=======
+      app_role: "user" | "moderator" | "admin" | "super_admin"
+      arena_attempt_status: "in_progress" | "passed" | "failed" | "abandoned"
+      arena_battle_mode:
+        | "1v1"
+        | "team"
+        | "classroom"
+        | "survival"
+        | "speedrun"
+        | "boss"
+      arena_battle_state: "pending" | "live" | "finished" | "cancelled"
+      arena_challenge_status: "draft" | "published" | "archived"
+      arena_challenge_type:
+        | "quiz"
+        | "code"
+        | "math"
+        | "science"
+        | "language"
+        | "essay"
+        | "logic"
+        | "simulation"
+      arena_difficulty: "easy" | "medium" | "hard" | "expert"
+      arena_reward_rarity: "common" | "rare" | "epic" | "legendary" | "mythic"
+      report_status: "pending" | "reviewed" | "resolved" | "dismissed"
+      report_target_type:
+        | "lesson"
+        | "comment"
+        | "chat_message"
+        | "user"
+        | "direct_message"
+    }
+>>>>>>> skillchain/main
     CompositeTypes: {
       [_ in never]: never;
     };
@@ -849,6 +1577,29 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["user", "moderator", "admin", "super_admin"],
+      arena_attempt_status: ["in_progress", "passed", "failed", "abandoned"],
+      arena_battle_mode: [
+        "1v1",
+        "team",
+        "classroom",
+        "survival",
+        "speedrun",
+        "boss",
+      ],
+      arena_battle_state: ["pending", "live", "finished", "cancelled"],
+      arena_challenge_status: ["draft", "published", "archived"],
+      arena_challenge_type: [
+        "quiz",
+        "code",
+        "math",
+        "science",
+        "language",
+        "essay",
+        "logic",
+        "simulation",
+      ],
+      arena_difficulty: ["easy", "medium", "hard", "expert"],
+      arena_reward_rarity: ["common", "rare", "epic", "legendary", "mythic"],
       report_status: ["pending", "reviewed", "resolved", "dismissed"],
       report_target_type: ["lesson", "comment", "chat_message", "user", "direct_message"],
     },
