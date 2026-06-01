@@ -29,25 +29,27 @@ function ArenaHome() {
         supabase.from("arena_profiles").select("*").eq("user_id", user.id).maybeSingle(),
         supabase.from("arena_challenges").select("id,slug,title,description,type,difficulty,tags,estimated_minutes,points_reward,solve_count,attempt_count")
           .eq("status", "published").order("attempt_count", { ascending: false }).limit(6),
-        supabase.from("arena_attempts").select("id,created_at,challenge_id,arena_challenges(title),profiles(username)")
+        supabase.from("arena_attempts").select("id,created_at,user_id,arena_challenges(title)")
           .eq("status", "passed").order("created_at", { ascending: false }).limit(8),
       ]);
       if (ap) setProfile(ap as ArenaProfile);
       else {
-        // ensure arena_profile row
-        await supabase.from("arena_profiles").insert({ user_id: user.id }).select().maybeSingle();
+        await supabase.from("arena_profiles").insert({ user_id: user.id });
         setProfile({ xp: 0, coins: 0, reputation: 0, rank: "Bronze", streak: 0, longest_streak: 0, shields: 1, total_solves: 0, total_attempts: 0, multiplier: 1 });
       }
       setTrending((ch ?? []) as ChallengeCardData[]);
-      setFeed(
-        ((solves ?? []) as Array<{ id: string; created_at: string; arena_challenges: { title: string } | null; profiles: { username: string } | null }>)
-          .map((s) => ({
-            id: s.id,
-            user: s.profiles?.username ?? "someone",
-            title: s.arena_challenges?.title ?? "a challenge",
-            ts: new Date(s.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          })),
-      );
+      const solveRows = (solves ?? []) as Array<{ id: string; created_at: string; user_id: string; arena_challenges: { title: string } | null }>;
+      const userIds = Array.from(new Set(solveRows.map((s) => s.user_id)));
+      const { data: profs } = userIds.length
+        ? await supabase.from("profiles").select("id,username").in("id", userIds)
+        : { data: [] as { id: string; username: string }[] };
+      const nameMap = new Map((profs ?? []).map((p) => [p.id, p.username]));
+      setFeed(solveRows.map((s) => ({
+        id: s.id,
+        user: nameMap.get(s.user_id) ?? "someone",
+        title: s.arena_challenges?.title ?? "a challenge",
+        ts: new Date(s.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      })));
     })();
   }, [user]);
 
