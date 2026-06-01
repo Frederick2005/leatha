@@ -65,7 +65,6 @@ export const Route = createRootRoute({
       { name: "twitter:description", content: "Social learning platform where lessons can be forked, remixed, and improved by everyone." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a5855352-5b38-4d84-b53c-088324fbcd65/id-preview-036ad0bd--05a54205-22fe-43db-87f7-bfdff2030e2f.lovable.app-1778092426718.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a5855352-5b38-4d84-b53c-088324fbcd65/id-preview-036ad0bd--05a54205-22fe-43db-87f7-bfdff2030e2f.lovable.app-1778092426718.png" },
->>>>>>> skillchain/main
     ],
     links: [
   { rel: "stylesheet", href: appCss },
