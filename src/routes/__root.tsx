@@ -42,7 +42,6 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-<<<<<<< HEAD
       { title: "Leatha – Fork knowledge. Build skills together." },
       {
         name: "description",
@@ -56,7 +55,6 @@ export const Route = createRootRoute({
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "apple-mobile-web-app-title", content: "Leatha" },
-=======
       { title: "Leatha — Fork knowledge. Build skills together." },
       { name: "description", content: "Social learning platform where lessons can be forked, remixed, and improved by everyone." },
       { property: "og:title", content: "Leatha — Fork knowledge. Build skills together." },
