@@ -25,14 +25,24 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ArenaRouteImport } from './routes/arena'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ArenaIndexRouteImport } from './routes/arena.index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as MessagesUsernameRouteImport } from './routes/messages.$username'
 import { Route as LessonsNewRouteImport } from './routes/lessons.new'
 import { Route as LessonsLessonIdRouteImport } from './routes/lessons.$lessonId'
+import { Route as ArenaStudioRouteImport } from './routes/arena.studio'
+import { Route as ArenaSchoolsRouteImport } from './routes/arena.schools'
+import { Route as ArenaProfileRouteImport } from './routes/arena.profile'
+import { Route as ArenaLeaderboardRouteImport } from './routes/arena.leaderboard'
+import { Route as ArenaDailyRouteImport } from './routes/arena.daily'
+import { Route as ArenaChallengesRouteImport } from './routes/arena.challenges'
+import { Route as ArenaBattlesRouteImport } from './routes/arena.battles'
 import { Route as LessonsLessonIdEditRouteImport } from './routes/lessons.$lessonId.edit'
 import { Route as LessonsLessonIdDiffRouteImport } from './routes/lessons.$lessonId.diff'
+import { Route as ArenaChallengesSlugRouteImport } from './routes/arena.challenges.$slug'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -114,6 +124,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArenaRoute = ArenaRouteImport.update({
+  id: '/arena',
+  path: '/arena',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -123,6 +138,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ArenaIndexRoute = ArenaIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ArenaRoute,
 } as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
@@ -144,6 +164,41 @@ const LessonsLessonIdRoute = LessonsLessonIdRouteImport.update({
   path: '/lessons/$lessonId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArenaStudioRoute = ArenaStudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
+  getParentRoute: () => ArenaRoute,
+} as any)
+const ArenaSchoolsRoute = ArenaSchoolsRouteImport.update({
+  id: '/schools',
+  path: '/schools',
+  getParentRoute: () => ArenaRoute,
+} as any)
+const ArenaProfileRoute = ArenaProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => ArenaRoute,
+} as any)
+const ArenaLeaderboardRoute = ArenaLeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
+  getParentRoute: () => ArenaRoute,
+} as any)
+const ArenaDailyRoute = ArenaDailyRouteImport.update({
+  id: '/daily',
+  path: '/daily',
+  getParentRoute: () => ArenaRoute,
+} as any)
+const ArenaChallengesRoute = ArenaChallengesRouteImport.update({
+  id: '/challenges',
+  path: '/challenges',
+  getParentRoute: () => ArenaRoute,
+} as any)
+const ArenaBattlesRoute = ArenaBattlesRouteImport.update({
+  id: '/battles',
+  path: '/battles',
+  getParentRoute: () => ArenaRoute,
+} as any)
 const LessonsLessonIdEditRoute = LessonsLessonIdEditRouteImport.update({
   id: '/edit',
   path: '/edit',
@@ -154,10 +209,16 @@ const LessonsLessonIdDiffRoute = LessonsLessonIdDiffRouteImport.update({
   path: '/diff',
   getParentRoute: () => LessonsLessonIdRoute,
 } as any)
+const ArenaChallengesSlugRoute = ArenaChallengesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ArenaChallengesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/arena': typeof ArenaRouteWithChildren
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/cookies': typeof CookiesRoute
@@ -174,10 +235,19 @@ export interface FileRoutesByFullPath {
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
+  '/arena/battles': typeof ArenaBattlesRoute
+  '/arena/challenges': typeof ArenaChallengesRouteWithChildren
+  '/arena/daily': typeof ArenaDailyRoute
+  '/arena/leaderboard': typeof ArenaLeaderboardRoute
+  '/arena/profile': typeof ArenaProfileRoute
+  '/arena/schools': typeof ArenaSchoolsRoute
+  '/arena/studio': typeof ArenaStudioRoute
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
   '/messages/$username': typeof MessagesUsernameRoute
   '/u/$username': typeof UUsernameRoute
+  '/arena/': typeof ArenaIndexRoute
+  '/arena/challenges/$slug': typeof ArenaChallengesSlugRoute
   '/lessons/$lessonId/diff': typeof LessonsLessonIdDiffRoute
   '/lessons/$lessonId/edit': typeof LessonsLessonIdEditRoute
 }
@@ -200,10 +270,19 @@ export interface FileRoutesByTo {
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
+  '/arena/battles': typeof ArenaBattlesRoute
+  '/arena/challenges': typeof ArenaChallengesRouteWithChildren
+  '/arena/daily': typeof ArenaDailyRoute
+  '/arena/leaderboard': typeof ArenaLeaderboardRoute
+  '/arena/profile': typeof ArenaProfileRoute
+  '/arena/schools': typeof ArenaSchoolsRoute
+  '/arena/studio': typeof ArenaStudioRoute
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
   '/messages/$username': typeof MessagesUsernameRoute
   '/u/$username': typeof UUsernameRoute
+  '/arena': typeof ArenaIndexRoute
+  '/arena/challenges/$slug': typeof ArenaChallengesSlugRoute
   '/lessons/$lessonId/diff': typeof LessonsLessonIdDiffRoute
   '/lessons/$lessonId/edit': typeof LessonsLessonIdEditRoute
 }
@@ -211,6 +290,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/arena': typeof ArenaRouteWithChildren
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/cookies': typeof CookiesRoute
@@ -227,10 +307,19 @@ export interface FileRoutesById {
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
+  '/arena/battles': typeof ArenaBattlesRoute
+  '/arena/challenges': typeof ArenaChallengesRouteWithChildren
+  '/arena/daily': typeof ArenaDailyRoute
+  '/arena/leaderboard': typeof ArenaLeaderboardRoute
+  '/arena/profile': typeof ArenaProfileRoute
+  '/arena/schools': typeof ArenaSchoolsRoute
+  '/arena/studio': typeof ArenaStudioRoute
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
   '/messages/$username': typeof MessagesUsernameRoute
   '/u/$username': typeof UUsernameRoute
+  '/arena/': typeof ArenaIndexRoute
+  '/arena/challenges/$slug': typeof ArenaChallengesSlugRoute
   '/lessons/$lessonId/diff': typeof LessonsLessonIdDiffRoute
   '/lessons/$lessonId/edit': typeof LessonsLessonIdEditRoute
 }
@@ -239,6 +328,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/arena'
     | '/auth'
     | '/chat'
     | '/cookies'
@@ -255,10 +345,19 @@ export interface FileRouteTypes {
     | '/schools'
     | '/settings'
     | '/terms'
+    | '/arena/battles'
+    | '/arena/challenges'
+    | '/arena/daily'
+    | '/arena/leaderboard'
+    | '/arena/profile'
+    | '/arena/schools'
+    | '/arena/studio'
     | '/lessons/$lessonId'
     | '/lessons/new'
     | '/messages/$username'
     | '/u/$username'
+    | '/arena/'
+    | '/arena/challenges/$slug'
     | '/lessons/$lessonId/diff'
     | '/lessons/$lessonId/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -281,16 +380,26 @@ export interface FileRouteTypes {
     | '/schools'
     | '/settings'
     | '/terms'
+    | '/arena/battles'
+    | '/arena/challenges'
+    | '/arena/daily'
+    | '/arena/leaderboard'
+    | '/arena/profile'
+    | '/arena/schools'
+    | '/arena/studio'
     | '/lessons/$lessonId'
     | '/lessons/new'
     | '/messages/$username'
     | '/u/$username'
+    | '/arena'
+    | '/arena/challenges/$slug'
     | '/lessons/$lessonId/diff'
     | '/lessons/$lessonId/edit'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/arena'
     | '/auth'
     | '/chat'
     | '/cookies'
@@ -307,10 +416,19 @@ export interface FileRouteTypes {
     | '/schools'
     | '/settings'
     | '/terms'
+    | '/arena/battles'
+    | '/arena/challenges'
+    | '/arena/daily'
+    | '/arena/leaderboard'
+    | '/arena/profile'
+    | '/arena/schools'
+    | '/arena/studio'
     | '/lessons/$lessonId'
     | '/lessons/new'
     | '/messages/$username'
     | '/u/$username'
+    | '/arena/'
+    | '/arena/challenges/$slug'
     | '/lessons/$lessonId/diff'
     | '/lessons/$lessonId/edit'
   fileRoutesById: FileRoutesById
@@ -318,6 +436,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  ArenaRoute: typeof ArenaRouteWithChildren
   AuthRoute: typeof AuthRoute
   ChatRoute: typeof ChatRoute
   CookiesRoute: typeof CookiesRoute
@@ -453,6 +572,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/arena': {
+      id: '/arena'
+      path: '/arena'
+      fullPath: '/arena'
+      preLoaderRoute: typeof ArenaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -466,6 +592,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/arena/': {
+      id: '/arena/'
+      path: '/'
+      fullPath: '/arena/'
+      preLoaderRoute: typeof ArenaIndexRouteImport
+      parentRoute: typeof ArenaRoute
     }
     '/u/$username': {
       id: '/u/$username'
@@ -495,6 +628,55 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LessonsLessonIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/arena/studio': {
+      id: '/arena/studio'
+      path: '/studio'
+      fullPath: '/arena/studio'
+      preLoaderRoute: typeof ArenaStudioRouteImport
+      parentRoute: typeof ArenaRoute
+    }
+    '/arena/schools': {
+      id: '/arena/schools'
+      path: '/schools'
+      fullPath: '/arena/schools'
+      preLoaderRoute: typeof ArenaSchoolsRouteImport
+      parentRoute: typeof ArenaRoute
+    }
+    '/arena/profile': {
+      id: '/arena/profile'
+      path: '/profile'
+      fullPath: '/arena/profile'
+      preLoaderRoute: typeof ArenaProfileRouteImport
+      parentRoute: typeof ArenaRoute
+    }
+    '/arena/leaderboard': {
+      id: '/arena/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/arena/leaderboard'
+      preLoaderRoute: typeof ArenaLeaderboardRouteImport
+      parentRoute: typeof ArenaRoute
+    }
+    '/arena/daily': {
+      id: '/arena/daily'
+      path: '/daily'
+      fullPath: '/arena/daily'
+      preLoaderRoute: typeof ArenaDailyRouteImport
+      parentRoute: typeof ArenaRoute
+    }
+    '/arena/challenges': {
+      id: '/arena/challenges'
+      path: '/challenges'
+      fullPath: '/arena/challenges'
+      preLoaderRoute: typeof ArenaChallengesRouteImport
+      parentRoute: typeof ArenaRoute
+    }
+    '/arena/battles': {
+      id: '/arena/battles'
+      path: '/battles'
+      fullPath: '/arena/battles'
+      preLoaderRoute: typeof ArenaBattlesRouteImport
+      parentRoute: typeof ArenaRoute
+    }
     '/lessons/$lessonId/edit': {
       id: '/lessons/$lessonId/edit'
       path: '/edit'
@@ -509,8 +691,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LessonsLessonIdDiffRouteImport
       parentRoute: typeof LessonsLessonIdRoute
     }
+    '/arena/challenges/$slug': {
+      id: '/arena/challenges/$slug'
+      path: '/$slug'
+      fullPath: '/arena/challenges/$slug'
+      preLoaderRoute: typeof ArenaChallengesSlugRouteImport
+      parentRoute: typeof ArenaChallengesRoute
+    }
   }
 }
+
+interface ArenaChallengesRouteChildren {
+  ArenaChallengesSlugRoute: typeof ArenaChallengesSlugRoute
+}
+
+const ArenaChallengesRouteChildren: ArenaChallengesRouteChildren = {
+  ArenaChallengesSlugRoute: ArenaChallengesSlugRoute,
+}
+
+const ArenaChallengesRouteWithChildren = ArenaChallengesRoute._addFileChildren(
+  ArenaChallengesRouteChildren,
+)
+
+interface ArenaRouteChildren {
+  ArenaBattlesRoute: typeof ArenaBattlesRoute
+  ArenaChallengesRoute: typeof ArenaChallengesRouteWithChildren
+  ArenaDailyRoute: typeof ArenaDailyRoute
+  ArenaLeaderboardRoute: typeof ArenaLeaderboardRoute
+  ArenaProfileRoute: typeof ArenaProfileRoute
+  ArenaSchoolsRoute: typeof ArenaSchoolsRoute
+  ArenaStudioRoute: typeof ArenaStudioRoute
+  ArenaIndexRoute: typeof ArenaIndexRoute
+}
+
+const ArenaRouteChildren: ArenaRouteChildren = {
+  ArenaBattlesRoute: ArenaBattlesRoute,
+  ArenaChallengesRoute: ArenaChallengesRouteWithChildren,
+  ArenaDailyRoute: ArenaDailyRoute,
+  ArenaLeaderboardRoute: ArenaLeaderboardRoute,
+  ArenaProfileRoute: ArenaProfileRoute,
+  ArenaSchoolsRoute: ArenaSchoolsRoute,
+  ArenaStudioRoute: ArenaStudioRoute,
+  ArenaIndexRoute: ArenaIndexRoute,
+}
+
+const ArenaRouteWithChildren = ArenaRoute._addFileChildren(ArenaRouteChildren)
 
 interface MessagesRouteChildren {
   MessagesUsernameRoute: typeof MessagesUsernameRoute
@@ -541,6 +766,7 @@ const LessonsLessonIdRouteWithChildren = LessonsLessonIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  ArenaRoute: ArenaRouteWithChildren,
   AuthRoute: AuthRoute,
   ChatRoute: ChatRoute,
   CookiesRoute: CookiesRoute,
@@ -564,12 +790,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
