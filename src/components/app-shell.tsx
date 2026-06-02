@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import {
-  GitFork, Home, BookOpen, MessageSquare, MessagesSquare, Trophy, Sparkles, Swords,
+  GitFork, Home, BookOpen, MessageSquare, MessagesSquare, Trophy, Sparkles, Swords, Lightbulb,
   Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X, MessageSquareWarning,
 } from "lucide-react";
 import { LeathaLogo } from "@/components/leatha-logo";
@@ -23,6 +23,7 @@ const navItems = [
   { to: "/feed" as const, label: "Feed", icon: Sparkles, auth: true },
   { to: "/explore" as const, label: "Explore", icon: BookOpen, auth: true },
   { to: "/arena" as const, label: "Arena", icon: Swords, auth: true, highlight: true },
+  { to: "/suggestions" as const, label: "Suggestions", icon: Lightbulb, auth: true },
   { to: "/chat" as const, label: "Chat", icon: MessageSquare, auth: true },
   { to: "/messages" as const, label: "Messages", icon: MessagesSquare, auth: true },
   { to: "/leaderboard" as const, label: "Leaderboard", icon: Trophy, auth: true },
