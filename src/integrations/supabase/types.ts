@@ -47,23 +47,32 @@ export type Database = {
       analytics_events: {
         Row: {
           created_at: string
+          device_type: string | null
+          event_data: Json
           event_type: string
           id: string
           metadata: Json
+          session_id: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string
+          device_type?: string | null
+          event_data?: Json
           event_type: string
           id?: string
           metadata?: Json
+          session_id?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string
+          device_type?: string | null
+          event_data?: Json
           event_type?: string
           id?: string
           metadata?: Json
+          session_id?: string | null
           user_id?: string | null
         }
         Relationships: []
@@ -796,6 +805,32 @@ export type Database = {
         }
         Relationships: []
       }
+      bookmarks: {
+        Row: {
+          created_at: string
+          lesson_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          lesson_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          lesson_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           author_id: string
@@ -816,6 +851,101 @@ export type Database = {
           id?: string
         }
         Relationships: []
+      }
+      class_assignments: {
+        Row: {
+          class_id: string
+          created_at: string
+          due_at: string | null
+          id: string
+          lesson_id: string | null
+          title: string
+        }
+        Insert: {
+          class_id: string
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          lesson_id?: string | null
+          title: string
+        }
+        Update: {
+          class_id?: string
+          created_at?: string
+          due_at?: string | null
+          id?: string
+          lesson_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_assignments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "class_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_assignments_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      class_memberships: {
+        Row: {
+          class_id: string
+          joined_at: string
+          student_id: string
+        }
+        Insert: {
+          class_id: string
+          joined_at?: string
+          student_id: string
+        }
+        Update: {
+          class_id?: string
+          joined_at?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_memberships_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "class_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       comments: {
         Row: {
@@ -1024,6 +1154,97 @@ export type Database = {
           },
         ]
       }
+      lesson_suggestions: {
+        Row: {
+          claimed_at: string | null
+          claimed_by: string | null
+          created_at: string
+          description: string
+          id: string
+          lesson_id: string | null
+          status: string
+          subject: string
+          suggested_by: string
+          title: string
+          updated_at: string
+          upvote_count: number
+          view_count: number
+        }
+        Insert: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          lesson_id?: string | null
+          status?: string
+          subject: string
+          suggested_by: string
+          title: string
+          updated_at?: string
+          upvote_count?: number
+          view_count?: number
+        }
+        Update: {
+          claimed_at?: string | null
+          claimed_by?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          lesson_id?: string | null
+          status?: string
+          subject?: string
+          suggested_by?: string
+          title?: string
+          updated_at?: string
+          upvote_count?: number
+          view_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_suggestions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_views: {
+        Row: {
+          created_at: string
+          id: string
+          lesson_id: string
+          scroll_depth_percent: number
+          time_spent_seconds: number
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lesson_id: string
+          scroll_depth_percent?: number
+          time_spent_seconds?: number
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          scroll_depth_percent?: number
+          time_spent_seconds?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_views_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
           attachments: Json
@@ -1047,6 +1268,7 @@ export type Database = {
           title: string
           updated_at: string
           video_url: string | null
+          view_count: number
         }
         Insert: {
           attachments?: Json
@@ -1070,6 +1292,7 @@ export type Database = {
           title: string
           updated_at?: string
           video_url?: string | null
+          view_count?: number
         }
         Update: {
           attachments?: Json
@@ -1093,6 +1316,7 @@ export type Database = {
           title?: string
           updated_at?: string
           video_url?: string | null
+          view_count?: number
         }
         Relationships: [
           {
@@ -1118,6 +1342,42 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          link: string | null
+          read_at: string | null
+          related_id: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          related_id?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          related_id?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           account_type: string
@@ -1133,13 +1393,19 @@ export type Database = {
           id: string
           interests: string[]
           is_verified: boolean
+          last_active_at: string
+          learning_style: string | null
           lesson_count: number
           points: number
+          preferred_subjects: string[]
           school: string | null
           skill_level: string | null
+          study_goal: string | null
           theme: string
           updated_at: string
           username: string
+          weekly_challenge_target: number
+          weekly_lesson_target: number
         }
         Insert: {
           account_type?: string
@@ -1155,13 +1421,19 @@ export type Database = {
           id: string
           interests?: string[]
           is_verified?: boolean
+          last_active_at?: string
+          learning_style?: string | null
           lesson_count?: number
           points?: number
+          preferred_subjects?: string[]
           school?: string | null
           skill_level?: string | null
+          study_goal?: string | null
           theme?: string
           updated_at?: string
           username: string
+          weekly_challenge_target?: number
+          weekly_lesson_target?: number
         }
         Update: {
           account_type?: string
@@ -1177,13 +1449,19 @@ export type Database = {
           id?: string
           interests?: string[]
           is_verified?: boolean
+          last_active_at?: string
+          learning_style?: string | null
           lesson_count?: number
           points?: number
+          preferred_subjects?: string[]
           school?: string | null
           skill_level?: string | null
+          study_goal?: string | null
           theme?: string
           updated_at?: string
           username?: string
+          weekly_challenge_target?: number
+          weekly_lesson_target?: number
         }
         Relationships: []
       }
@@ -1276,6 +1554,64 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      suggestion_upvotes: {
+        Row: {
+          created_at: string
+          id: string
+          suggestion_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          suggestion_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          suggestion_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggestion_upvotes_suggestion_id_fkey"
+            columns: ["suggestion_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_suggestions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      suggestion_views: {
+        Row: {
+          id: string
+          suggestion_id: string
+          user_id: string | null
+          viewed_at: string
+        }
+        Insert: {
+          id?: string
+          suggestion_id: string
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Update: {
+          id?: string
+          suggestion_id?: string
+          user_id?: string | null
+          viewed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "suggestion_views_suggestion_id_fkey"
+            columns: ["suggestion_id"]
+            isOneToOne: false
+            referencedRelation: "lesson_suggestions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       teacher_schools: {
         Row: {
