@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 export type AnalyticsEvent =
   | "login" | "signup" | "session_start"
   | "lesson_view" | "lesson_complete" | "lesson_scroll" | "lesson_fork" | "lesson_like" | "lesson_created"
-  | "challenge_attempt" | "challenge_view"
+  | "challenge_attempt" | "challenge_view" | "lesson_forked"
   | "suggestion_view" | "suggestion_upvote" | "suggestion_submit"
   | "feed_click" | "feed_scroll_depth"
   | "search"
