@@ -32,6 +32,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArenaIndexRouteImport } from './routes/arena.index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as SuggestionsNewRouteImport } from './routes/suggestions.new'
+import { Route as SuggestionsIdRouteImport } from './routes/suggestions.$id'
 import { Route as MessagesUsernameRouteImport } from './routes/messages.$username'
 import { Route as LessonsNewRouteImport } from './routes/lessons.new'
 import { Route as LessonsLessonIdRouteImport } from './routes/lessons.$lessonId'
@@ -161,6 +162,11 @@ const SuggestionsNewRoute = SuggestionsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => SuggestionsRoute,
 } as any)
+const SuggestionsIdRoute = SuggestionsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => SuggestionsRoute,
+} as any)
 const MessagesUsernameRoute = MessagesUsernameRouteImport.update({
   id: '/$username',
   path: '/$username',
@@ -258,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
   '/messages/$username': typeof MessagesUsernameRoute
+  '/suggestions/$id': typeof SuggestionsIdRoute
   '/suggestions/new': typeof SuggestionsNewRoute
   '/u/$username': typeof UUsernameRoute
   '/arena/': typeof ArenaIndexRoute
@@ -295,6 +302,7 @@ export interface FileRoutesByTo {
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
   '/messages/$username': typeof MessagesUsernameRoute
+  '/suggestions/$id': typeof SuggestionsIdRoute
   '/suggestions/new': typeof SuggestionsNewRoute
   '/u/$username': typeof UUsernameRoute
   '/arena': typeof ArenaIndexRoute
@@ -334,6 +342,7 @@ export interface FileRoutesById {
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
   '/messages/$username': typeof MessagesUsernameRoute
+  '/suggestions/$id': typeof SuggestionsIdRoute
   '/suggestions/new': typeof SuggestionsNewRoute
   '/u/$username': typeof UUsernameRoute
   '/arena/': typeof ArenaIndexRoute
@@ -374,6 +383,7 @@ export interface FileRouteTypes {
     | '/lessons/$lessonId'
     | '/lessons/new'
     | '/messages/$username'
+    | '/suggestions/$id'
     | '/suggestions/new'
     | '/u/$username'
     | '/arena/'
@@ -411,6 +421,7 @@ export interface FileRouteTypes {
     | '/lessons/$lessonId'
     | '/lessons/new'
     | '/messages/$username'
+    | '/suggestions/$id'
     | '/suggestions/new'
     | '/u/$username'
     | '/arena'
@@ -449,6 +460,7 @@ export interface FileRouteTypes {
     | '/lessons/$lessonId'
     | '/lessons/new'
     | '/messages/$username'
+    | '/suggestions/$id'
     | '/suggestions/new'
     | '/u/$username'
     | '/arena/'
@@ -646,6 +658,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuggestionsNewRouteImport
       parentRoute: typeof SuggestionsRoute
     }
+    '/suggestions/$id': {
+      id: '/suggestions/$id'
+      path: '/$id'
+      fullPath: '/suggestions/$id'
+      preLoaderRoute: typeof SuggestionsIdRouteImport
+      parentRoute: typeof SuggestionsRoute
+    }
     '/messages/$username': {
       id: '/messages/$username'
       path: '/$username'
@@ -789,10 +808,12 @@ const MessagesRouteWithChildren = MessagesRoute._addFileChildren(
 )
 
 interface SuggestionsRouteChildren {
+  SuggestionsIdRoute: typeof SuggestionsIdRoute
   SuggestionsNewRoute: typeof SuggestionsNewRoute
 }
 
 const SuggestionsRouteChildren: SuggestionsRouteChildren = {
+  SuggestionsIdRoute: SuggestionsIdRoute,
   SuggestionsNewRoute: SuggestionsNewRoute,
 }
 
