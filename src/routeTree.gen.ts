@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SuggestionsRouteImport } from './routes/suggestions'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SchoolsRouteImport } from './routes/schools'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -30,6 +31,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArenaIndexRouteImport } from './routes/arena.index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as SuggestionsNewRouteImport } from './routes/suggestions.new'
 import { Route as MessagesUsernameRouteImport } from './routes/messages.$username'
 import { Route as LessonsNewRouteImport } from './routes/lessons.new'
 import { Route as LessonsLessonIdRouteImport } from './routes/lessons.$lessonId'
@@ -47,6 +49,11 @@ import { Route as ArenaChallengesSlugRouteImport } from './routes/arena.challeng
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuggestionsRoute = SuggestionsRouteImport.update({
+  id: '/suggestions',
+  path: '/suggestions',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -149,6 +156,11 @@ const UUsernameRoute = UUsernameRouteImport.update({
   path: '/u/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SuggestionsNewRoute = SuggestionsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => SuggestionsRoute,
+} as any)
 const MessagesUsernameRoute = MessagesUsernameRouteImport.update({
   id: '/$username',
   path: '/$username',
@@ -234,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
+  '/suggestions': typeof SuggestionsRouteWithChildren
   '/terms': typeof TermsRoute
   '/arena/battles': typeof ArenaBattlesRoute
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
@@ -245,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
   '/messages/$username': typeof MessagesUsernameRoute
+  '/suggestions/new': typeof SuggestionsNewRoute
   '/u/$username': typeof UUsernameRoute
   '/arena/': typeof ArenaIndexRoute
   '/arena/challenges/$slug': typeof ArenaChallengesSlugRoute
@@ -269,6 +283,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
+  '/suggestions': typeof SuggestionsRouteWithChildren
   '/terms': typeof TermsRoute
   '/arena/battles': typeof ArenaBattlesRoute
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
@@ -280,6 +295,7 @@ export interface FileRoutesByTo {
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
   '/messages/$username': typeof MessagesUsernameRoute
+  '/suggestions/new': typeof SuggestionsNewRoute
   '/u/$username': typeof UUsernameRoute
   '/arena': typeof ArenaIndexRoute
   '/arena/challenges/$slug': typeof ArenaChallengesSlugRoute
@@ -306,6 +322,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
+  '/suggestions': typeof SuggestionsRouteWithChildren
   '/terms': typeof TermsRoute
   '/arena/battles': typeof ArenaBattlesRoute
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
@@ -317,6 +334,7 @@ export interface FileRoutesById {
   '/lessons/$lessonId': typeof LessonsLessonIdRouteWithChildren
   '/lessons/new': typeof LessonsNewRoute
   '/messages/$username': typeof MessagesUsernameRoute
+  '/suggestions/new': typeof SuggestionsNewRoute
   '/u/$username': typeof UUsernameRoute
   '/arena/': typeof ArenaIndexRoute
   '/arena/challenges/$slug': typeof ArenaChallengesSlugRoute
@@ -344,6 +362,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/schools'
     | '/settings'
+    | '/suggestions'
     | '/terms'
     | '/arena/battles'
     | '/arena/challenges'
@@ -355,6 +374,7 @@ export interface FileRouteTypes {
     | '/lessons/$lessonId'
     | '/lessons/new'
     | '/messages/$username'
+    | '/suggestions/new'
     | '/u/$username'
     | '/arena/'
     | '/arena/challenges/$slug'
@@ -379,6 +399,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/schools'
     | '/settings'
+    | '/suggestions'
     | '/terms'
     | '/arena/battles'
     | '/arena/challenges'
@@ -390,6 +411,7 @@ export interface FileRouteTypes {
     | '/lessons/$lessonId'
     | '/lessons/new'
     | '/messages/$username'
+    | '/suggestions/new'
     | '/u/$username'
     | '/arena'
     | '/arena/challenges/$slug'
@@ -415,6 +437,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/schools'
     | '/settings'
+    | '/suggestions'
     | '/terms'
     | '/arena/battles'
     | '/arena/challenges'
@@ -426,6 +449,7 @@ export interface FileRouteTypes {
     | '/lessons/$lessonId'
     | '/lessons/new'
     | '/messages/$username'
+    | '/suggestions/new'
     | '/u/$username'
     | '/arena/'
     | '/arena/challenges/$slug'
@@ -452,6 +476,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SchoolsRoute: typeof SchoolsRoute
   SettingsRoute: typeof SettingsRoute
+  SuggestionsRoute: typeof SuggestionsRouteWithChildren
   TermsRoute: typeof TermsRoute
   LessonsLessonIdRoute: typeof LessonsLessonIdRouteWithChildren
   LessonsNewRoute: typeof LessonsNewRoute
@@ -465,6 +490,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/suggestions': {
+      id: '/suggestions'
+      path: '/suggestions'
+      fullPath: '/suggestions'
+      preLoaderRoute: typeof SuggestionsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -606,6 +638,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/u/$username'
       preLoaderRoute: typeof UUsernameRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/suggestions/new': {
+      id: '/suggestions/new'
+      path: '/new'
+      fullPath: '/suggestions/new'
+      preLoaderRoute: typeof SuggestionsNewRouteImport
+      parentRoute: typeof SuggestionsRoute
     }
     '/messages/$username': {
       id: '/messages/$username'
@@ -749,6 +788,18 @@ const MessagesRouteWithChildren = MessagesRoute._addFileChildren(
   MessagesRouteChildren,
 )
 
+interface SuggestionsRouteChildren {
+  SuggestionsNewRoute: typeof SuggestionsNewRoute
+}
+
+const SuggestionsRouteChildren: SuggestionsRouteChildren = {
+  SuggestionsNewRoute: SuggestionsNewRoute,
+}
+
+const SuggestionsRouteWithChildren = SuggestionsRoute._addFileChildren(
+  SuggestionsRouteChildren,
+)
+
 interface LessonsLessonIdRouteChildren {
   LessonsLessonIdDiffRoute: typeof LessonsLessonIdDiffRoute
   LessonsLessonIdEditRoute: typeof LessonsLessonIdEditRoute
@@ -782,6 +833,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SchoolsRoute: SchoolsRoute,
   SettingsRoute: SettingsRoute,
+  SuggestionsRoute: SuggestionsRouteWithChildren,
   TermsRoute: TermsRoute,
   LessonsLessonIdRoute: LessonsLessonIdRouteWithChildren,
   LessonsNewRoute: LessonsNewRoute,
@@ -790,3 +842,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
