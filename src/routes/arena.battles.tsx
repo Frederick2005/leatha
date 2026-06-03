@@ -40,11 +40,11 @@ function BattlesPage() {
 
   async function joinBattle(b: Battle) {
     if (!user) return;
-    if (b.arena_battle_participants.some((p) => p.user_id === user.id)) return toast("You're already in this battle");
-    const { error } = await supabase.from("arena_battle_participants").insert({ battle_id: b.id, user_id: user.id });
-    if (error) return toast.error(error.message);
-    toast.success("Joined battle");
-    void load();
+    if (!b.arena_battle_participants.some((p) => p.user_id === user.id)) {
+      const { error } = await supabase.from("arena_battle_participants").insert({ battle_id: b.id, user_id: user.id });
+      if (error) return toast.error(error.message);
+    }
+    navigate({ to: "/arena/battles/$id", params: { id: b.id } });
   }
 
   return (
