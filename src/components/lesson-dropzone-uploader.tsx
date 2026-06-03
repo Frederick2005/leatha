@@ -78,12 +78,7 @@ export function LessonDropzoneUploader({
         toast.error(`Failed: ${file.name} — ${error.message}`);
         continue;
       }
-      next.push({
-        path,
-        name: file.name,
-        size: file.size,
-        type: file.type || "application/octet-stream",
-      });
+      next.push({ path, name: file.name, size: file.size, type: file.type || "application/octet-stream" });
     }
     onChange(next);
     setUploading(false);
@@ -98,10 +93,7 @@ export function LessonDropzoneUploader({
   return (
     <div className="space-y-3">
       <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
+        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={(e) => {
           e.preventDefault();
@@ -131,13 +123,7 @@ export function LessonDropzoneUploader({
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
           >
-            {uploading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-1 animate-spin inline" /> Uploading…
-              </>
-            ) : (
-              "Browse Files"
-            )}
+            {uploading ? <><Loader2 className="h-4 w-4 mr-1 animate-spin inline" /> Uploading…</> : "Browse Files"}
           </Button>
         </p>
         <p className="text-xs text-muted-foreground mt-1">
@@ -153,10 +139,7 @@ export function LessonDropzoneUploader({
           {attachments.map((a) => {
             const Icon = iconFor(a.name, a.type);
             return (
-              <li
-                key={a.path}
-                className="flex items-center gap-2 px-3 py-2 rounded-md border border-border bg-surface text-sm"
-              >
+              <li key={a.path} className="flex items-center gap-2 px-3 py-2 rounded-md border border-border bg-surface text-sm">
                 <Icon className="h-4 w-4 shrink-0 text-primary" />
                 <span className="flex-1 truncate">{a.name}</span>
                 <span className="text-xs text-muted-foreground">{formatBytes(a.size)}</span>

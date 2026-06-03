@@ -1,5 +1,33 @@
+import { WifiOff } from "lucide-react";
+// Add this component inside app-shell.tsx
+function OfflineBanner() {
+  const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    setIsOffline(!navigator.onLine);
+    const goOffline = () => setIsOffline(true);
+    const goOnline = () => setIsOffline(false);
+    window.addEventListener("offline", goOffline);
+    window.addEventListener("online", goOnline);
+    return () => {
+      window.removeEventListener("offline", goOffline);
+      window.removeEventListener("online", goOnline);
+    };
+  }, []);
+
+  if (!isOffline) return null;
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500 text-amber-950 text-xs font-medium py-2 text-center flex items-center justify-center gap-2">
+      <WifiOff className="h-3 w-3" />
+      You are offline — showing cached content
+    </div>
+  );
+}
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import {
+  GitFork, Home, BookOpen, MessageSquare, MessagesSquare, Trophy, Sparkles, Swords,
+  Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X, MessageSquareWarning,
   GitFork, Home, BookOpen, MessageSquare, MessagesSquare, Trophy, Sparkles, Swords, Lightbulb,
   Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X, MessageSquareWarning,
   GraduationCap, Backpack,
@@ -16,6 +44,8 @@ import { cn } from "@/lib/utils";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -25,6 +55,7 @@ const navItems = [
   { to: "/explore" as const, label: "Explore", icon: BookOpen, auth: true },
   { to: "/arena" as const, label: "Arena", icon: Swords, auth: true, highlight: true },
   { to: "/suggestions" as const, label: "Suggestions", icon: Lightbulb, auth: true },
+  { to: "/arena" as const, label: "Arena", icon: Swords, auth: true, highlight: true },
   { to: "/chat" as const, label: "Chat", icon: MessageSquare, auth: true },
   { to: "/messages" as const, label: "Messages", icon: MessagesSquare, auth: true },
   { to: "/leaderboard" as const, label: "Leaderboard", icon: Trophy, auth: true },
@@ -131,9 +162,11 @@ export function AppShell() {
           {user ? (
             <Button asChild className="w-full justify-start gap-2" variant="default">
               <Link to="/lessons/new"><Plus className="h-4 w-4" /> New lesson</Link>
+              <Link to="/lessons/new"><Plus className="h-4 w-4" /> New lesson</Link>
             </Button>
           ) : (
             <Button asChild className="w-full justify-start gap-2" variant="default">
+              <Link to="/auth"><LogIn className="h-4 w-4" /> Sign in</Link>
               <Link to="/auth"><LogIn className="h-4 w-4" /> Sign in</Link>
             </Button>
           )}
@@ -224,6 +257,53 @@ export function AppShell() {
           </div>
           <div className="flex-1 sm:hidden" />
 
+          {!loading && (user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 rounded-full hover:bg-accent p-1 pr-3">
+                  <UserAvatar name={profile?.display_name ?? profile?.username} url={profile?.avatar_url} size="sm" />
+                  <span className="text-sm font-medium hidden sm:inline">{profile?.username ?? "..."}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="flex flex-col">
+                  <span className="text-sm font-semibold">{profile?.display_name ?? profile?.username}</span>
+                  <span className="text-xs text-muted-foreground font-mono">@{profile?.username}</span>
+                  <span className="text-xs text-primary mt-1">{profile?.points ?? 0} pts</span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/u/$username" params={{ username: profile?.username ?? "" }}>
+                    <UserIcon className="h-4 w-4 mr-2" /> Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/lessons/new"><Plus className="h-4 w-4 mr-2" /> New lesson</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/feedback"><MessageSquareWarning className="h-4 w-4 mr-2" /> Send feedback</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setThemeOpen(true)}>
+                  <Palette className="h-4 w-4 mr-2" /> Themes
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={toggleDarkMode}>
+                  {darkMode ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
+                  {darkMode ? "Light mode" : "Dark mode"}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4 mr-2" /> Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className="flex items-center gap-2">
+              <button onClick={toggleDarkMode} className="p-2 rounded-md hover:bg-accent" aria-label="Toggle dark mode">
+                {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </button>
+              <Button asChild size="sm"><Link to="/auth">Sign in</Link></Button>
+            </div>
+          ))}
           {!loading && (user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
