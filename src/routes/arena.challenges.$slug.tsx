@@ -82,19 +82,28 @@ function SolverPage() {
 
   async function runCode() {
     setRunning(true);
-    // Mock execution — simulate test runner. Pass if user wrote anything non-trivial that includes "return".
-    await new Promise((r) => setTimeout(r, 600));
+    setFatal(null);
     const tests = ch!.test_cases ?? [];
-    const looksReal = code.trim().length > (ch!.starter_code?.length ?? 0) + 10 && /return|print|console\.log/.test(code);
-    const res = tests.map((t) => ({
-      passed: looksReal,
-      input: t.input,
-      expected: t.expected,
-      got: looksReal ? t.expected : "—",
-    }));
-    setResults(res);
+    const lang = (ch!.language ?? "javascript").toLowerCase();
+    const canRun = lang === "javascript" || lang === "typescript";
+
+    if (!canRun) {
+      // Mock fallback for non-JS languages (no in-browser interpreter)
+      await new Promise((r) => setTimeout(r, 400));
+      const looksReal = code.trim().length > (ch!.starter_code?.length ?? 0) + 10 && /return|print|console\.log/.test(code);
+      const res = tests.map((t) => ({ passed: looksReal, input: t.input, expected: t.expected, got: looksReal ? t.expected : "—" }));
+      setResults(res);
+      setRunning(false);
+      if (res.every((r) => r.passed) && res.length > 0) await submitSolve(res.length, res.length);
+      return;
+    }
+
+    const { results: res, fatal: f } = await runJsTests(code, tests);
     setRunning(false);
-    if (res.every((r) => r.passed) && res.length > 0) await submitSolve(res.length, res.length);
+    if (f) { setFatal(f); setResults(null); return; }
+    setResults(res);
+    if (res.length > 0 && res.every((r) => r.passed)) await submitSolve(res.length, res.length);
+    else if (res.length > 0) toast.error(`${res.filter((r) => r.passed).length}/${res.length} passed`);
   }
 
   async function submitQuiz() {
