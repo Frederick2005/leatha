@@ -34,8 +34,8 @@ function BattlesPage() {
     const { data, error } = await supabase.from("arena_battles").insert([{ host_id: user.id, mode: mode as "1v1", duration_seconds: 600 }]).select().maybeSingle();
     if (error || !data) return toast.error(error?.message ?? "Failed");
     await supabase.from("arena_battle_participants").insert({ battle_id: data.id, user_id: user.id });
-    toast.success("Battle created — waiting for opponent");
-    void load();
+    toast.success("Battle created — share the room link");
+    navigate({ to: "/arena/battles/$id", params: { id: data.id } });
   }
 
   async function joinBattle(b: Battle) {
