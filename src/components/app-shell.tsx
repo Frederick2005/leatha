@@ -179,6 +179,16 @@ export function AppShell() {
                 </Link>
               );
             })}
+            {profile?.account_type === "teacher" && (
+              <Link to="/teacher" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent">
+                <GraduationCap className="h-4 w-4" /> Teacher
+              </Link>
+            )}
+            {profile?.account_type === "student" && (
+              <Link to="/student" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent">
+                <Backpack className="h-4 w-4" /> My learning
+              </Link>
+            )}
             {isModOrAdmin && (
               <Link to="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent">
                 <Shield className="h-4 w-4" /> Moderation
