@@ -254,6 +254,12 @@ function SolverPage() {
             </div>
           )}
 
+          {fatal && (
+            <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-3 text-xs font-mono text-rose-300 whitespace-pre-wrap">
+              {fatal}
+            </div>
+          )}
+
           {results && (
             <div className="rounded-xl border border-border bg-card p-4">
               <h3 className="font-semibold text-sm mb-2">Results</h3>
