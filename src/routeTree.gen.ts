@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TeacherRouteImport } from './routes/teacher'
 import { Route as SuggestionsRouteImport } from './routes/suggestions'
+import { Route as StudentRouteImport } from './routes/student'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SchoolsRouteImport } from './routes/schools'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -61,6 +62,11 @@ const TeacherRoute = TeacherRouteImport.update({
 const SuggestionsRoute = SuggestionsRouteImport.update({
   id: '/suggestions',
   path: '/suggestions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudentRoute = StudentRouteImport.update({
+  id: '/student',
+  path: '/student',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -258,6 +264,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
+  '/student': typeof StudentRoute
   '/suggestions': typeof SuggestionsRouteWithChildren
   '/teacher': typeof TeacherRoute
   '/terms': typeof TermsRoute
@@ -297,6 +304,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
+  '/student': typeof StudentRoute
   '/suggestions': typeof SuggestionsRouteWithChildren
   '/teacher': typeof TeacherRoute
   '/terms': typeof TermsRoute
@@ -338,6 +346,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
+  '/student': typeof StudentRoute
   '/suggestions': typeof SuggestionsRouteWithChildren
   '/teacher': typeof TeacherRoute
   '/terms': typeof TermsRoute
@@ -380,6 +389,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/schools'
     | '/settings'
+    | '/student'
     | '/suggestions'
     | '/teacher'
     | '/terms'
@@ -419,6 +429,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/schools'
     | '/settings'
+    | '/student'
     | '/suggestions'
     | '/teacher'
     | '/terms'
@@ -459,6 +470,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/schools'
     | '/settings'
+    | '/student'
     | '/suggestions'
     | '/teacher'
     | '/terms'
@@ -500,6 +512,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SchoolsRoute: typeof SchoolsRoute
   SettingsRoute: typeof SettingsRoute
+  StudentRoute: typeof StudentRoute
   SuggestionsRoute: typeof SuggestionsRouteWithChildren
   TeacherRoute: typeof TeacherRoute
   TermsRoute: typeof TermsRoute
@@ -529,6 +542,13 @@ declare module '@tanstack/react-router' {
       path: '/suggestions'
       fullPath: '/suggestions'
       preLoaderRoute: typeof SuggestionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/student': {
+      id: '/student'
+      path: '/student'
+      fullPath: '/student'
+      preLoaderRoute: typeof StudentRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -874,6 +894,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SchoolsRoute: SchoolsRoute,
   SettingsRoute: SettingsRoute,
+  StudentRoute: StudentRoute,
   SuggestionsRoute: SuggestionsRouteWithChildren,
   TeacherRoute: TeacherRoute,
   TermsRoute: TermsRoute,
