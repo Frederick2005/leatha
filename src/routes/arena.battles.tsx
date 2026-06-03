@@ -13,6 +13,7 @@ interface Battle { id: string; mode: string; state: string; host_id: string; dur
 
 function BattlesPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [battles, setBattles] = useState<Battle[]>([]);
   const [mode, setMode] = useState("1v1");
 
