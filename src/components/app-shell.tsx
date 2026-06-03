@@ -99,6 +99,18 @@ export function AppShell() {
               </Link>
             );
           })}
+          {profile?.account_type === "teacher" && (
+            <Link to="/teacher" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              location.pathname.startsWith("/teacher") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60")}>
+              <GraduationCap className="h-4 w-4" /> Teacher
+            </Link>
+          )}
+          {profile?.account_type === "student" && (
+            <Link to="/student" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              location.pathname.startsWith("/student") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60")}>
+              <Backpack className="h-4 w-4" /> My learning
+            </Link>
+          )}
           {isModOrAdmin && (
             <Link
               to="/admin"
