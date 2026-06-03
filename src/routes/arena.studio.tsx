@@ -119,7 +119,7 @@ function StudioPage() {
         </div>
         <p className="text-xs text-muted-foreground mt-2">Drafts are pre-filled below — review carefully before publishing.</p>
       </div>
-
+      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
 
         <div className="flex gap-2">
           {(["quiz", "code"] as const).map((t) => (
