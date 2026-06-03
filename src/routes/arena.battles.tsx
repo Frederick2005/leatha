@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Swords, Plus, Users, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +13,7 @@ interface Battle { id: string; mode: string; state: string; host_id: string; dur
 
 function BattlesPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [battles, setBattles] = useState<Battle[]>([]);
   const [mode, setMode] = useState("1v1");
 
@@ -33,17 +34,17 @@ function BattlesPage() {
     const { data, error } = await supabase.from("arena_battles").insert([{ host_id: user.id, mode: mode as "1v1", duration_seconds: 600 }]).select().maybeSingle();
     if (error || !data) return toast.error(error?.message ?? "Failed");
     await supabase.from("arena_battle_participants").insert({ battle_id: data.id, user_id: user.id });
-    toast.success("Battle created — waiting for opponent");
-    void load();
+    toast.success("Battle created — share the room link");
+    navigate({ to: "/arena/battles/$id", params: { id: data.id } });
   }
 
   async function joinBattle(b: Battle) {
     if (!user) return;
-    if (b.arena_battle_participants.some((p) => p.user_id === user.id)) return toast("You're already in this battle");
-    const { error } = await supabase.from("arena_battle_participants").insert({ battle_id: b.id, user_id: user.id });
-    if (error) return toast.error(error.message);
-    toast.success("Joined battle");
-    void load();
+    if (!b.arena_battle_participants.some((p) => p.user_id === user.id)) {
+      const { error } = await supabase.from("arena_battle_participants").insert({ battle_id: b.id, user_id: user.id });
+      if (error) return toast.error(error.message);
+    }
+    navigate({ to: "/arena/battles/$id", params: { id: b.id } });
   }
 
   return (
@@ -79,9 +80,14 @@ function BattlesPage() {
                   <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {Math.round(b.duration_seconds / 60)}m</span>
                 </div>
               </div>
-              <Button size="sm" onClick={() => joinBattle(b)} disabled={b.host_id === user?.id}>
-                {b.host_id === user?.id ? "Your battle" : "Join"}
-              </Button>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" asChild>
+                  <Link to="/arena/battles/$id" params={{ id: b.id }}>Open room</Link>
+                </Button>
+                <Button size="sm" onClick={() => joinBattle(b)}>
+                  {b.host_id === user?.id ? "Enter" : "Join"}
+                </Button>
+              </div>
             </div>
           ))}
         </div>
