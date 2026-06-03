@@ -80,9 +80,14 @@ function BattlesPage() {
                   <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {Math.round(b.duration_seconds / 60)}m</span>
                 </div>
               </div>
-              <Button size="sm" onClick={() => joinBattle(b)} disabled={b.host_id === user?.id}>
-                {b.host_id === user?.id ? "Your battle" : "Join"}
-              </Button>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" asChild>
+                  <Link to="/arena/battles/$id" params={{ id: b.id }}>Open room</Link>
+                </Button>
+                <Button size="sm" onClick={() => joinBattle(b)}>
+                  {b.host_id === user?.id ? "Enter" : "Join"}
+                </Button>
+              </div>
             </div>
           ))}
         </div>
