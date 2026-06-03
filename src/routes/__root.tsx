@@ -1,5 +1,4 @@
 import { Outlet, createRootRoute, HeadContent, Scripts, Link } from "@tanstack/react-router";
-import { useEffect } from "react";
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
@@ -9,12 +8,8 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <div className="font-mono text-xs text-muted-foreground tracking-widest uppercase">
-          Error 404
-        </div>
-        <h1 className="text-7xl font-bold mt-2 bg-gradient-to-br from-primary to-foreground bg-clip-text text-transparent">
-          404
-        </h1>
+        <div className="font-mono text-xs text-muted-foreground tracking-widest uppercase">Error 404</div>
+        <h1 className="text-7xl font-bold mt-2 bg-gradient-to-br from-primary to-foreground bg-clip-text text-transparent">404</h1>
         <h2 className="mt-2 text-xl font-semibold">Page not found</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           That URL forks into the void. Try the feed instead.
@@ -33,34 +28,37 @@ function NotFoundComponent() {
 }
 
 export const Route = createRootRoute({
-  pendingComponent: () => (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-    </div>
-  ),
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Leatha – Fork knowledge. Build skills together." },
-      {
-        name: "description",
-        content: "Social learning platform where lessons can be forked, remixed, and improved by everyone.",
-      },
-      { property: "og:title", content: "Leatha" },
-      { property: "og:description", content: "Fork knowledge. Build skills together." },
+      { title: "Leatha — Fork knowledge. Build skills together." },
+      { name: "description", content: "Social learning platform where lessons can be forked, remixed, and improved by everyone." },
+      { property: "og:title", content: "Leatha — Fork knowledge. Build skills together." },
+      { property: "og:description", content: "Social learning platform where lessons can be forked, remixed, and improved by everyone." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "theme-color", content: "#3b82f6" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { name: "apple-mobile-web-app-title", content: "Leatha" },
+      { title: "Leatha — Fork knowledge. Build skills together." },
+      { name: "description", content: "Social learning platform where lessons can be forked, remixed, and improved by everyone." },
+      { property: "og:title", content: "Leatha — Fork knowledge. Build skills together." },
+      { property: "og:description", content: "Social learning platform where lessons can be forked, remixed, and improved by everyone." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Leatha — Fork knowledge. Build skills together." },
+      { name: "twitter:description", content: "Social learning platform where lessons can be forked, remixed, and improved by everyone." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a5855352-5b38-4d84-b53c-088324fbcd65/id-preview-036ad0bd--05a54205-22fe-43db-87f7-bfdff2030e2f.lovable.app-1778092426718.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a5855352-5b38-4d84-b53c-088324fbcd65/id-preview-036ad0bd--05a54205-22fe-43db-87f7-bfdff2030e2f.lovable.app-1778092426718.png" },
     ],
     links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "manifest", href: "/manifest.json" },
-      { rel: "apple-touch-icon", href: "/icons/icon-192x192.png" },
-    ],
+  { rel: "stylesheet", href: appCss },
+  { rel: "manifest", href: "/manifest.json" },
+  { rel: "icon", href: "/favicon.ico", sizes: "any" },
+  { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -82,17 +80,6 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker
-          .register("/sw.js")
-          .then((reg) => console.log("SW registered:", reg.scope))
-          .catch((err) => console.log("SW failed:", err));
-      });
-    }
-  }, []);
-
   return (
     <AuthProvider>
       <ThemeProvider>

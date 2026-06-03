@@ -5,6 +5,8 @@ import { useAuth } from "@/providers/auth-provider";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { LeathaCall } from "@/components/leatha-call";
+import { Phone, Video, BookOpen, Sword } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import {
   Send,
@@ -93,6 +95,12 @@ function ThreadPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [callState, setCallState] = useState<{
+    roomName: string;
+    type: "audio" | "video";
+    status: "idle" | "calling" | "in-call";
+    hostId: string;
+  } | null>(null);
 
   // Initial load
   useEffect(() => {
@@ -224,6 +232,7 @@ function ThreadPage() {
       name: file.name,
       size: file.size,
       type: file.type || "application/octet-stream",
+      
     };
   };
 
@@ -332,6 +341,136 @@ function ThreadPage() {
     }
   };
 
+  const startCall = async (type: "audio" | "video") => {
+    if (!user || !other) return;
+
+    const roomName = `dm-${[user.id, other.id].sort().join("-")}`;
+
+    await supabase.from("calls").upsert({
+      room_name: roomName,
+      room_type: "tutoring",
+      title: `Call with ${other.username}`,
+      host_id: user.id,
+      status: "calling",
+    });
+
+    await supabase.from("notifications").insert({
+      user_id: other.id,
+      type: "incoming_call",
+      title: `Incoming ${type} call`,
+      message: `${user.email} is calling you`,
+      link: `/messages/${other.username}?call=${roomName}`,
+      actor_id: user.id,
+    });
+
+    setCallState({ roomName, type, status: "calling", hostId: user.id });
+  };
+
+  const acceptCall = async () => {
+    if (!user || !other || !callState) return;
+
+    const { error } = await supabase
+      .from("calls")
+      .update({ status: "active" })
+      .eq("room_name", callState.roomName);
+
+    if (error) return toast.error(error.message);
+
+    setCallState({ ...callState, status: "in-call" });
+  };
+const declineCall = async () => {
+    if (!callState) return;
+    await supabase
+      .from("calls")
+      .update({ status: "ended", ended_at: new Date().toISOString() })
+      .eq("room_name", callState.roomName);
+    setCallState(null);
+  };
+
+  useEffect(() => {
+    if (!user || !other) return;
+    const roomName = `dm-${[user.id, other.id].sort().join("-")}`;
+    let cancelled = false;
+
+    void (async () => {
+      const { data, error } = await supabase
+        .from("calls")
+        .select("host_id, status")
+        .eq("room_name", roomName)
+        .maybeSingle();
+
+      if (cancelled || error || !data) return;
+
+      const callAge = Date.now() - new Date(data.created_at).getTime();
+      const isRecent = callAge < 60_000;
+
+      if (!isRecent) {
+        await supabase
+          .from("calls")
+          .update({ status: "ended" })
+          .eq("room_name", roomName);
+        return;
+      }
+
+      if (data.status === "calling") {
+        setCallState({ roomName, type: "audio", status: "calling", hostId: data.host_id });
+      } else if (data.status === "active") {
+        setCallState({ roomName, type: "audio", status: "in-call", hostId: data.host_id });
+      }
+    })();
+
+    const channel = supabase
+      .channel(`call-${roomName}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "calls",
+          filter: `room_name=eq.${roomName}`,
+        },
+        (payload) => {
+          const row = payload.new as { host_id: string; status: string };
+          if (row.status === "calling") {
+            setCallState((prev) =>
+              prev ?? { roomName, type: "audio", status: "calling", hostId: row.host_id },
+            );
+          } else if (row.status === "active") {
+            setCallState((prev) =>
+              prev ? { ...prev, status: "in-call" } : { roomName, type: "audio", status: "in-call", hostId: row.host_id },
+            );
+          }
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "calls",
+          filter: `room_name=eq.${roomName}`,
+        },
+        (payload) => {
+          const row = payload.new as { host_id: string; status: string };
+          if (row.status === "active") {
+            setCallState((prev) =>
+              prev ? { ...prev, status: "in-call" } : { roomName, type: "audio", status: "in-call", hostId: row.host_id },
+            );
+          } else if (row.status === "calling") {
+            setCallState((prev) =>
+              prev ?? { roomName, type: "audio", status: "calling", hostId: row.host_id },
+            );
+          }
+        },
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      void supabase.removeChannel(channel);
+    };
+  }, [user, other]);
+
   if (!user) return null;
   if (loading)
     return (
@@ -389,6 +528,7 @@ function ThreadPage() {
             </div>
           </div>
         </Link>
+        <CallTypeSelector onSelect={startCall} />
         <Button variant="ghost" size="sm" onClick={toggleBlock} className="gap-2">
           {blocked ? (
             <>
@@ -435,8 +575,48 @@ function ThreadPage() {
             })}
           </div>
         ))}
+        {callState?.status === "calling" && (
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm mb-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-semibold">
+                  {callState.hostId === user.id ? "Calling…" : "Incoming call…"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {callState.hostId === user.id
+                    ? `Waiting for ${other.username} to answer.`
+                    : `${other.username} is calling you.`}
+                </p>
+              </div>
+              {callState.hostId !== user.id ? (
+                <div className="flex gap-2">
+                  <Button onClick={acceptCall} size="sm">
+                    Accept
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={declineCall}>
+                    Decline
+                  </Button>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
+        {callState?.status === "in-call" && (
+          <LeathaCall
+            roomName={callState.roomName}
+            roomType="tutoring"
+            isHost={callState.hostId === user.id}
+            title={`Call with ${other.username}`}
+           onLeave={async () => {
+  await supabase
+    .from("calls")
+    .update({ status: "ended", ended_at: new Date().toISOString() })
+    .eq("room_name", callState!.roomName);
+  setCallState(null);
+}}
+          />
+        )}
       </div>
-
       {/* Composer */}
       <div className="border-t border-border bg-card px-2 py-2">
         {blocked ? (
@@ -752,6 +932,94 @@ function VoicePlayer({ url, mine }: { url: string; mine: boolean }) {
       </div>
       <Mic className="h-4 w-4 opacity-60" />
       <audio ref={audioRef} src={url} preload="metadata" className="hidden" />
+    </div>
+  );
+}
+
+function CallTypeSelector({ onSelect }: { onSelect: (type: "audio" | "video") => void }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <Phone className="h-4 w-4" />
+      </Button>
+
+      {open && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setOpen(false)}
+          />
+          {/* Dropdown */}
+          <div className="absolute right-0 top-10 z-50 w-56 rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+            <div className="px-3 py-2 border-b border-border">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                Start a call
+              </p>
+            </div>
+            <button
+              className="w-full flex items-center gap-3 px-3 py-3 hover:bg-muted transition-colors text-left"
+              onClick={() => { setOpen(false); onSelect("audio"); }}
+            >
+              <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
+                <Phone className="h-4 w-4 text-green-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Voice call</p>
+                <p className="text-xs text-muted-foreground">Audio only</p>
+              </div>
+            </button>
+            <button
+              className="w-full flex items-center gap-3 px-3 py-3 hover:bg-muted transition-colors text-left"
+              onClick={() => { setOpen(false); onSelect("video"); }}
+            >
+              <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+                <Video className="h-4 w-4 text-blue-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Video call</p>
+                <p className="text-xs text-muted-foreground">Camera + audio</p>
+              </div>
+            </button>
+            <div className="px-3 py-2 border-t border-border">
+              <p className="text-xs text-muted-foreground">Coming soon</p>
+            </div>
+            <button disabled className="w-full flex items-center gap-3 px-3 py-3 opacity-40 cursor-not-allowed text-left">
+              <div className="h-8 w-8 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
+                <BookOpen className="h-4 w-4 text-purple-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Tutoring session</p>
+                <p className="text-xs text-muted-foreground">Scheduled 1-on-1</p>
+              </div>
+            </button>
+            <button disabled className="w-full flex items-center gap-3 px-3 py-3 opacity-40 cursor-not-allowed text-left">
+              <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                <Sword className="h-4 w-4 text-amber-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Arena battle</p>
+                <p className="text-xs text-muted-foreground">Compete on challenges</p>
+              </div>
+            </button>
+            <button disabled className="w-full flex items-center gap-3 px-3 py-3 opacity-40 cursor-not-allowed text-left">
+              <div className="h-8 w-8 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
+                <Users className="h-4 w-4 text-teal-500" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Group session</p>
+                <p className="text-xs text-muted-foreground">Invite multiple people</p>
+              </div>
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
