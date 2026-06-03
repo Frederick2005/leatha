@@ -10,6 +10,7 @@ import {
   Trophy,
   Users,
   TrendingUp,
+  Lightbulb,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
@@ -95,11 +96,20 @@ function DashboardPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button asChild>
-            <Link to="/lessons/new">
-              <Plus className="h-4 w-4 mr-1.5" /> New lesson
-            </Link>
-          </Button>
+          {profile.account_type === "teacher" && (
+            <Button asChild>
+              <Link to="/lessons/new">
+                <Plus className="h-4 w-4 mr-1.5" /> New lesson
+              </Link>
+            </Button>
+          )}
+          {profile.account_type === "student" && (
+            <Button asChild>
+              <Link to="/suggestions/new">
+                <Lightbulb className="h-4 w-4 mr-1.5" /> Suggest
+              </Link>
+            </Button>
+          )}
           <Button asChild variant="outline">
             <Link to="/feed">
               <Sparkles className="h-4 w-4 mr-1.5" /> Feed
