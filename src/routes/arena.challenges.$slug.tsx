@@ -36,7 +36,8 @@ function SolverPage() {
   const [hints, setHints] = useState<Hint[]>([]);
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
   const [code, setCode] = useState("");
-  const [results, setResults] = useState<{ passed: boolean; got: string; expected: string; input: string }[] | null>(null);
+  const [results, setResults] = useState<{ passed: boolean; got: string; expected: string; input: string; error?: string; runtime_ms?: number }[] | null>(null);
+  const [fatal, setFatal] = useState<string | null>(null);
   const [running, setRunning] = useState(false);
   const [answers, setAnswers] = useState<Record<string, number[]>>({});
   const [comments, setComments] = useState<Comment[]>([]);
