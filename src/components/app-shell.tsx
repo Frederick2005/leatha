@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   GitFork, Home, BookOpen, MessageSquare, MessagesSquare, Trophy, Sparkles, Swords, Lightbulb,
   Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X, MessageSquareWarning,
+  GraduationCap, Backpack,
 } from "lucide-react";
 import { LeathaLogo } from "@/components/leatha-logo";
 import { useEffect, useState } from "react";
