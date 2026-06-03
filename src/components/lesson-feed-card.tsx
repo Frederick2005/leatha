@@ -18,6 +18,7 @@ export interface FeedLesson {
   created_at: string;
   parent_lesson_id: string | null;
   author: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null;
+  author: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null;
 }
 
 export function LessonFeedCard({ lesson }: { lesson: FeedLesson }) {
@@ -66,9 +67,6 @@ export function LessonFeedCard({ lesson }: { lesson: FeedLesson }) {
             <span className="inline-flex items-center gap-1"><Heart className="h-3.5 w-3.5" /> {lesson.like_count}</span>
             <span className="inline-flex items-center gap-1"><GitFork className="h-3.5 w-3.5" /> {lesson.fork_count}</span>
             <span className="inline-flex items-center gap-1"><MessageCircle className="h-3.5 w-3.5" /> {lesson.comment_count}</span>
-            {typeof lesson.view_count === "number" && (
-              <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" /> {lesson.view_count}</span>
-            )}
           </div>
         </div>
       </div>

@@ -8,7 +8,10 @@ import { useTheme } from "@/providers/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DIFFICULTY_META, TYPE_META } from "@/lib/arena";
+<<<<<<< HEAD
 import { runJsTests } from "@/lib/arena-runner";
+=======
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/arena/challenges/$slug")({ component: SolverPage });
@@ -36,8 +39,12 @@ function SolverPage() {
   const [hints, setHints] = useState<Hint[]>([]);
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
   const [code, setCode] = useState("");
+<<<<<<< HEAD
   const [results, setResults] = useState<{ passed: boolean; got: string; expected: string; input: string; error?: string; runtime_ms?: number }[] | null>(null);
   const [fatal, setFatal] = useState<string | null>(null);
+=======
+  const [results, setResults] = useState<{ passed: boolean; got: string; expected: string; input: string }[] | null>(null);
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
   const [running, setRunning] = useState(false);
   const [answers, setAnswers] = useState<Record<string, number[]>>({});
   const [comments, setComments] = useState<Comment[]>([]);
@@ -82,6 +89,7 @@ function SolverPage() {
 
   async function runCode() {
     setRunning(true);
+<<<<<<< HEAD
     setFatal(null);
     const tests = ch!.test_cases ?? [];
     const lang = (ch!.language ?? "javascript").toLowerCase();
@@ -104,6 +112,21 @@ function SolverPage() {
     setResults(res);
     if (res.length > 0 && res.every((r) => r.passed)) await submitSolve(res.length, res.length);
     else if (res.length > 0) toast.error(`${res.filter((r) => r.passed).length}/${res.length} passed`);
+=======
+    // Mock execution — simulate test runner. Pass if user wrote anything non-trivial that includes "return".
+    await new Promise((r) => setTimeout(r, 600));
+    const tests = ch!.test_cases ?? [];
+    const looksReal = code.trim().length > (ch!.starter_code?.length ?? 0) + 10 && /return|print|console\.log/.test(code);
+    const res = tests.map((t) => ({
+      passed: looksReal,
+      input: t.input,
+      expected: t.expected,
+      got: looksReal ? t.expected : "—",
+    }));
+    setResults(res);
+    setRunning(false);
+    if (res.every((r) => r.passed) && res.length > 0) await submitSolve(res.length, res.length);
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
   }
 
   async function submitQuiz() {
@@ -254,12 +277,15 @@ function SolverPage() {
             </div>
           )}
 
+<<<<<<< HEAD
           {fatal && (
             <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-3 text-xs font-mono text-rose-300 whitespace-pre-wrap">
               {fatal}
             </div>
           )}
 
+=======
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
           {results && (
             <div className="rounded-xl border border-border bg-card p-4">
               <h3 className="font-semibold text-sm mb-2">Results</h3>
@@ -269,9 +295,13 @@ function SolverPage() {
                     {r.passed ? <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" /> : <XCircle className="h-4 w-4 text-rose-500 shrink-0" />}
                     <div className="flex-1 min-w-0">
                       <div className="font-mono truncate">{r.input}</div>
+<<<<<<< HEAD
                       {r.error && <div className="text-rose-400 mt-0.5 font-mono">⚠ {r.error}</div>}
                       {!r.passed && !r.error && <div className="text-muted-foreground mt-0.5">got <span className="font-mono">{r.got}</span> — expected <span className="font-mono">{r.expected}</span></div>}
                       {typeof r.runtime_ms === "number" && <div className="text-muted-foreground text-[10px] mt-0.5">{r.runtime_ms}ms</div>}
+=======
+                      {!r.passed && <div className="text-muted-foreground mt-0.5">got <span className="font-mono">{r.got}</span> — expected <span className="font-mono">{r.expected}</span></div>}
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
                     </div>
                   </li>
                 ))}

@@ -50,7 +50,10 @@ import { Route as ArenaBattlesRouteImport } from './routes/arena.battles'
 import { Route as LessonsLessonIdEditRouteImport } from './routes/lessons.$lessonId.edit'
 import { Route as LessonsLessonIdDiffRouteImport } from './routes/lessons.$lessonId.diff'
 import { Route as ArenaChallengesSlugRouteImport } from './routes/arena.challenges.$slug'
+<<<<<<< HEAD
 import { Route as ArenaBattlesIdRouteImport } from './routes/arena.battles.$id'
+=======
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -257,11 +260,14 @@ const ArenaChallengesSlugRoute = ArenaChallengesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ArenaChallengesRoute,
 } as any)
+<<<<<<< HEAD
 const ArenaBattlesIdRoute = ArenaBattlesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => ArenaBattlesRoute,
 } as any)
+=======
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -288,7 +294,11 @@ export interface FileRoutesByFullPath {
   '/suggestions': typeof SuggestionsRouteWithChildren
   '/teacher': typeof TeacherRoute
   '/terms': typeof TermsRoute
+<<<<<<< HEAD
   '/arena/battles': typeof ArenaBattlesRouteWithChildren
+=======
+  '/arena/battles': typeof ArenaBattlesRoute
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
   '/arena/daily': typeof ArenaDailyRoute
   '/arena/leaderboard': typeof ArenaLeaderboardRoute
@@ -302,7 +312,10 @@ export interface FileRoutesByFullPath {
   '/suggestions/new': typeof SuggestionsNewRoute
   '/u/$username': typeof UUsernameRoute
   '/arena/': typeof ArenaIndexRoute
+<<<<<<< HEAD
   '/arena/battles/$id': typeof ArenaBattlesIdRoute
+=======
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
   '/arena/challenges/$slug': typeof ArenaChallengesSlugRoute
   '/lessons/$lessonId/diff': typeof LessonsLessonIdDiffRoute
   '/lessons/$lessonId/edit': typeof LessonsLessonIdEditRoute
@@ -331,7 +344,11 @@ export interface FileRoutesByTo {
   '/suggestions': typeof SuggestionsRouteWithChildren
   '/teacher': typeof TeacherRoute
   '/terms': typeof TermsRoute
+<<<<<<< HEAD
   '/arena/battles': typeof ArenaBattlesRouteWithChildren
+=======
+  '/arena/battles': typeof ArenaBattlesRoute
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
   '/arena/daily': typeof ArenaDailyRoute
   '/arena/leaderboard': typeof ArenaLeaderboardRoute
@@ -345,7 +362,10 @@ export interface FileRoutesByTo {
   '/suggestions/new': typeof SuggestionsNewRoute
   '/u/$username': typeof UUsernameRoute
   '/arena': typeof ArenaIndexRoute
+<<<<<<< HEAD
   '/arena/battles/$id': typeof ArenaBattlesIdRoute
+=======
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
   '/arena/challenges/$slug': typeof ArenaChallengesSlugRoute
   '/lessons/$lessonId/diff': typeof LessonsLessonIdDiffRoute
   '/lessons/$lessonId/edit': typeof LessonsLessonIdEditRoute
@@ -376,7 +396,11 @@ export interface FileRoutesById {
   '/suggestions': typeof SuggestionsRouteWithChildren
   '/teacher': typeof TeacherRoute
   '/terms': typeof TermsRoute
+<<<<<<< HEAD
   '/arena/battles': typeof ArenaBattlesRouteWithChildren
+=======
+  '/arena/battles': typeof ArenaBattlesRoute
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
   '/arena/daily': typeof ArenaDailyRoute
   '/arena/leaderboard': typeof ArenaLeaderboardRoute
@@ -390,7 +414,10 @@ export interface FileRoutesById {
   '/suggestions/new': typeof SuggestionsNewRoute
   '/u/$username': typeof UUsernameRoute
   '/arena/': typeof ArenaIndexRoute
+<<<<<<< HEAD
   '/arena/battles/$id': typeof ArenaBattlesIdRoute
+=======
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
   '/arena/challenges/$slug': typeof ArenaChallengesSlugRoute
   '/lessons/$lessonId/diff': typeof LessonsLessonIdDiffRoute
   '/lessons/$lessonId/edit': typeof LessonsLessonIdEditRoute
@@ -436,7 +463,10 @@ export interface FileRouteTypes {
     | '/suggestions/new'
     | '/u/$username'
     | '/arena/'
+<<<<<<< HEAD
     | '/arena/battles/$id'
+=======
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
     | '/arena/challenges/$slug'
     | '/lessons/$lessonId/diff'
     | '/lessons/$lessonId/edit'
@@ -479,7 +509,10 @@ export interface FileRouteTypes {
     | '/suggestions/new'
     | '/u/$username'
     | '/arena'
+<<<<<<< HEAD
     | '/arena/battles/$id'
+=======
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
     | '/arena/challenges/$slug'
     | '/lessons/$lessonId/diff'
     | '/lessons/$lessonId/edit'
@@ -523,7 +556,10 @@ export interface FileRouteTypes {
     | '/suggestions/new'
     | '/u/$username'
     | '/arena/'
+<<<<<<< HEAD
     | '/arena/battles/$id'
+=======
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
     | '/arena/challenges/$slug'
     | '/lessons/$lessonId/diff'
     | '/lessons/$lessonId/edit'
@@ -848,6 +884,7 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArenaChallengesSlugRouteImport
       parentRoute: typeof ArenaChallengesRoute
     }
+<<<<<<< HEAD
     '/arena/battles/$id': {
       id: '/arena/battles/$id'
       path: '/$id'
@@ -870,6 +907,11 @@ const ArenaBattlesRouteWithChildren = ArenaBattlesRoute._addFileChildren(
   ArenaBattlesRouteChildren,
 )
 
+=======
+  }
+}
+
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
 interface ArenaChallengesRouteChildren {
   ArenaChallengesSlugRoute: typeof ArenaChallengesSlugRoute
 }
@@ -883,7 +925,11 @@ const ArenaChallengesRouteWithChildren = ArenaChallengesRoute._addFileChildren(
 )
 
 interface ArenaRouteChildren {
+<<<<<<< HEAD
   ArenaBattlesRoute: typeof ArenaBattlesRouteWithChildren
+=======
+  ArenaBattlesRoute: typeof ArenaBattlesRoute
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
   ArenaChallengesRoute: typeof ArenaChallengesRouteWithChildren
   ArenaDailyRoute: typeof ArenaDailyRoute
   ArenaLeaderboardRoute: typeof ArenaLeaderboardRoute
@@ -894,7 +940,11 @@ interface ArenaRouteChildren {
 }
 
 const ArenaRouteChildren: ArenaRouteChildren = {
+<<<<<<< HEAD
   ArenaBattlesRoute: ArenaBattlesRouteWithChildren,
+=======
+  ArenaBattlesRoute: ArenaBattlesRoute,
+>>>>>>> ca36805b4cf478d74a9a74891c2d9d1ae805ce9d
   ArenaChallengesRoute: ArenaChallengesRouteWithChildren,
   ArenaDailyRoute: ArenaDailyRoute,
   ArenaLeaderboardRoute: ArenaLeaderboardRoute,
