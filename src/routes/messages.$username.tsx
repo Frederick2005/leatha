@@ -503,7 +503,6 @@ const declineCall = async () => {
     <div className="flex-1 flex flex-col min-w-0 h-full bg-[hsl(var(--chat-bg,210_15%_15%))]">
       {/* WhatsApp-style header */}
       <header className="border-b border-border px-3 py-2.5 flex items-center gap-3 bg-card">
-       <CallTypeSelector onSelect={startCall} />
         <button
           onClick={() => navigate({ to: "/messages" })}
           className="md:hidden p-1 -ml-1 rounded hover:bg-accent"
@@ -529,6 +528,7 @@ const declineCall = async () => {
             </div>
           </div>
         </Link>
+        <CallTypeSelector onSelect={startCall} />
         <Button variant="ghost" size="sm" onClick={toggleBlock} className="gap-2">
           {blocked ? (
             <>

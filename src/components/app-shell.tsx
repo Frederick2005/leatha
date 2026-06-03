@@ -155,9 +155,18 @@ export function AppShell() {
 
         <div className="p-3 border-t border-sidebar-border space-y-2">
           {user ? (
-            <Button asChild className="w-full justify-start gap-2" variant="default">
-              <Link to="/lessons/new"><Plus className="h-4 w-4" /> New lesson</Link>
-            </Button>
+            <>
+              {profile?.account_type === "teacher" && (
+                <Button asChild className="w-full justify-start gap-2" variant="default">
+                  <Link to="/lessons/new"><Plus className="h-4 w-4" /> New lesson</Link>
+                </Button>
+              )}
+              {profile?.account_type === "student" && (
+                <Button asChild className="w-full justify-start gap-2" variant="default">
+                  <Link to="/suggestions/new"><Lightbulb className="h-4 w-4" /> Suggest</Link>
+                </Button>
+              )}
+            </>
           ) : (
             <Button asChild className="w-full justify-start gap-2" variant="default">
               <Link to="/auth"><LogIn className="h-4 w-4" /> Sign in</Link>
@@ -270,9 +279,16 @@ export function AppShell() {
                     <UserIcon className="h-4 w-4 mr-2" /> Profile
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/lessons/new"><Plus className="h-4 w-4 mr-2" /> New lesson</Link>
-                </DropdownMenuItem>
+                {profile?.account_type === "teacher" && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/lessons/new"><Plus className="h-4 w-4 mr-2" /> New lesson</Link>
+                  </DropdownMenuItem>
+                )}
+                {profile?.account_type === "student" && (
+                  <DropdownMenuItem asChild>
+                    <Link to="/suggestions/new"><Lightbulb className="h-4 w-4 mr-2" /> Suggest</Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <Link to="/feedback"><MessageSquareWarning className="h-4 w-4 mr-2" /> Send feedback</Link>
                 </DropdownMenuItem>
