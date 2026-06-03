@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { GitFork, Heart, MessageCircle, Sparkles, TrendingUp, Users } from "lucide-react";
+import { GitFork, Heart, MessageCircle, Sparkles, TrendingUp, Users, Lightbulb } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { UserAvatar } from "@/components/user-avatar";
@@ -105,9 +105,16 @@ function FeedPage() {
             {profile?.follower_count ?? 0} followers
           </p>
         </div>
-        <Button asChild>
-          <Link to="/lessons/new">New lesson</Link>
-        </Button>
+        {profile?.account_type === "teacher" && (
+          <Button asChild>
+            <Link to="/lessons/new">New lesson</Link>
+          </Button>
+        )}
+        {profile?.account_type === "student" && (
+          <Button asChild>
+            <Link to="/suggestions/new"><Lightbulb className="h-4 w-4 mr-2" /> Suggest</Link>
+          </Button>
+        )}
       </div>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
