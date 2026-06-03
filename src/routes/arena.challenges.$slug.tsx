@@ -8,6 +8,7 @@ import { useTheme } from "@/providers/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DIFFICULTY_META, TYPE_META } from "@/lib/arena";
+import { runJsTests } from "@/lib/arena-runner";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/arena/challenges/$slug")({ component: SolverPage });
