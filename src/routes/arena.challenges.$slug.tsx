@@ -269,7 +269,9 @@ function SolverPage() {
                     {r.passed ? <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" /> : <XCircle className="h-4 w-4 text-rose-500 shrink-0" />}
                     <div className="flex-1 min-w-0">
                       <div className="font-mono truncate">{r.input}</div>
-                      {!r.passed && <div className="text-muted-foreground mt-0.5">got <span className="font-mono">{r.got}</span> — expected <span className="font-mono">{r.expected}</span></div>}
+                      {r.error && <div className="text-rose-400 mt-0.5 font-mono">⚠ {r.error}</div>}
+                      {!r.passed && !r.error && <div className="text-muted-foreground mt-0.5">got <span className="font-mono">{r.got}</span> — expected <span className="font-mono">{r.expected}</span></div>}
+                      {typeof r.runtime_ms === "number" && <div className="text-muted-foreground text-[10px] mt-0.5">{r.runtime_ms}ms</div>}
                     </div>
                   </li>
                 ))}
