@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TeacherRouteImport } from './routes/teacher'
 import { Route as SuggestionsRouteImport } from './routes/suggestions'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SchoolsRouteImport } from './routes/schools'
@@ -50,6 +51,11 @@ import { Route as ArenaChallengesSlugRouteImport } from './routes/arena.challeng
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeacherRoute = TeacherRouteImport.update({
+  id: '/teacher',
+  path: '/teacher',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SuggestionsRoute = SuggestionsRouteImport.update({
@@ -253,6 +259,7 @@ export interface FileRoutesByFullPath {
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
   '/suggestions': typeof SuggestionsRouteWithChildren
+  '/teacher': typeof TeacherRoute
   '/terms': typeof TermsRoute
   '/arena/battles': typeof ArenaBattlesRoute
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
@@ -291,6 +298,7 @@ export interface FileRoutesByTo {
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
   '/suggestions': typeof SuggestionsRouteWithChildren
+  '/teacher': typeof TeacherRoute
   '/terms': typeof TermsRoute
   '/arena/battles': typeof ArenaBattlesRoute
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
@@ -331,6 +339,7 @@ export interface FileRoutesById {
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
   '/suggestions': typeof SuggestionsRouteWithChildren
+  '/teacher': typeof TeacherRoute
   '/terms': typeof TermsRoute
   '/arena/battles': typeof ArenaBattlesRoute
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
@@ -372,6 +381,7 @@ export interface FileRouteTypes {
     | '/schools'
     | '/settings'
     | '/suggestions'
+    | '/teacher'
     | '/terms'
     | '/arena/battles'
     | '/arena/challenges'
@@ -410,6 +420,7 @@ export interface FileRouteTypes {
     | '/schools'
     | '/settings'
     | '/suggestions'
+    | '/teacher'
     | '/terms'
     | '/arena/battles'
     | '/arena/challenges'
@@ -449,6 +460,7 @@ export interface FileRouteTypes {
     | '/schools'
     | '/settings'
     | '/suggestions'
+    | '/teacher'
     | '/terms'
     | '/arena/battles'
     | '/arena/challenges'
@@ -489,6 +501,7 @@ export interface RootRouteChildren {
   SchoolsRoute: typeof SchoolsRoute
   SettingsRoute: typeof SettingsRoute
   SuggestionsRoute: typeof SuggestionsRouteWithChildren
+  TeacherRoute: typeof TeacherRoute
   TermsRoute: typeof TermsRoute
   LessonsLessonIdRoute: typeof LessonsLessonIdRouteWithChildren
   LessonsNewRoute: typeof LessonsNewRoute
@@ -502,6 +515,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/teacher': {
+      id: '/teacher'
+      path: '/teacher'
+      fullPath: '/teacher'
+      preLoaderRoute: typeof TeacherRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/suggestions': {
@@ -855,6 +875,7 @@ const rootRouteChildren: RootRouteChildren = {
   SchoolsRoute: SchoolsRoute,
   SettingsRoute: SettingsRoute,
   SuggestionsRoute: SuggestionsRouteWithChildren,
+  TeacherRoute: TeacherRoute,
   TermsRoute: TermsRoute,
   LessonsLessonIdRoute: LessonsLessonIdRouteWithChildren,
   LessonsNewRoute: LessonsNewRoute,
@@ -863,12 +884,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
