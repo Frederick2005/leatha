@@ -2,6 +2,7 @@ import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import {
   GitFork, Home, BookOpen, MessageSquare, MessagesSquare, Trophy, Sparkles, Swords, Lightbulb,
   Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X, MessageSquareWarning,
+  GraduationCap, Backpack,
 } from "lucide-react";
 import { LeathaLogo } from "@/components/leatha-logo";
 import { useEffect, useState } from "react";
@@ -98,6 +99,18 @@ export function AppShell() {
               </Link>
             );
           })}
+          {profile?.account_type === "teacher" && (
+            <Link to="/teacher" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              location.pathname.startsWith("/teacher") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60")}>
+              <GraduationCap className="h-4 w-4" /> Teacher
+            </Link>
+          )}
+          {profile?.account_type === "student" && (
+            <Link to="/student" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+              location.pathname.startsWith("/student") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60")}>
+              <Backpack className="h-4 w-4" /> My learning
+            </Link>
+          )}
           {isModOrAdmin && (
             <Link
               to="/admin"
@@ -166,6 +179,16 @@ export function AppShell() {
                 </Link>
               );
             })}
+            {profile?.account_type === "teacher" && (
+              <Link to="/teacher" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent">
+                <GraduationCap className="h-4 w-4" /> Teacher
+              </Link>
+            )}
+            {profile?.account_type === "student" && (
+              <Link to="/student" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent">
+                <Backpack className="h-4 w-4" /> My learning
+              </Link>
+            )}
             {isModOrAdmin && (
               <Link to="/admin" onClick={() => setMobileOpen(false)} className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent">
                 <Shield className="h-4 w-4" /> Moderation
