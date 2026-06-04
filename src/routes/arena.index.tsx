@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Flame, Swords, Trophy, Sparkles, Zap, Shield, Target } from "lucide-react";
+import { Flame, Swords, Trophy, Sparkles, Zap, Shield, Target, Star, Building2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { ChallengeCard, type ChallengeCardData } from "@/components/arena/challenge-card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { rankFor } from "@/lib/arena";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/arena/")({ component: ArenaHome });
 
@@ -106,6 +107,27 @@ function ArenaHome() {
         <QuickCard to="/arena/profile" icon={<Zap className="h-5 w-5 text-purple-500" />} title="Coins" desc={`${profile?.coins ?? 0} owned`} />
       </div>
 
+      {/* Competitions */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-display text-xl font-semibold">Competitions</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <CompetitionCard color="amber" icon={<Flame className="h-5 w-5" />} title="Daily Challenge"
+            description="One challenge per day. Double points if you solve it." badge="Active today" to="/arena/daily" cta="Solve Now" />
+          <CompetitionCard color="yellow" icon={<Zap className="h-5 w-5" />} title="Speed Run"
+            description="Solve challenges as fast as possible. Bonus points for speed." badge="Always available" to="/arena/challenges" cta="Start Speed Run" />
+          <CompetitionCard color="red" icon={<Swords className="h-5 w-5" />} title="1v1 Battle"
+            description="Challenge a friend. Same challenge, first to solve wins." badge="Coming Soon" disabled />
+          <CompetitionCard color="purple" icon={<Trophy className="h-5 w-5" />} title="Weekly Sprint"
+            description="7 themed challenges in 7 days. Complete all for a big bonus." badge={`${7 - new Date().getDay()} days left`} to="/arena/challenges" cta="Join Sprint" />
+          <CompetitionCard color="sky" icon={<Star className="h-5 w-5" />} title="Subject Master"
+            description="Complete all challenges in one subject to earn the Subject Master badge." to="/arena/challenges" cta="Choose Subject" />
+          <CompetitionCard color="emerald" icon={<Building2 className="h-5 w-5" />} title="School League"
+            description="Compete against other schools. Top school each week wins a trophy." to="/arena/leaderboard" cta="View League" />
+        </div>
+      </section>
+
       {/* Trending */}
       <section>
         <div className="flex items-center justify-between mb-3">
@@ -169,6 +191,38 @@ function EmptyState({ text, cta }: { text: string; cta?: { to: string; label: st
     <div className="rounded-xl border border-dashed border-border bg-card/50 p-10 text-center">
       <p className="text-sm text-muted-foreground">{text}</p>
       {cta && <Button asChild className="mt-3"><Link to={cta.to}>{cta.label}</Link></Button>}
+    </div>
+  );
+}
+
+const COMP_COLORS: Record<string, string> = {
+  amber: "bg-amber-500/15 text-amber-500",
+  yellow: "bg-yellow-500/15 text-yellow-500",
+  red: "bg-red-500/15 text-red-500",
+  purple: "bg-purple-500/15 text-purple-500",
+  sky: "bg-sky-500/15 text-sky-500",
+  emerald: "bg-emerald-500/15 text-emerald-500",
+};
+
+function CompetitionCard({ color, icon, title, description, badge, to, cta, disabled }: {
+  color: string; icon: React.ReactNode; title: string; description: string; badge?: string;
+  to?: string; cta?: string; disabled?: boolean;
+}) {
+  return (
+    <div className={cn("rounded-xl border border-border bg-card p-4 flex flex-col gap-3", disabled && "opacity-60")}>
+      <div className="flex items-start justify-between gap-2">
+        <div className={cn("h-10 w-10 grid place-items-center rounded-lg", COMP_COLORS[color])}>{icon}</div>
+        {badge && <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-full bg-muted text-muted-foreground">{badge}</span>}
+      </div>
+      <div>
+        <div className="font-display font-semibold">{title}</div>
+        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{description}</p>
+      </div>
+      {disabled ? (
+        <Button size="sm" variant="outline" disabled className="w-full">Coming Soon</Button>
+      ) : (
+        <Button asChild size="sm" className="w-full"><Link to={to!}>{cta} →</Link></Button>
+      )}
     </div>
   );
 }
