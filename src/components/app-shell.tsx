@@ -44,11 +44,16 @@ export function AppShell() {
     setSearchQuery(params.get("q") ?? "");
   }, [location.search]);
 
-  // Redirect new users to onboarding (skip on auth/onboarding/legal pages)
+  // Redirect new/incomplete users to onboarding
   useEffect(() => {
     if (loading || !user || !profile) return;
-    const p = profile as unknown as { has_completed_onboarding?: boolean };
-    if (p.has_completed_onboarding) return;
+    const p = profile as unknown as { has_completed_onboarding?: boolean; account_type?: string; school?: string | null; username?: string };
+    const needsOnboarding =
+      !p.has_completed_onboarding ||
+      !p.username ||
+      !p.account_type ||
+      !p.school;
+    if (!needsOnboarding) return;
     const skip = ["/onboarding", "/auth", "/reset-password", "/terms", "/privacy", "/cookies", "/legal"];
     if (skip.some((s) => location.pathname.startsWith(s))) return;
     navigate({ to: "/onboarding", replace: true });
