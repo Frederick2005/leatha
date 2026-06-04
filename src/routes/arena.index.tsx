@@ -194,3 +194,35 @@ function EmptyState({ text, cta }: { text: string; cta?: { to: string; label: st
     </div>
   );
 }
+
+const COMP_COLORS: Record<string, string> = {
+  amber: "bg-amber-500/15 text-amber-500",
+  yellow: "bg-yellow-500/15 text-yellow-500",
+  red: "bg-red-500/15 text-red-500",
+  purple: "bg-purple-500/15 text-purple-500",
+  sky: "bg-sky-500/15 text-sky-500",
+  emerald: "bg-emerald-500/15 text-emerald-500",
+};
+
+function CompetitionCard({ color, icon, title, description, badge, to, cta, disabled }: {
+  color: string; icon: React.ReactNode; title: string; description: string; badge?: string;
+  to?: string; cta?: string; disabled?: boolean;
+}) {
+  return (
+    <div className={cn("rounded-xl border border-border bg-card p-4 flex flex-col gap-3", disabled && "opacity-60")}>
+      <div className="flex items-start justify-between gap-2">
+        <div className={cn("h-10 w-10 grid place-items-center rounded-lg", COMP_COLORS[color])}>{icon}</div>
+        {badge && <span className="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-full bg-muted text-muted-foreground">{badge}</span>}
+      </div>
+      <div>
+        <div className="font-display font-semibold">{title}</div>
+        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{description}</p>
+      </div>
+      {disabled ? (
+        <Button size="sm" variant="outline" disabled className="w-full">Coming Soon</Button>
+      ) : (
+        <Button asChild size="sm" className="w-full"><Link to={to!}>{cta} →</Link></Button>
+      )}
+    </div>
+  );
+}
