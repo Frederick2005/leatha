@@ -1,138 +1,107 @@
-import {
-  LiveKitRoom,
-  VideoConference,
-  RoomAudioRenderer,
-  ControlBar,
-  GridLayout,
-  ParticipantTile,
-  useTracks,
-  useParticipants,
-  useLocalParticipant,
-  RoomName,
-} from "@livekit/components-react";
+import { LiveKitRoom, VideoConference, RoomAudioRenderer } from "@livekit/components-react";
 import "@livekit/components-styles";
-import { Track } from "livekit-client";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/providers/auth-provider";
-import { UserAvatar } from "@/components/user-avatar";
+import { getLivekitToken } from "@/lib/livekit.functions";
 import { Button } from "@/components/ui/button";
-import {
-  PhoneOff,
-  Mic,
-  MicOff,
-  Video,
-  VideoOff,
-  Users,
-  Hand,
-  MonitorUp,
-} from "lucide-react";
+import { PhoneOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import type { RoomType } from "@/lib/livekit";
+
+export type RoomType = "tutoring" | "classroom" | "battle" | "assembly" | "group" | "audio" | "video";
 
 interface LeathaCallProps {
   roomName: string;
   roomType: RoomType;
-  isHost?: boolean;
+  isHost: boolean;
+  title: string;
   onLeave: () => void;
-  title?: string;
 }
 
-export function LeathaCall({
-  roomName,
-  roomType,
-  isHost = false,
-  onLeave,
-  title,
-}: LeathaCallProps) {
+export function LeathaCall({ roomName, roomType, isHost, title, onLeave }: LeathaCallProps) {
   const { profile } = useAuth();
+  const fetchToken = useServerFn(getLivekitToken);
   const [token, setToken] = useState<string | null>(null);
-  const [liveKitUrl, setLiveKitUrl] = useState<string | null>(null);
+  const [serverUrl, setServerUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const getToken = async () => {
+    if (!profile) return;
+    let cancelled = false;
+    (async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("get-livekit-token", {
-          body: {
+        setLoading(true);
+        setError(null);
+        const data = await fetchToken({
+          data: {
             roomName,
             roomType,
             isHost,
-            username: profile?.username,
-            displayName: profile?.display_name ?? profile?.username,
+            username: profile.username,
+            displayName: profile.display_name ?? profile.username,
           },
         });
-
-        if (error) throw error;
+        if (cancelled) return;
         setToken(data.token);
-        setLiveKitUrl(data.url);
+        setServerUrl(data.url);
       } catch (err) {
-        setError("Failed to join call. Please try again.");
-        toast.error("Failed to join call");
+        if (cancelled) return;
+        const msg = err instanceof Error ? err.message : "Failed to join call";
+        setError(msg);
+        toast.error(msg);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    };
-
-    if (profile) getToken();
-  }, [roomName, profile]);
+    })();
+    return () => { cancelled = true; };
+  }, [roomName, roomType, isHost, profile, fetchToken]);
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto" />
-          <p className="text-sm text-muted-foreground mt-3">Joining call...</p>
+      <div className="fixed inset-0 z-50 grid place-items-center bg-background/95 backdrop-blur">
+        <div className="text-center space-y-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Connecting to call…</p>
         </div>
       </div>
     );
   }
 
-  if (error || !token || !liveKitUrl) {
+  if (error || !token || !serverUrl) {
     return (
-      <div className="fixed inset-0 z-50 bg-background flex items-center justify-center">
-        <div className="text-center max-w-sm">
-          <p className="text-destructive">{error}</p>
-          <Button className="mt-4" onClick={onLeave}>Go back</Button>
+      <div className="fixed inset-0 z-50 grid place-items-center bg-background/95 p-6">
+        <div className="text-center space-y-4 max-w-md">
+          <p className="text-destructive font-medium">{error ?? "Could not connect to call"}</p>
+          <p className="text-xs text-muted-foreground">Ensure LiveKit credentials are configured in project secrets.</p>
+          <Button onClick={onLeave} variant="outline">Go back</Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-background flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
-        <div>
-          <p className="font-semibold text-sm">{title ?? roomName}</p>
-          <p className="text-xs text-muted-foreground capitalize">{roomType} session</p>
+    <div className="fixed inset-0 z-50 flex flex-col bg-background">
+      <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
+        <div className="min-w-0">
+          <h2 className="font-display font-semibold truncate">{title}</h2>
+          <p className="text-xs text-muted-foreground capitalize">{roomType} · {isHost ? "Host" : "Participant"}</p>
         </div>
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={onLeave}
-          className="gap-2"
-        >
-          <PhoneOff className="h-4 w-4" />
-          Leave
+        <Button variant="destructive" size="sm" onClick={onLeave} className="gap-2">
+          <PhoneOff className="h-4 w-4" /> End call
         </Button>
-      </div>
-
-      {/* LiveKit Room */}
-      <div className="flex-1 overflow-hidden">
+      </header>
+      <div className="flex-1 min-h-0">
         <LiveKitRoom
-          video={roomType === "tutoring" || roomType === "group" || isHost}
-          audio={true}
           token={token}
-          serverUrl={liveKitUrl}
+          serverUrl={serverUrl}
+          connect
+          audio
+          video={roomType === "video" || roomType === "tutoring" || roomType === "group" || (roomType === "classroom" && isHost) || (roomType === "assembly" && isHost)}
           onDisconnected={onLeave}
-          onError={(err) => {
-            toast.error("Call error: " + err.message);
-            onLeave();
-          }}
-          style={{ height: "100%", background: "var(--background)" }}
+          onError={(err: Error) => { toast.error("Call error: " + err.message); }}
           data-lk-theme="default"
+          style={{ height: "100%", background: "hsl(var(--background))" }}
         >
           <VideoConference />
           <RoomAudioRenderer />
