@@ -99,7 +99,7 @@ export function LeathaCall({ roomName, roomType, isHost, title, onLeave }: Leath
           audio
           video={roomType === "video" || roomType === "tutoring" || roomType === "group" || (roomType === "classroom" && isHost) || (roomType === "assembly" && isHost)}
           onDisconnected={onLeave}
-          onError={(err) => { toast.error("Call error: " + err.message); }}
+          onError={(err: Error) => { toast.error("Call error: " + err.message); }}
           data-lk-theme="default"
           style={{ height: "100%", background: "hsl(var(--background))" }}
         >
