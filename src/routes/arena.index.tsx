@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Flame, Swords, Trophy, Sparkles, Zap, Shield, Target } from "lucide-react";
+import { Flame, Swords, Trophy, Sparkles, Zap, Shield, Target, Star, Building2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { ChallengeCard, type ChallengeCardData } from "@/components/arena/challenge-card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { rankFor } from "@/lib/arena";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/arena/")({ component: ArenaHome });
 
@@ -105,6 +106,27 @@ function ArenaHome() {
         <QuickCard to="/arena/leaderboard" icon={<Trophy className="h-5 w-5 text-warning" />} title="Leaders" desc="Weekly" />
         <QuickCard to="/arena/profile" icon={<Zap className="h-5 w-5 text-purple-500" />} title="Coins" desc={`${profile?.coins ?? 0} owned`} />
       </div>
+
+      {/* Competitions */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-display text-xl font-semibold">Competitions</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <CompetitionCard color="amber" icon={<Flame className="h-5 w-5" />} title="Daily Challenge"
+            description="One challenge per day. Double points if you solve it." badge="Active today" to="/arena/daily" cta="Solve Now" />
+          <CompetitionCard color="yellow" icon={<Zap className="h-5 w-5" />} title="Speed Run"
+            description="Solve challenges as fast as possible. Bonus points for speed." badge="Always available" to="/arena/challenges" cta="Start Speed Run" />
+          <CompetitionCard color="red" icon={<Swords className="h-5 w-5" />} title="1v1 Battle"
+            description="Challenge a friend. Same challenge, first to solve wins." badge="Coming Soon" disabled />
+          <CompetitionCard color="purple" icon={<Trophy className="h-5 w-5" />} title="Weekly Sprint"
+            description="7 themed challenges in 7 days. Complete all for a big bonus." badge={`${7 - new Date().getDay()} days left`} to="/arena/challenges" cta="Join Sprint" />
+          <CompetitionCard color="sky" icon={<Star className="h-5 w-5" />} title="Subject Master"
+            description="Complete all challenges in one subject to earn the Subject Master badge." to="/arena/challenges" cta="Choose Subject" />
+          <CompetitionCard color="emerald" icon={<Building2 className="h-5 w-5" />} title="School League"
+            description="Compete against other schools. Top school each week wins a trophy." to="/arena/leaderboard" cta="View League" />
+        </div>
+      </section>
 
       {/* Trending */}
       <section>
