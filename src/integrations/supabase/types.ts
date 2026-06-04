@@ -831,6 +831,83 @@ export type Database = {
           },
         ]
       }
+      call_participants: {
+        Row: {
+          call_id: string
+          id: string
+          joined_at: string
+          left_at: string | null
+          user_id: string
+        }
+        Insert: {
+          call_id: string
+          id?: string
+          joined_at?: string
+          left_at?: string | null
+          user_id: string
+        }
+        Update: {
+          call_id?: string
+          id?: string
+          joined_at?: string
+          left_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_participants_call_id_fkey"
+            columns: ["call_id"]
+            isOneToOne: false
+            referencedRelation: "calls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calls: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          ended_at: string | null
+          host_id: string
+          id: string
+          max_participants: number | null
+          room_name: string
+          room_type: string
+          scheduled_for: string | null
+          started_at: string | null
+          status: string
+          title: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          host_id: string
+          id?: string
+          max_participants?: number | null
+          room_name: string
+          room_type: string
+          scheduled_for?: string | null
+          started_at?: string | null
+          status?: string
+          title?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          ended_at?: string | null
+          host_id?: string
+          id?: string
+          max_participants?: number | null
+          room_name?: string
+          room_type?: string
+          scheduled_for?: string | null
+          started_at?: string | null
+          status?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           author_id: string
@@ -1026,6 +1103,30 @@ export type Database = {
           read_at?: string | null
           recipient_id?: string
           sender_id?: string
+        }
+        Relationships: []
+      }
+      endorsements: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          student_id: string
+          teacher_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          student_id: string
+          teacher_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          student_id?: string
+          teacher_id?: string
         }
         Relationships: []
       }
@@ -1383,85 +1484,121 @@ export type Database = {
           account_type: string
           avatar_url: string | null
           bio: string | null
+          career_goal: string | null
+          certifications: string[]
+          cover_url: string | null
           created_at: string
           dark_mode: boolean
           display_name: string | null
+          experience: string | null
           follower_count: number
           following_count: number
           fork_received_count: number
+          grade: string | null
           has_completed_onboarding: boolean
           id: string
           interests: string[]
+          intro_video_url: string | null
           is_verified: boolean
           last_active_at: string
           learning_style: string | null
           lesson_count: number
+          level: number
+          location: string | null
           points: number
           preferred_subjects: string[]
           school: string | null
           skill_level: string | null
+          streak_days: number
           study_goal: string | null
+          subjects: string[]
+          teaching_philosophy: string | null
           theme: string
           updated_at: string
           username: string
           weekly_challenge_target: number
           weekly_lesson_target: number
+          xp: number
         }
         Insert: {
           account_type?: string
           avatar_url?: string | null
           bio?: string | null
+          career_goal?: string | null
+          certifications?: string[]
+          cover_url?: string | null
           created_at?: string
           dark_mode?: boolean
           display_name?: string | null
+          experience?: string | null
           follower_count?: number
           following_count?: number
           fork_received_count?: number
+          grade?: string | null
           has_completed_onboarding?: boolean
           id: string
           interests?: string[]
+          intro_video_url?: string | null
           is_verified?: boolean
           last_active_at?: string
           learning_style?: string | null
           lesson_count?: number
+          level?: number
+          location?: string | null
           points?: number
           preferred_subjects?: string[]
           school?: string | null
           skill_level?: string | null
+          streak_days?: number
           study_goal?: string | null
+          subjects?: string[]
+          teaching_philosophy?: string | null
           theme?: string
           updated_at?: string
           username: string
           weekly_challenge_target?: number
           weekly_lesson_target?: number
+          xp?: number
         }
         Update: {
           account_type?: string
           avatar_url?: string | null
           bio?: string | null
+          career_goal?: string | null
+          certifications?: string[]
+          cover_url?: string | null
           created_at?: string
           dark_mode?: boolean
           display_name?: string | null
+          experience?: string | null
           follower_count?: number
           following_count?: number
           fork_received_count?: number
+          grade?: string | null
           has_completed_onboarding?: boolean
           id?: string
           interests?: string[]
+          intro_video_url?: string | null
           is_verified?: boolean
           last_active_at?: string
           learning_style?: string | null
           lesson_count?: number
+          level?: number
+          location?: string | null
           points?: number
           preferred_subjects?: string[]
           school?: string | null
           skill_level?: string | null
+          streak_days?: number
           study_goal?: string | null
+          subjects?: string[]
+          teaching_philosophy?: string | null
           theme?: string
           updated_at?: string
           username?: string
           weekly_challenge_target?: number
           weekly_lesson_target?: number
+          xp?: number
         }
         Relationships: []
       }
@@ -1644,6 +1781,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      teacher_verifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
