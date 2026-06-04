@@ -72,18 +72,18 @@ function ProfilePage() {
         .select("id, body, teacher_id, created_at, teacher:profiles!endorsements_teacher_id_fkey(username, display_name, avatar_url)")
         .eq("student_id", p.id).order("created_at", { ascending: false }).limit(10),
       (p as ProfileFull).account_type === "teacher"
-        ? supabase.from("arena_challenges").select("id, title, difficulty, slug, solve_count").eq("created_by", p.id).eq("status", "published").limit(20)
+        ? supabase.from("arena_challenges").select("id, title, difficulty, slug, solve_count").eq("creator_id", p.id).eq("status", "published").limit(20)
         : Promise.resolve({ data: [] as Array<{ id: string; title: string; difficulty: string; slug: string; solve_count: number }> }),
     ]);
 
     setLessons((ls as unknown as FeedLesson[]) ?? []);
     setFollowing(!!(follow as { data: unknown }).data);
 
-    const rows = (attempts.data ?? []) as Array<{ status: string; arena_challenges: { subject: string } | null }>;
+    const rows = (attempts.data ?? []) as unknown as Array<{ status: string; arena_challenges: { tags: string[] | null } | null }>;
     const subjects: Record<string, { ok: number; total: number }> = {};
     let solves = 0;
     for (const r of rows) {
-      const subj = r.arena_challenges?.subject ?? "Other";
+      const subj = r.arena_challenges?.tags?.[0] ?? "Other";
       subjects[subj] ??= { ok: 0, total: 0 };
       subjects[subj].total++;
       if (r.status === "passed") { subjects[subj].ok++; solves++; }
