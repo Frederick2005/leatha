@@ -1,14 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { GraduationCap, Plus, Save, Sparkles, Trash2 } from "lucide-react";
+import { GraduationCap, Plus, Save, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { slugify } from "@/lib/arena";
-import { generateArenaChallenge } from "@/lib/arena-generate.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/arena/studio")({ component: StudioPage });
@@ -30,35 +28,6 @@ function StudioPage() {
   const [testCases, setTestCases] = useState<{ input: string; expected: string }[]>([{ input: "1", expected: "1" }]);
   const [questions, setQuestions] = useState<Q[]>([{ prompt: "", options: ["", "", "", ""], correct: [0] }]);
   const [saving, setSaving] = useState(false);
-  const [aiTopic, setAiTopic] = useState("");
-  const [generating, setGenerating] = useState(false);
-  const generate = useServerFn(generateArenaChallenge);
-
-  async function aiGenerate() {
-    if (!aiTopic.trim()) return toast.error("Enter a topic for the AI to write about.");
-    setGenerating(true);
-    try {
-      const out = await generate({ data: { topic: aiTopic.trim(), type, difficulty, language: type === "code" ? language : undefined } });
-      setTitle(out.title ?? "");
-      setDescription(out.description ?? "");
-      setTags((out.tags ?? []).join(", "));
-      if (type === "code") {
-        if (out.starter_code) setStarter(out.starter_code);
-        if (out.test_cases && out.test_cases.length) setTestCases(out.test_cases);
-      } else if (out.questions && out.questions.length) {
-        setQuestions(out.questions.map((q) => ({
-          prompt: q.prompt ?? "",
-          options: (q.options ?? ["","","",""]).slice(0, 4),
-          correct: q.correct ?? [0],
-        })));
-      }
-      toast.success("Draft generated — review and publish.");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Generation failed");
-    } finally {
-      setGenerating(false);
-    }
-  }
 
   async function save(publish: boolean) {
     if (!user || !title.trim()) return toast.error("Title required");
