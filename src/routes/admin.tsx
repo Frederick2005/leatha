@@ -61,7 +61,7 @@ function AdminGate() {
   );
 }
 
-type Section = "dashboard" | "users" | "lessons" | "reports" | "feedback" | "rewards" | "announcements" | "schools" | "analytics" | "logs";
+type Section = "dashboard" | "users" | "lessons" | "reports" | "feedback" | "rewards" | "announcements" | "schools" | "analytics" | "logs" | "verifications";
 
 function AdminApp({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin: boolean }) {
   const [section, setSection] = useState<Section>("dashboard");
@@ -86,6 +86,7 @@ function AdminApp({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin: b
             { key: "users", icon: <UserOutlined />, label: "Users" },
             { key: "lessons", icon: <BookOutlined />, label: "Lessons" },
             { key: "schools", icon: <BankOutlined />, label: "Schools" },
+            { key: "verifications", icon: <CheckCircleOutlined />, label: "Verifications" },
             { key: "reports", icon: <FlagOutlined />, label: "Reports" },
             { key: "feedback", icon: <MessageOutlined />, label: "Feedback" },
             { key: "rewards", icon: <TrophyOutlined />, label: "Rewards" },
@@ -101,6 +102,7 @@ function AdminApp({ isAdmin, isSuperAdmin }: { isAdmin: boolean; isSuperAdmin: b
           {section === "users" && <UsersPanel isAdmin={isAdmin} isSuperAdmin={isSuperAdmin} />}
           {section === "lessons" && <LessonsPanel />}
           {section === "schools" && <SchoolsPanel isAdmin={isAdmin} />}
+          {section === "verifications" && <VerificationsPanel />}
           {section === "reports" && <ReportsPanel />}
           {section === "feedback" && <FeedbackPanel />}
           {section === "rewards" && <RewardsPanel isAdmin={isAdmin} />}
@@ -757,6 +759,117 @@ function SchoolsPanel({ isAdmin }: { isAdmin: boolean }) {
           <Button type="primary" htmlType="submit">Create</Button>
         </Form>
       </Modal>
+    </div>
+  );
+}
+
+// ─────────────── Verifications ───────────────
+interface VerificationRow {
+  id: string;
+  user_id: string;
+  status: string;
+  submitted_at: string;
+  evidence_url: string | null;
+  notes: string | null;
+  profile: { username: string; display_name: string | null; avatar_url: string | null } | null;
+}
+
+function VerificationsPanel() {
+  const [rows, setRows] = useState<VerificationRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState<"pending" | "approved" | "rejected">("pending");
+
+  const load = async () => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("teacher_verifications")
+      .select("id, user_id, status, submitted_at, evidence_url, notes")
+      .eq("status", filter)
+      .order("submitted_at", { ascending: false })
+      .limit(200);
+    const ids = (data ?? []).map((r) => r.user_id);
+    const { data: profs } = ids.length
+      ? await supabase.from("profiles").select("id, username, display_name, avatar_url").in("id", ids)
+      : { data: [] as { id: string; username: string; display_name: string | null; avatar_url: string | null }[] };
+    const byId = new Map((profs ?? []).map((p) => [p.id, p]));
+    setRows((data ?? []).map((r) => ({ ...r, profile: byId.get(r.user_id) ?? null })));
+    setLoading(false);
+  };
+  useEffect(() => { void load(); }, [filter]);
+
+  const decide = async (row: VerificationRow, approve: boolean) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { error } = await supabase
+      .from("teacher_verifications")
+      .update({ status: approve ? "approved" : "rejected", reviewed_at: new Date().toISOString(), reviewer_id: user.id })
+      .eq("id", row.id);
+    if (error) return message.error(error.message);
+    if (approve) {
+      await supabase.from("profiles").update({ is_verified: true }).eq("id", row.user_id);
+    }
+    await logAdminAction(approve ? "verify_teacher" : "reject_verification", "profile", row.user_id);
+    message.success(approve ? "Teacher verified" : "Verification rejected");
+    void load();
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <Title level={3} style={{ margin: 0 }}>Teacher Verifications</Title>
+        <Select value={filter} onChange={(v) => setFilter(v)} style={{ width: 160 }}
+          options={[
+            { value: "pending", label: "Pending" },
+            { value: "approved", label: "Approved" },
+            { value: "rejected", label: "Rejected" },
+          ]}
+        />
+      </div>
+      <Table
+        rowKey="id"
+        loading={loading}
+        dataSource={rows}
+        pagination={{ pageSize: 20 }}
+        columns={[
+          {
+            title: "Teacher",
+            render: (_: unknown, r: VerificationRow) => (
+              <Space>
+                <Avatar src={r.profile?.avatar_url ?? undefined} icon={<UserOutlined />} />
+                <div>
+                  <div>{r.profile?.display_name ?? r.profile?.username ?? "—"}</div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>@{r.profile?.username ?? "unknown"}</Text>
+                </div>
+              </Space>
+            ),
+          },
+          { title: "Submitted", dataIndex: "submitted_at", render: (v: string) => new Date(v).toLocaleDateString() },
+          {
+            title: "Evidence",
+            dataIndex: "evidence_url",
+            render: (v: string | null) => v ? <a href={v} target="_blank" rel="noreferrer">Open</a> : <Text type="secondary">—</Text>,
+          },
+          { title: "Notes", dataIndex: "notes", render: (v: string | null) => v ?? <Text type="secondary">—</Text> },
+          {
+            title: "Status",
+            dataIndex: "status",
+            render: (v: string) => <Tag color={v === "approved" ? "green" : v === "rejected" ? "red" : "gold"}>{v}</Tag>,
+          },
+          {
+            title: "Actions",
+            render: (_: unknown, r: VerificationRow) => r.status === "pending" ? (
+              <Space>
+                <Popconfirm title="Approve this teacher?" onConfirm={() => decide(r, true)}>
+                  <Button type="primary" size="small">Approve</Button>
+                </Popconfirm>
+                <Popconfirm title="Reject this request?" onConfirm={() => decide(r, false)}>
+                  <Button danger size="small">Reject</Button>
+                </Popconfirm>
+              </Space>
+            ) : <Text type="secondary">—</Text>,
+          },
+        ]}
+      />
     </div>
   );
 }
