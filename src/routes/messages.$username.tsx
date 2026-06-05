@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { format, isToday, isYesterday } from "date-fns";
 import {
-  Send, ArrowLeft, Ban, ShieldOff, Paperclip, X, Loader2, Mic, Check, CheckCheck, Play, Pause, Smile,
+  Send, ArrowLeft, Ban, ShieldOff, Paperclip, X, Loader2, Mic, Check, CheckCheck, Play, Pause, Smile, Phone, Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type AttachmentMeta } from "@/components/dm-attachment";
 import { RequireAuth } from "@/components/require-auth";
 import { trackEvent } from "@/lib/analytics";
+import { LeathaCall } from "@/components/leatha-call";
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
 const MAX_FILES = 6;
@@ -52,6 +53,7 @@ function ThreadPage() {
   const [blocked, setBlocked] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
+  const [callMode, setCallMode] = useState<null | "audio" | "video">(null);
   const [recording, setRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -278,10 +280,26 @@ function ThreadPage() {
             <div className="text-[11px] text-muted-foreground font-mono truncate">@{other.username}</div>
           </div>
         </Link>
+        <Button variant="ghost" size="icon" onClick={() => setCallMode("audio")} aria-label="Voice call">
+          <Phone className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={() => setCallMode("video")} aria-label="Video call">
+          <Video className="h-4 w-4" />
+        </Button>
         <Button variant="ghost" size="sm" onClick={toggleBlock} className="gap-2">
           {blocked ? <><ShieldOff className="h-4 w-4" /> Unblock</> : <><Ban className="h-4 w-4" /></>}
         </Button>
       </header>
+
+      {callMode && other && user && (
+        <LeathaCall
+          roomName={`dm-${[user.id, other.id].sort().join("-")}`}
+          roomType={callMode === "video" ? "video" : "audio"}
+          isHost
+          title={`Call with ${other.display_name ?? other.username}`}
+          onLeave={() => setCallMode(null)}
+        />
+      )}
 
       {/* Messages */}
       <div
