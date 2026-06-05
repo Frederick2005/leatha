@@ -768,9 +768,8 @@ interface VerificationRow {
   id: string;
   user_id: string;
   status: string;
-  submitted_at: string;
-  evidence_url: string | null;
-  notes: string | null;
+  created_at: string;
+  message: string | null;
   profile: { username: string; display_name: string | null; avatar_url: string | null } | null;
 }
 
@@ -783,16 +782,17 @@ function VerificationsPanel() {
     setLoading(true);
     const { data } = await supabase
       .from("teacher_verifications")
-      .select("id, user_id, status, submitted_at, evidence_url, notes")
+      .select("id, user_id, status, created_at, message")
       .eq("status", filter)
-      .order("submitted_at", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(200);
-    const ids = (data ?? []).map((r) => r.user_id);
+    const list = (data ?? []) as { id: string; user_id: string; status: string; created_at: string; message: string | null }[];
+    const ids = list.map((r) => r.user_id);
     const { data: profs } = ids.length
       ? await supabase.from("profiles").select("id, username, display_name, avatar_url").in("id", ids)
       : { data: [] as { id: string; username: string; display_name: string | null; avatar_url: string | null }[] };
     const byId = new Map((profs ?? []).map((p) => [p.id, p]));
-    setRows((data ?? []).map((r) => ({ ...r, profile: byId.get(r.user_id) ?? null })));
+    setRows(list.map((r) => ({ ...r, profile: byId.get(r.user_id) ?? null })));
     setLoading(false);
   };
   useEffect(() => { void load(); }, [filter]);
@@ -802,11 +802,11 @@ function VerificationsPanel() {
     if (!user) return;
     const { error } = await supabase
       .from("teacher_verifications")
-      .update({ status: approve ? "approved" : "rejected", reviewed_at: new Date().toISOString(), reviewer_id: user.id })
+      .update({ status: approve ? "approved" : "rejected", reviewed_at: new Date().toISOString(), reviewed_by: user.id })
       .eq("id", row.id);
     if (error) return message.error(error.message);
     if (approve) {
-      await supabase.from("profiles").update({ is_verified: true }).eq("id", row.user_id);
+      await supabase.from("profiles").update({ is_verified: true } as never).eq("id", row.user_id);
     }
     await logAdminAction(approve ? "verify_teacher" : "reject_verification", "profile", row.user_id);
     message.success(approve ? "Teacher verified" : "Verification rejected");
@@ -843,13 +843,8 @@ function VerificationsPanel() {
               </Space>
             ),
           },
-          { title: "Submitted", dataIndex: "submitted_at", render: (v: string) => new Date(v).toLocaleDateString() },
-          {
-            title: "Evidence",
-            dataIndex: "evidence_url",
-            render: (v: string | null) => v ? <a href={v} target="_blank" rel="noreferrer">Open</a> : <Text type="secondary">—</Text>,
-          },
-          { title: "Notes", dataIndex: "notes", render: (v: string | null) => v ?? <Text type="secondary">—</Text> },
+          { title: "Submitted", dataIndex: "created_at", render: (v: string) => new Date(v).toLocaleDateString() },
+          { title: "Message", dataIndex: "message", render: (v: string | null) => v ?? <Text type="secondary">—</Text> },
           {
             title: "Status",
             dataIndex: "status",
