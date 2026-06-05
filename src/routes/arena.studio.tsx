@@ -75,19 +75,6 @@ function StudioPage() {
         <p className="text-sm text-muted-foreground">Author a new challenge. Publish to share it with the arena.</p>
       </header>
 
-      <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <span className="font-semibold text-sm">Generate with AI</span>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <Input placeholder="Topic, e.g. 'binary search basics'" value={aiTopic} onChange={(e) => setAiTopic(e.target.value)} className="flex-1 min-w-[200px]" />
-          <Button onClick={aiGenerate} disabled={generating}>
-            <Sparkles className="h-4 w-4 mr-1" /> {generating ? "Generating…" : "Generate draft"}
-          </Button>
-        </div>
-        <p className="text-xs text-muted-foreground mt-2">Drafts are pre-filled below — review carefully before publishing.</p>
-      </div>
       <div className="rounded-xl border border-border bg-card p-5 space-y-4">
 
         <div className="flex gap-2">
