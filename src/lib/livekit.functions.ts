@@ -49,15 +49,46 @@ async function signLivekitToken(apiKey: string, apiSecret: string, identity: str
   return `${data}.${b64url(sig)}`;
 }
 
+function getPermissions(roomType: string, isHost: boolean) {
+  switch (roomType) {
+    case "tutoring":
+      return { canPublish: true, canSubscribe: true, canPublishData: true, roomAdmin: isHost };
+    case "classroom":
+      return {
+        canPublish: true,
+        canSubscribe: true,
+        canPublishData: true,
+        roomAdmin: isHost,
+        canPublishSources: isHost ? ["camera", "microphone", "screen_share"] : ["microphone"],
+      };
+    case "battle":
+      return { canPublish: true, canSubscribe: true, canPublishData: true, canPublishSources: ["microphone"] };
+    case "assembly":
+      return {
+        canPublish: isHost,
+        canSubscribe: true,
+        canPublishData: isHost,
+        roomAdmin: isHost,
+        canPublishSources: isHost ? ["camera", "microphone"] : [],
+      };
+    case "group":
+    case "video":
+    case "audio":
+      return { canPublish: true, canSubscribe: true, canPublishData: true };
+    default:
+      return { canPublish: false, canSubscribe: true };
+  }
+}
+
 export const getLivekitToken = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => Input.parse(data))
   .handler(async ({ data, context }) => {
     const apiKey = process.env.LIVEKIT_API_KEY;
     const apiSecret = process.env.LIVEKIT_API_SECRET;
-    const url = process.env.LIVEKIT_URL ?? process.env.VITE_LIVEKIT_URL;
+    const url = process.env.LIVEKIT_URL;
     if (!apiKey || !apiSecret || !url) {
-      throw new Error("LiveKit not configured. Missing LIVEKIT_API_KEY / LIVEKIT_API_SECRET / LIVEKIT_URL.");
+      throw new Error("LiveKit not configured. Missing LIVEKIT_API_KEY, LIVEKIT_API_SECRET, or LIVEKIT_URL environment variables.");
     }
     const identity = `${context.userId}:${data.username}`;
     const token = await signLivekitToken(apiKey, apiSecret, identity, data.displayName, data.roomName, data.isHost);
