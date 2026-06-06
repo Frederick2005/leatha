@@ -1,14 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
-import { GraduationCap, Plus, Save, Sparkles, Trash2 } from "lucide-react";
+import { GraduationCap, Plus, Save, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { slugify } from "@/lib/arena";
-import { generateArenaChallenge } from "@/lib/arena-generate.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/arena/studio")({ component: StudioPage });
@@ -30,35 +28,6 @@ function StudioPage() {
   const [testCases, setTestCases] = useState<{ input: string; expected: string }[]>([{ input: "1", expected: "1" }]);
   const [questions, setQuestions] = useState<Q[]>([{ prompt: "", options: ["", "", "", ""], correct: [0] }]);
   const [saving, setSaving] = useState(false);
-  const [aiTopic, setAiTopic] = useState("");
-  const [generating, setGenerating] = useState(false);
-  const generate = useServerFn(generateArenaChallenge);
-
-  async function aiGenerate() {
-    if (!aiTopic.trim()) return toast.error("Enter a topic for the AI to write about.");
-    setGenerating(true);
-    try {
-      const out = await generate({ data: { topic: aiTopic.trim(), type, difficulty, language: type === "code" ? language : undefined } });
-      setTitle(out.title ?? "");
-      setDescription(out.description ?? "");
-      setTags((out.tags ?? []).join(", "));
-      if (type === "code") {
-        if (out.starter_code) setStarter(out.starter_code);
-        if (out.test_cases && out.test_cases.length) setTestCases(out.test_cases);
-      } else if (out.questions && out.questions.length) {
-        setQuestions(out.questions.map((q) => ({
-          prompt: q.prompt ?? "",
-          options: (q.options ?? ["","","",""]).slice(0, 4),
-          correct: q.correct ?? [0],
-        })));
-      }
-      toast.success("Draft generated — review and publish.");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Generation failed");
-    } finally {
-      setGenerating(false);
-    }
-  }
 
   async function save(publish: boolean) {
     if (!user || !title.trim()) return toast.error("Title required");
@@ -106,19 +75,6 @@ function StudioPage() {
         <p className="text-sm text-muted-foreground">Author a new challenge. Publish to share it with the arena.</p>
       </header>
 
-      <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 mb-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles className="h-4 w-4 text-primary" />
-          <span className="font-semibold text-sm">Generate with AI</span>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <Input placeholder="Topic, e.g. 'binary search basics'" value={aiTopic} onChange={(e) => setAiTopic(e.target.value)} className="flex-1 min-w-[200px]" />
-          <Button onClick={aiGenerate} disabled={generating}>
-            <Sparkles className="h-4 w-4 mr-1" /> {generating ? "Generating…" : "Generate draft"}
-          </Button>
-        </div>
-        <p className="text-xs text-muted-foreground mt-2">Drafts are pre-filled below — review carefully before publishing.</p>
-      </div>
       <div className="rounded-xl border border-border bg-card p-5 space-y-4">
 
         <div className="flex gap-2">

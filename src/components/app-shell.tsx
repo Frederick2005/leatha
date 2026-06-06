@@ -1,34 +1,7 @@
-import { WifiOff } from "lucide-react";
-// Add this component inside app-shell.tsx
-function OfflineBanner() {
-  const [isOffline, setIsOffline] = useState(false);
-
-  useEffect(() => {
-    setIsOffline(!navigator.onLine);
-    const goOffline = () => setIsOffline(true);
-    const goOnline = () => setIsOffline(false);
-    window.addEventListener("offline", goOffline);
-    window.addEventListener("online", goOnline);
-    return () => {
-      window.removeEventListener("offline", goOffline);
-      window.removeEventListener("online", goOnline);
-    };
-  }, []);
-
-  if (!isOffline) return null;
-
-  return (
-    <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500 text-amber-950 text-xs font-medium py-2 text-center flex items-center justify-center gap-2">
-      <WifiOff className="h-3 w-3" />
-      You are offline — showing cached content
-    </div>
-  );
-}
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import {
-  GitFork, Home, BookOpen, MessageSquare, MessagesSquare, Trophy, Sparkles, Swords,
-  Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X, MessageSquareWarning,
-  GraduationCap, Backpack, Lightbulb,
+  Home, BookOpen, MessagesSquare, Sparkles, Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X, MessageSquareWarning,
+  GraduationCap, Backpack, Users, CalendarDays, FileText, DollarSign, Clock,
 } from "lucide-react";
 import { LeathaLogo } from "@/components/leatha-logo";
 import { useEffect, useState } from "react";
@@ -47,13 +20,12 @@ import { Toaster } from "@/components/ui/sonner";
 
 const navItems = [
   { to: "/dashboard" as const, label: "Dashboard", icon: Home, auth: true },
+  { to: "/find-teachers" as const, label: "Find Teachers", icon: Users, auth: true },
+  { to: "/appointments" as const, label: "Appointments", icon: CalendarDays, auth: true },
+  { to: "/messages" as const, label: "Messages", icon: MessagesSquare, auth: true },
+  { to: "/documents" as const, label: "Documents", icon: FileText, auth: true },
   { to: "/feed" as const, label: "Feed", icon: Sparkles, auth: true },
   { to: "/explore" as const, label: "Explore", icon: BookOpen, auth: true },
-  { to: "/arena" as const, label: "Arena", icon: Swords, auth: true, highlight: true },
-  { to: "/suggestions" as const, label: "Suggestions", icon: Lightbulb, auth: true },
-  { to: "/chat" as const, label: "Chat", icon: MessageSquare, auth: true },
-  { to: "/messages" as const, label: "Messages", icon: MessagesSquare, auth: true },
-  { to: "/leaderboard" as const, label: "Leaderboard", icon: Trophy, auth: true },
 ];
 
 export function AppShell() {
@@ -131,10 +103,20 @@ export function AppShell() {
             );
           })}
           {profile?.account_type === "teacher" && (
-            <Link to="/teacher" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              location.pathname.startsWith("/teacher") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60")}>
-              <GraduationCap className="h-4 w-4" /> Teacher
-            </Link>
+            <>
+              <Link to="/teacher" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                location.pathname === "/teacher" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60")}>
+                <GraduationCap className="h-4 w-4" /> Teacher
+              </Link>
+              <Link to="/teacher/earnings" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                location.pathname === "/teacher/earnings" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60")}>
+                <DollarSign className="h-4 w-4" /> Earnings
+              </Link>
+              <Link to="/teacher/availability" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                location.pathname === "/teacher/availability" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60")}>
+                <Clock className="h-4 w-4" /> Availability
+              </Link>
+            </>
           )}
           {profile?.account_type === "student" && (
             <Link to="/student" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
@@ -160,18 +142,9 @@ export function AppShell() {
 
         <div className="p-3 border-t border-sidebar-border space-y-2">
           {user ? (
-            <>
-              {profile?.account_type === "teacher" && (
-                <Button asChild className="w-full justify-start gap-2" variant="default">
-                  <Link to="/lessons/new"><Plus className="h-4 w-4" /> New lesson</Link>
-                </Button>
-              )}
-              {profile?.account_type === "student" && (
-                <Button asChild className="w-full justify-start gap-2" variant="default">
-                  <Link to="/suggestions/new"><Lightbulb className="h-4 w-4" /> Suggest</Link>
-                </Button>
-              )}
-            </>
+            <Button asChild className="w-full justify-start gap-2" variant="default">
+              <Link to="/lessons/new"><Plus className="h-4 w-4" /> New lesson</Link>
+            </Button>
           ) : (
             <Button asChild className="w-full justify-start gap-2" variant="default">
               <Link to="/auth"><LogIn className="h-4 w-4" /> Sign in</Link>
@@ -284,16 +257,9 @@ export function AppShell() {
                     <UserIcon className="h-4 w-4 mr-2" /> Profile
                   </Link>
                 </DropdownMenuItem>
-                {profile?.account_type === "teacher" && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/lessons/new"><Plus className="h-4 w-4 mr-2" /> New lesson</Link>
-                  </DropdownMenuItem>
-                )}
-                {profile?.account_type === "student" && (
-                  <DropdownMenuItem asChild>
-                    <Link to="/suggestions/new"><Lightbulb className="h-4 w-4 mr-2" /> Suggest</Link>
-                  </DropdownMenuItem>
-                )}
+                <DropdownMenuItem asChild>
+                  <Link to="/lessons/new"><Plus className="h-4 w-4 mr-2" /> New lesson</Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/feedback"><MessageSquareWarning className="h-4 w-4 mr-2" /> Send feedback</Link>
                 </DropdownMenuItem>

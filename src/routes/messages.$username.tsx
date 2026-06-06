@@ -5,38 +5,21 @@ import { useAuth } from "@/providers/auth-provider";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { LeathaCall } from "@/components/leatha-call";
-import { Phone, Video, BookOpen, Sword } from "lucide-react";
 import { format, isToday, isYesterday } from "date-fns";
 import {
-  Send,
-  ArrowLeft,
-  Ban,
-  ShieldOff,
-  Paperclip,
-  X,
-  Loader2,
-  Mic,
-  Check,
-  CheckCheck,
-  Play,
-  Pause,
-  Smile,
+  Send, ArrowLeft, Ban, ShieldOff, Paperclip, X, Loader2, Mic, Check, CheckCheck, Play, Pause, Smile, Phone, Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { type AttachmentMeta } from "@/components/dm-attachment";
 import { RequireAuth } from "@/components/require-auth";
 import { trackEvent } from "@/lib/analytics";
+import { LeathaCall } from "@/components/leatha-call";
 
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
 const MAX_FILES = 6;
 
 export const Route = createFileRoute("/messages/$username")({
-  component: () => (
-    <RequireAuth>
-      <ThreadPage />
-    </RequireAuth>
-  ),
+  component: () => (<RequireAuth><ThreadPage /></RequireAuth>),
 });
 
 interface DM {
@@ -56,24 +39,7 @@ interface OtherProfile {
   avatar_url: string | null;
 }
 
-const EMOJIS = [
-  "😀",
-  "😂",
-  "❤️",
-  "🔥",
-  "👍",
-  "🎉",
-  "🙌",
-  "🤔",
-  "😎",
-  "👀",
-  "💡",
-  "📚",
-  "✅",
-  "🚀",
-  "🥳",
-  "😅",
-];
+const EMOJIS = ["😀", "😂", "❤️", "🔥", "👍", "🎉", "🙌", "🤔", "😎", "👀", "💡", "📚", "✅", "🚀", "🥳", "😅"];
 
 function ThreadPage() {
   const { username } = Route.useParams();
@@ -87,6 +53,7 @@ function ThreadPage() {
   const [blocked, setBlocked] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [showEmoji, setShowEmoji] = useState(false);
+  const [callMode, setCallMode] = useState<null | "audio" | "video">(null);
   const [recording, setRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
   const recorderRef = useRef<MediaRecorder | null>(null);
@@ -95,12 +62,6 @@ function ThreadPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [callState, setCallState] = useState<{
-    roomName: string;
-    type: "audio" | "video";
-    status: "idle" | "calling" | "in-call";
-    hostId: string;
-  } | null>(null);
 
   // Initial load
   useEffect(() => {
@@ -115,19 +76,14 @@ function ThreadPage() {
         .eq("username", username)
         .maybeSingle();
 
-      if (!prof || cancelled) {
-        setLoading(false);
-        return;
-      }
+      if (!prof || cancelled) { setLoading(false); return; }
       setOther(prof as OtherProfile);
 
       const [{ data: msgs }, { data: blocks }] = await Promise.all([
         supabase
           .from("direct_messages")
           .select("*")
-          .or(
-            `and(sender_id.eq.${user.id},recipient_id.eq.${prof.id}),and(sender_id.eq.${prof.id},recipient_id.eq.${user.id})`,
-          )
+          .or(`and(sender_id.eq.${user.id},recipient_id.eq.${prof.id}),and(sender_id.eq.${prof.id},recipient_id.eq.${user.id})`)
           .order("created_at", { ascending: true })
           .limit(500),
         supabase
@@ -144,17 +100,12 @@ function ThreadPage() {
         .filter((m) => m.recipient_id === user.id && !m.read_at)
         .map((m) => m.id);
       if (unreadIds.length) {
-        await supabase
-          .from("direct_messages")
-          .update({ read_at: new Date().toISOString() })
-          .in("id", unreadIds);
+        await supabase.from("direct_messages").update({ read_at: new Date().toISOString() }).in("id", unreadIds);
       }
       setLoading(false);
     })();
 
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [user, username]);
 
   // Realtime
@@ -162,38 +113,23 @@ function ThreadPage() {
     if (!user || !other) return;
     const channel = supabase
       .channel(`dm-${user.id}-${other.id}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "direct_messages" },
-        (payload) => {
-          const row = payload.new as DM;
-          const involves =
-            (row.sender_id === user.id && row.recipient_id === other.id) ||
-            (row.sender_id === other.id && row.recipient_id === user.id);
-          if (!involves) return;
-          setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, row]));
-          if (row.recipient_id === user.id) {
-            void supabase
-              .from("direct_messages")
-              .update({ read_at: new Date().toISOString() })
-              .eq("id", row.id);
-          }
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "direct_messages" },
-        (payload) => {
-          const row = payload.new as DM;
-          setMessages((prev) =>
-            prev.map((m) => (m.id === row.id ? { ...m, read_at: row.read_at } : m)),
-          );
-        },
-      )
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "direct_messages" }, (payload) => {
+        const row = payload.new as DM;
+        const involves =
+          (row.sender_id === user.id && row.recipient_id === other.id) ||
+          (row.sender_id === other.id && row.recipient_id === user.id);
+        if (!involves) return;
+        setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, row]));
+        if (row.recipient_id === user.id) {
+          void supabase.from("direct_messages").update({ read_at: new Date().toISOString() }).eq("id", row.id);
+        }
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "direct_messages" }, (payload) => {
+        const row = payload.new as DM;
+        setMessages((prev) => prev.map((m) => (m.id === row.id ? { ...m, read_at: row.read_at } : m)));
+      })
       .subscribe();
-    return () => {
-      void supabase.removeChannel(channel);
-    };
+    return () => { void supabase.removeChannel(channel); };
   }, [user, other]);
 
   useEffect(() => {
@@ -205,14 +141,8 @@ function ThreadPage() {
     const incoming = Array.from(files);
     const next = [...pendingFiles];
     for (const f of incoming) {
-      if (next.length >= MAX_FILES) {
-        toast.error(`Max ${MAX_FILES} files per message`);
-        break;
-      }
-      if (f.size > MAX_FILE_BYTES) {
-        toast.error(`${f.name} exceeds 25 MB`);
-        continue;
-      }
+      if (next.length >= MAX_FILES) { toast.error(`Max ${MAX_FILES} files per message`); break; }
+      if (f.size > MAX_FILE_BYTES) { toast.error(`${f.name} exceeds 25 MB`); continue; }
       next.push(f);
     }
     setPendingFiles(next);
@@ -227,13 +157,7 @@ function ThreadPage() {
       .from("chat-media")
       .upload(path, file, { contentType: file.type, upsert: false });
     if (error) throw error;
-    return {
-      path,
-      name: file.name,
-      size: file.size,
-      type: file.type || "application/octet-stream",
-      
-    };
+    return { path, name: file.name, size: file.size, type: file.type || "application/octet-stream" };
   };
 
   const send = async (extraAttachments: AttachmentMeta[] = []) => {
@@ -244,8 +168,7 @@ function ThreadPage() {
 
     let uploaded: AttachmentMeta[] = [...extraAttachments];
     try {
-      if (pendingFiles.length)
-        uploaded = uploaded.concat(await Promise.all(pendingFiles.map(uploadOne)));
+      if (pendingFiles.length) uploaded = uploaded.concat(await Promise.all(pendingFiles.map(uploadOne)));
     } catch (e) {
       setSending(false);
       toast.error(e instanceof Error ? e.message : "Upload failed");
@@ -259,19 +182,11 @@ function ThreadPage() {
       attachments: uploaded as unknown as never,
     });
     setSending(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    void trackEvent(
-      uploaded.some((a) => a.type.startsWith("audio/")) ? "voice_message_sent" : "message_sent",
-      { has_attachments: uploaded.length > 0 },
-    );
+    if (error) { toast.error(error.message); return; }
+    void trackEvent(uploaded.some((a) => a.type.startsWith("audio/")) ? "voice_message_sent" : "message_sent", { has_attachments: uploaded.length > 0 });
     setBody("");
     setPendingFiles([]);
-    if (inputRef.current) {
-      inputRef.current.style.height = "auto";
-    }
+    if (inputRef.current) { inputRef.current.style.height = "auto"; }
   };
 
   // Voice recording
@@ -281,9 +196,7 @@ function ThreadPage() {
       const mime = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm" : "";
       const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
       recordChunksRef.current = [];
-      rec.ondataavailable = (e) => {
-        if (e.data.size > 0) recordChunksRef.current.push(e.data);
-      };
+      rec.ondataavailable = (e) => { if (e.data.size > 0) recordChunksRef.current.push(e.data); };
       rec.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
         const blob = new Blob(recordChunksRef.current, { type: mime || "audio/webm" });
@@ -307,10 +220,7 @@ function ThreadPage() {
 
   const stopRecording = (cancel = false) => {
     const rec = recorderRef.current;
-    if (recordTimerRef.current) {
-      window.clearInterval(recordTimerRef.current);
-      recordTimerRef.current = null;
-    }
+    if (recordTimerRef.current) { window.clearInterval(recordTimerRef.current); recordTimerRef.current = null; }
     setRecording(false);
     if (!rec) return;
     if (cancel) {
@@ -323,167 +233,24 @@ function ThreadPage() {
   const toggleBlock = async () => {
     if (!user || !other) return;
     if (blocked) {
-      const { error } = await supabase
-        .from("blocks")
-        .delete()
-        .eq("blocker_id", user.id)
-        .eq("blocked_id", other.id);
+      const { error } = await supabase.from("blocks").delete().eq("blocker_id", user.id).eq("blocked_id", other.id);
       if (error) return toast.error(error.message);
-      setBlocked(false);
-      toast.success("User unblocked");
+      setBlocked(false); toast.success("User unblocked");
     } else {
-      const { error } = await supabase
-        .from("blocks")
-        .insert({ blocker_id: user.id, blocked_id: other.id });
+      const { error } = await supabase.from("blocks").insert({ blocker_id: user.id, blocked_id: other.id });
       if (error) return toast.error(error.message);
-      setBlocked(true);
-      toast.success("User blocked");
+      setBlocked(true); toast.success("User blocked");
     }
   };
 
-  const startCall = async (type: "audio" | "video") => {
-    if (!user || !other) return;
-
-    const roomName = `dm-${[user.id, other.id].sort().join("-")}`;
-
-    await supabase.from("calls").upsert({
-      room_name: roomName,
-      room_type: "tutoring",
-      title: `Call with ${other.username}`,
-      host_id: user.id,
-      status: "calling",
-    });
-
-    await supabase.from("notifications").insert({
-      user_id: other.id,
-      type: "incoming_call",
-      title: `Incoming ${type} call`,
-      message: `${user.email} is calling you`,
-      link: `/messages/${other.username}?call=${roomName}`,
-      actor_id: user.id,
-    });
-
-    setCallState({ roomName, type, status: "calling", hostId: user.id });
-  };
-
-  const acceptCall = async () => {
-    if (!user || !other || !callState) return;
-
-    const { error } = await supabase
-      .from("calls")
-      .update({ status: "active" })
-      .eq("room_name", callState.roomName);
-
-    if (error) return toast.error(error.message);
-
-    setCallState({ ...callState, status: "in-call" });
-  };
-const declineCall = async () => {
-    if (!callState) return;
-    await supabase
-      .from("calls")
-      .update({ status: "ended", ended_at: new Date().toISOString() })
-      .eq("room_name", callState.roomName);
-    setCallState(null);
-  };
-
-  useEffect(() => {
-    if (!user || !other) return;
-    const roomName = `dm-${[user.id, other.id].sort().join("-")}`;
-    let cancelled = false;
-
-    void (async () => {
-      const { data, error } = await supabase
-        .from("calls")
-        .select("host_id, status")
-        .eq("room_name", roomName)
-        .maybeSingle();
-
-      if (cancelled || error || !data) return;
-
-      const callAge = Date.now() - new Date(data.created_at).getTime();
-      const isRecent = callAge < 60_000;
-
-      if (!isRecent) {
-        await supabase
-          .from("calls")
-          .update({ status: "ended" })
-          .eq("room_name", roomName);
-        return;
-      }
-
-      if (data.status === "calling") {
-        setCallState({ roomName, type: "audio", status: "calling", hostId: data.host_id });
-      } else if (data.status === "active") {
-        setCallState({ roomName, type: "audio", status: "in-call", hostId: data.host_id });
-      }
-    })();
-
-    const channel = supabase
-      .channel(`call-${roomName}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "calls",
-          filter: `room_name=eq.${roomName}`,
-        },
-        (payload) => {
-          const row = payload.new as { host_id: string; status: string };
-          if (row.status === "calling") {
-            setCallState((prev) =>
-              prev ?? { roomName, type: "audio", status: "calling", hostId: row.host_id },
-            );
-          } else if (row.status === "active") {
-            setCallState((prev) =>
-              prev ? { ...prev, status: "in-call" } : { roomName, type: "audio", status: "in-call", hostId: row.host_id },
-            );
-          }
-        },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "calls",
-          filter: `room_name=eq.${roomName}`,
-        },
-        (payload) => {
-          const row = payload.new as { host_id: string; status: string };
-          if (row.status === "active") {
-            setCallState((prev) =>
-              prev ? { ...prev, status: "in-call" } : { roomName, type: "audio", status: "in-call", hostId: row.host_id },
-            );
-          } else if (row.status === "calling") {
-            setCallState((prev) =>
-              prev ?? { roomName, type: "audio", status: "calling", hostId: row.host_id },
-            );
-          }
-        },
-      )
-      .subscribe();
-
-    return () => {
-      cancelled = true;
-      void supabase.removeChannel(channel);
-    };
-  }, [user, other]);
-
   if (!user) return null;
-  if (loading)
-    return (
-      <div className="flex-1 grid place-items-center text-sm text-muted-foreground">Loading…</div>
-    );
+  if (loading) return <div className="flex-1 grid place-items-center text-sm text-muted-foreground">Loading…</div>;
   if (!other) {
     return (
       <div className="flex-1 grid place-items-center p-6 text-center">
         <div>
           <p className="text-muted-foreground">User not found.</p>
-          <Link to="/messages" className="text-primary hover:underline mt-2 inline-block">
-            Back to messages
-          </Link>
+          <Link to="/messages" className="text-primary hover:underline mt-2 inline-block">Back to messages</Link>
         </div>
       </div>
     );
@@ -503,44 +270,36 @@ const declineCall = async () => {
     <div className="flex-1 flex flex-col min-w-0 h-full bg-[hsl(var(--chat-bg,210_15%_15%))]">
       {/* WhatsApp-style header */}
       <header className="border-b border-border px-3 py-2.5 flex items-center gap-3 bg-card">
-        <button
-          onClick={() => navigate({ to: "/messages" })}
-          className="md:hidden p-1 -ml-1 rounded hover:bg-accent"
-        >
+        <button onClick={() => navigate({ to: "/messages" })} className="md:hidden p-1 -ml-1 rounded hover:bg-accent">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <Link
-          to="/u/$username"
-          params={{ username: other.username }}
-          className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80"
-        >
-          <UserAvatar
-            name={other.display_name ?? other.username}
-            url={other.avatar_url}
-            size="md"
-          />
+        <Link to="/u/$username" params={{ username: other.username }} className="flex items-center gap-3 min-w-0 flex-1 hover:opacity-80">
+          <UserAvatar name={other.display_name ?? other.username} url={other.avatar_url} size="md" />
           <div className="min-w-0">
-            <div className="font-semibold truncate leading-tight">
-              {other.display_name ?? other.username}
-            </div>
-            <div className="text-[11px] text-muted-foreground font-mono truncate">
-              @{other.username}
-            </div>
+            <div className="font-semibold truncate leading-tight">{other.display_name ?? other.username}</div>
+            <div className="text-[11px] text-muted-foreground font-mono truncate">@{other.username}</div>
           </div>
         </Link>
-        <CallTypeSelector onSelect={startCall} />
+        <Button variant="ghost" size="icon" onClick={() => setCallMode("audio")} aria-label="Voice call">
+          <Phone className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" onClick={() => setCallMode("video")} aria-label="Video call">
+          <Video className="h-4 w-4" />
+        </Button>
         <Button variant="ghost" size="sm" onClick={toggleBlock} className="gap-2">
-          {blocked ? (
-            <>
-              <ShieldOff className="h-4 w-4" /> Unblock
-            </>
-          ) : (
-            <>
-              <Ban className="h-4 w-4" />
-            </>
-          )}
+          {blocked ? <><ShieldOff className="h-4 w-4" /> Unblock</> : <><Ban className="h-4 w-4" /></>}
         </Button>
       </header>
+
+      {callMode && other && user && (
+        <LeathaCall
+          roomName={`dm-${[user.id, other.id].sort().join("-")}`}
+          roomType={callMode === "video" ? "video" : "audio"}
+          isHost
+          title={`Call with ${other.display_name ?? other.username}`}
+          onLeave={() => setCallMode(null)}
+        />
+      )}
 
       {/* Messages */}
       <div
@@ -567,56 +326,13 @@ const declineCall = async () => {
             {g.items.map((m, i) => {
               const mine = m.sender_id === user.id;
               const prev = g.items[i - 1];
-              const grouped =
-                prev &&
-                prev.sender_id === m.sender_id &&
-                new Date(m.created_at).getTime() - new Date(prev.created_at).getTime() < 60_000;
+              const grouped = prev && prev.sender_id === m.sender_id && (new Date(m.created_at).getTime() - new Date(prev.created_at).getTime()) < 60_000;
               return <Bubble key={m.id} m={m} mine={mine} grouped={!!grouped} />;
             })}
           </div>
         ))}
-        {callState?.status === "calling" && (
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm mb-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="font-semibold">
-                  {callState.hostId === user.id ? "Calling…" : "Incoming call…"}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {callState.hostId === user.id
-                    ? `Waiting for ${other.username} to answer.`
-                    : `${other.username} is calling you.`}
-                </p>
-              </div>
-              {callState.hostId !== user.id ? (
-                <div className="flex gap-2">
-                  <Button onClick={acceptCall} size="sm">
-                    Accept
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={declineCall}>
-                    Decline
-                  </Button>
-                </div>
-              ) : null}
-            </div>
-          </div>
-        )}
-        {callState?.status === "in-call" && (
-          <LeathaCall
-            roomName={callState.roomName}
-            roomType="tutoring"
-            isHost={callState.hostId === user.id}
-            title={`Call with ${other.username}`}
-           onLeave={async () => {
-  await supabase
-    .from("calls")
-    .update({ status: "ended", ended_at: new Date().toISOString() })
-    .eq("room_name", callState!.roomName);
-  setCallState(null);
-}}
-          />
-        )}
       </div>
+
       {/* Composer */}
       <div className="border-t border-border bg-card px-2 py-2">
         {blocked ? (
@@ -625,18 +341,13 @@ const declineCall = async () => {
           </div>
         ) : recording ? (
           <div className="flex items-center gap-3 px-2 py-2">
-            <button
-              onClick={() => stopRecording(true)}
-              className="p-2 rounded-full hover:bg-destructive/10 text-destructive"
-              aria-label="Cancel"
-            >
+            <button onClick={() => stopRecording(true)} className="p-2 rounded-full hover:bg-destructive/10 text-destructive" aria-label="Cancel">
               <X className="h-5 w-5" />
             </button>
             <div className="flex items-center gap-2 flex-1">
               <span className="h-2.5 w-2.5 rounded-full bg-destructive animate-pulse" />
               <span className="text-sm text-muted-foreground font-mono">
-                {String(Math.floor(recordSeconds / 60)).padStart(2, "0")}:
-                {String(recordSeconds % 60).padStart(2, "0")}
+                {String(Math.floor(recordSeconds / 60)).padStart(2, "0")}:{String(recordSeconds % 60).padStart(2, "0")}
               </span>
               <span className="text-xs text-muted-foreground ml-2">Recording voice note…</span>
             </div>
@@ -653,11 +364,7 @@ const declineCall = async () => {
                   return (
                     <div key={i} className="relative group">
                       {isImg ? (
-                        <img
-                          src={URL.createObjectURL(f)}
-                          alt={f.name}
-                          className="h-16 w-16 object-cover rounded-lg border border-border"
-                        />
+                        <img src={URL.createObjectURL(f)} alt={f.name} className="h-16 w-16 object-cover rounded-lg border border-border" />
                       ) : (
                         <div className="h-16 px-3 flex items-center gap-2 rounded-lg border border-border bg-accent text-xs max-w-[180px]">
                           <Paperclip className="h-3.5 w-3.5 shrink-0" />
@@ -683,10 +390,7 @@ const declineCall = async () => {
                   <button
                     key={e}
                     type="button"
-                    onClick={() => {
-                      setBody((b) => b + e);
-                      inputRef.current?.focus();
-                    }}
+                    onClick={() => { setBody((b) => b + e); inputRef.current?.focus(); }}
                     className="text-xl hover:bg-accent rounded p-1"
                   >
                     {e}
@@ -703,21 +407,10 @@ const declineCall = async () => {
                 onChange={(e) => addFiles(e.target.files)}
                 accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.txt,.zip,.csv,.xlsx,.pptx"
               />
-              <button
-                type="button"
-                onClick={() => setShowEmoji((s) => !s)}
-                className="p-2 rounded-full hover:bg-accent text-muted-foreground"
-                aria-label="Emoji"
-              >
+              <button type="button" onClick={() => setShowEmoji((s) => !s)} className="p-2 rounded-full hover:bg-accent text-muted-foreground" aria-label="Emoji">
                 <Smile className="h-5 w-5" />
               </button>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={pendingFiles.length >= MAX_FILES}
-                className="p-2 rounded-full hover:bg-accent text-muted-foreground"
-                aria-label="Attach"
-              >
+              <button type="button" onClick={() => fileInputRef.current?.click()} disabled={pendingFiles.length >= MAX_FILES} className="p-2 rounded-full hover:bg-accent text-muted-foreground" aria-label="Attach">
                 <Paperclip className="h-5 w-5" />
               </button>
               <div className="flex-1 bg-background rounded-3xl border border-border px-3 py-2 max-h-40 overflow-auto">
@@ -743,17 +436,8 @@ const declineCall = async () => {
                 />
               </div>
               {body.trim() || pendingFiles.length ? (
-                <Button
-                  onClick={() => send()}
-                  disabled={sending}
-                  size="icon"
-                  className="rounded-full h-10 w-10"
-                >
-                  {sending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
+                <Button onClick={() => send()} disabled={sending} size="icon" className="rounded-full h-10 w-10">
+                  {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
               ) : (
                 <button
@@ -777,9 +461,7 @@ function Bubble({ m, mine, grouped }: { m: DM; mine: boolean; grouped: boolean }
   const atts = Array.isArray(m.attachments) ? m.attachments : [];
   const time = format(new Date(m.created_at), "HH:mm");
   return (
-    <div
-      className={cn("flex", mine ? "justify-end" : "justify-start", grouped ? "mt-0.5" : "mt-2")}
-    >
+    <div className={cn("flex", mine ? "justify-end" : "justify-start", grouped ? "mt-0.5" : "mt-2")}>
       <div
         className={cn(
           "max-w-[78%] sm:max-w-[65%] px-2.5 py-1.5 rounded-2xl text-sm break-words whitespace-pre-wrap shadow-sm relative",
@@ -790,25 +472,13 @@ function Bubble({ m, mine, grouped }: { m: DM; mine: boolean; grouped: boolean }
       >
         {atts.length > 0 && (
           <div className="space-y-1.5 mb-1">
-            {atts.map((a, i) => (
-              <ChatAttachment key={i} att={a} mine={mine} />
-            ))}
+            {atts.map((a, i) => <ChatAttachment key={i} att={a} mine={mine} />)}
           </div>
         )}
         {m.body && <div className="px-1">{m.body}</div>}
-        <div
-          className={cn(
-            "flex items-center justify-end gap-1 -mb-0.5 mt-0.5 text-[10px]",
-            mine ? "text-white/70" : "text-muted-foreground",
-          )}
-        >
+        <div className={cn("flex items-center justify-end gap-1 -mb-0.5 mt-0.5 text-[10px]", mine ? "text-white/70" : "text-muted-foreground")}>
           <span>{time}</span>
-          {mine &&
-            (m.read_at ? (
-              <CheckCheck className="h-3.5 w-3.5 text-sky-300" />
-            ) : (
-              <Check className="h-3.5 w-3.5" />
-            ))}
+          {mine && (m.read_at ? <CheckCheck className="h-3.5 w-3.5 text-sky-300" /> : <Check className="h-3.5 w-3.5" />)}
         </div>
       </div>
     </div>
@@ -824,12 +494,7 @@ function ChatAttachment({ att, mine }: { att: AttachmentMeta; mine: boolean }) {
   if (isImage) {
     return (
       <a href={url} target="_blank" rel="noreferrer" className="block">
-        <img
-          src={url}
-          alt={att.name}
-          className="max-w-[280px] max-h-[280px] rounded-lg object-cover"
-          loading="lazy"
-        />
+        <img src={url} alt={att.name} className="max-w-[280px] max-h-[280px] rounded-lg object-cover" loading="lazy" />
       </a>
     );
   }
@@ -883,13 +548,8 @@ function VoicePlayer({ url, mine }: { url: string; mine: boolean }) {
   const toggle = () => {
     const a = audioRef.current;
     if (!a) return;
-    if (playing) {
-      a.pause();
-      setPlaying(false);
-    } else {
-      void a.play();
-      setPlaying(true);
-    }
+    if (playing) { a.pause(); setPlaying(false); }
+    else { void a.play(); setPlaying(true); }
   };
 
   const fmt = (s: number) => {
@@ -902,124 +562,18 @@ function VoicePlayer({ url, mine }: { url: string; mine: boolean }) {
   const pct = duration > 0 ? (progress / duration) * 100 : 0;
 
   return (
-    <div
-      className={cn(
-        "flex items-center gap-2 px-2 py-1.5 rounded-lg min-w-[200px]",
-        mine ? "bg-white/10" : "bg-accent",
-      )}
-    >
-      <button
-        onClick={toggle}
-        className={cn(
-          "h-8 w-8 grid place-items-center rounded-full",
-          mine ? "bg-white/20" : "bg-primary text-primary-foreground",
-        )}
-      >
+    <div className={cn("flex items-center gap-2 px-2 py-1.5 rounded-lg min-w-[200px]", mine ? "bg-white/10" : "bg-accent")}>
+      <button onClick={toggle} className={cn("h-8 w-8 grid place-items-center rounded-full", mine ? "bg-white/20" : "bg-primary text-primary-foreground")}>
         {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
       </button>
       <div className="flex-1">
-        <div
-          className={cn("h-1 rounded-full overflow-hidden", mine ? "bg-white/20" : "bg-background")}
-        >
-          <div
-            className={cn("h-full transition-all", mine ? "bg-white" : "bg-primary")}
-            style={{ width: `${pct}%` }}
-          />
+        <div className={cn("h-1 rounded-full overflow-hidden", mine ? "bg-white/20" : "bg-background")}>
+          <div className={cn("h-full transition-all", mine ? "bg-white" : "bg-primary")} style={{ width: `${pct}%` }} />
         </div>
-        <div className="text-[10px] mt-1 opacity-70">
-          {fmt(playing || progress > 0 ? progress : duration)}
-        </div>
+        <div className="text-[10px] mt-1 opacity-70">{fmt(playing || progress > 0 ? progress : duration)}</div>
       </div>
       <Mic className="h-4 w-4 opacity-60" />
       <audio ref={audioRef} src={url} preload="metadata" className="hidden" />
-    </div>
-  );
-}
-
-function CallTypeSelector({ onSelect }: { onSelect: (type: "audio" | "video") => void }) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="relative">
-      <Button
-        size="icon"
-        variant="ghost"
-        onClick={() => setOpen((o) => !o)}
-      >
-        <Phone className="h-4 w-4" />
-      </Button>
-
-      {open && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setOpen(false)}
-          />
-          {/* Dropdown */}
-          <div className="absolute right-0 top-10 z-50 w-56 rounded-xl border border-border bg-card shadow-lg overflow-hidden">
-            <div className="px-3 py-2 border-b border-border">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                Start a call
-              </p>
-            </div>
-            <button
-              className="w-full flex items-center gap-3 px-3 py-3 hover:bg-muted transition-colors text-left"
-              onClick={() => { setOpen(false); onSelect("audio"); }}
-            >
-              <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center shrink-0">
-                <Phone className="h-4 w-4 text-green-500" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Voice call</p>
-                <p className="text-xs text-muted-foreground">Audio only</p>
-              </div>
-            </button>
-            <button
-              className="w-full flex items-center gap-3 px-3 py-3 hover:bg-muted transition-colors text-left"
-              onClick={() => { setOpen(false); onSelect("video"); }}
-            >
-              <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
-                <Video className="h-4 w-4 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Video call</p>
-                <p className="text-xs text-muted-foreground">Camera + audio</p>
-              </div>
-            </button>
-            <div className="px-3 py-2 border-t border-border">
-              <p className="text-xs text-muted-foreground">Coming soon</p>
-            </div>
-            <button disabled className="w-full flex items-center gap-3 px-3 py-3 opacity-40 cursor-not-allowed text-left">
-              <div className="h-8 w-8 rounded-full bg-purple-500/10 flex items-center justify-center shrink-0">
-                <BookOpen className="h-4 w-4 text-purple-500" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Tutoring session</p>
-                <p className="text-xs text-muted-foreground">Scheduled 1-on-1</p>
-              </div>
-            </button>
-            <button disabled className="w-full flex items-center gap-3 px-3 py-3 opacity-40 cursor-not-allowed text-left">
-              <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
-                <Sword className="h-4 w-4 text-amber-500" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Arena battle</p>
-                <p className="text-xs text-muted-foreground">Compete on challenges</p>
-              </div>
-            </button>
-            <button disabled className="w-full flex items-center gap-3 px-3 py-3 opacity-40 cursor-not-allowed text-left">
-              <div className="h-8 w-8 rounded-full bg-teal-500/10 flex items-center justify-center shrink-0">
-                <Users className="h-4 w-4 text-teal-500" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Group session</p>
-                <p className="text-xs text-muted-foreground">Invite multiple people</p>
-              </div>
-            </button>
-          </div>
-        </>
-      )}
     </div>
   );
 }
