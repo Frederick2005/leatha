@@ -25,6 +25,7 @@ import { Route as FindTeachersRouteImport } from './routes/find-teachers'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as ExploreRouteImport } from './routes/explore'
+import { Route as DocumentsRouteImport } from './routes/documents'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ChatRouteImport } from './routes/chat'
@@ -47,6 +48,7 @@ import { Route as ArenaLeaderboardRouteImport } from './routes/arena.leaderboard
 import { Route as ArenaDailyRouteImport } from './routes/arena.daily'
 import { Route as ArenaChallengesRouteImport } from './routes/arena.challenges'
 import { Route as ArenaBattlesRouteImport } from './routes/arena.battles'
+import { Route as AppointmentsIdRouteImport } from './routes/appointments.$id'
 import { Route as LessonsLessonIdEditRouteImport } from './routes/lessons.$lessonId.edit'
 import { Route as LessonsLessonIdDiffRouteImport } from './routes/lessons.$lessonId.diff'
 import { Route as ArenaChallengesSlugRouteImport } from './routes/arena.challenges.$slug'
@@ -130,6 +132,11 @@ const FeedRoute = FeedRouteImport.update({
 const ExploreRoute = ExploreRouteImport.update({
   id: '/explore',
   path: '/explore',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsRoute = DocumentsRouteImport.update({
+  id: '/documents',
+  path: '/documents',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -242,6 +249,11 @@ const ArenaBattlesRoute = ArenaBattlesRouteImport.update({
   path: '/battles',
   getParentRoute: () => ArenaRoute,
 } as any)
+const AppointmentsIdRoute = AppointmentsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AppointmentsRoute,
+} as any)
 const LessonsLessonIdEditRoute = LessonsLessonIdEditRouteImport.update({
   id: '/edit',
   path: '/edit',
@@ -266,12 +278,13 @@ const ArenaBattlesIdRoute = ArenaBattlesIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/appointments': typeof AppointmentsRoute
+  '/appointments': typeof AppointmentsRouteWithChildren
   '/arena': typeof ArenaRouteWithChildren
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
+  '/documents': typeof DocumentsRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
   '/feedback': typeof FeedbackRoute
@@ -288,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/suggestions': typeof SuggestionsRouteWithChildren
   '/teacher': typeof TeacherRoute
   '/terms': typeof TermsRoute
+  '/appointments/$id': typeof AppointmentsIdRoute
   '/arena/battles': typeof ArenaBattlesRouteWithChildren
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
   '/arena/daily': typeof ArenaDailyRoute
@@ -310,11 +324,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/appointments': typeof AppointmentsRoute
+  '/appointments': typeof AppointmentsRouteWithChildren
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
+  '/documents': typeof DocumentsRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
   '/feedback': typeof FeedbackRoute
@@ -331,6 +346,7 @@ export interface FileRoutesByTo {
   '/suggestions': typeof SuggestionsRouteWithChildren
   '/teacher': typeof TeacherRoute
   '/terms': typeof TermsRoute
+  '/appointments/$id': typeof AppointmentsIdRoute
   '/arena/battles': typeof ArenaBattlesRouteWithChildren
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
   '/arena/daily': typeof ArenaDailyRoute
@@ -354,12 +370,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
-  '/appointments': typeof AppointmentsRoute
+  '/appointments': typeof AppointmentsRouteWithChildren
   '/arena': typeof ArenaRouteWithChildren
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/cookies': typeof CookiesRoute
   '/dashboard': typeof DashboardRoute
+  '/documents': typeof DocumentsRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
   '/feedback': typeof FeedbackRoute
@@ -376,6 +393,7 @@ export interface FileRoutesById {
   '/suggestions': typeof SuggestionsRouteWithChildren
   '/teacher': typeof TeacherRoute
   '/terms': typeof TermsRoute
+  '/appointments/$id': typeof AppointmentsIdRoute
   '/arena/battles': typeof ArenaBattlesRouteWithChildren
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
   '/arena/daily': typeof ArenaDailyRoute
@@ -406,6 +424,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/cookies'
     | '/dashboard'
+    | '/documents'
     | '/explore'
     | '/feed'
     | '/feedback'
@@ -422,6 +441,7 @@ export interface FileRouteTypes {
     | '/suggestions'
     | '/teacher'
     | '/terms'
+    | '/appointments/$id'
     | '/arena/battles'
     | '/arena/challenges'
     | '/arena/daily'
@@ -449,6 +469,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/cookies'
     | '/dashboard'
+    | '/documents'
     | '/explore'
     | '/feed'
     | '/feedback'
@@ -465,6 +486,7 @@ export interface FileRouteTypes {
     | '/suggestions'
     | '/teacher'
     | '/terms'
+    | '/appointments/$id'
     | '/arena/battles'
     | '/arena/challenges'
     | '/arena/daily'
@@ -493,6 +515,7 @@ export interface FileRouteTypes {
     | '/chat'
     | '/cookies'
     | '/dashboard'
+    | '/documents'
     | '/explore'
     | '/feed'
     | '/feedback'
@@ -509,6 +532,7 @@ export interface FileRouteTypes {
     | '/suggestions'
     | '/teacher'
     | '/terms'
+    | '/appointments/$id'
     | '/arena/battles'
     | '/arena/challenges'
     | '/arena/daily'
@@ -532,12 +556,13 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
-  AppointmentsRoute: typeof AppointmentsRoute
+  AppointmentsRoute: typeof AppointmentsRouteWithChildren
   ArenaRoute: typeof ArenaRouteWithChildren
   AuthRoute: typeof AuthRoute
   ChatRoute: typeof ChatRoute
   CookiesRoute: typeof CookiesRoute
   DashboardRoute: typeof DashboardRoute
+  DocumentsRoute: typeof DocumentsRoute
   ExploreRoute: typeof ExploreRoute
   FeedRoute: typeof FeedRoute
   FeedbackRoute: typeof FeedbackRoute
@@ -671,6 +696,13 @@ declare module '@tanstack/react-router' {
       path: '/explore'
       fullPath: '/explore'
       preLoaderRoute: typeof ExploreRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents': {
+      id: '/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof DocumentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -827,6 +859,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArenaBattlesRouteImport
       parentRoute: typeof ArenaRoute
     }
+    '/appointments/$id': {
+      id: '/appointments/$id'
+      path: '/$id'
+      fullPath: '/appointments/$id'
+      preLoaderRoute: typeof AppointmentsIdRouteImport
+      parentRoute: typeof AppointmentsRoute
+    }
     '/lessons/$lessonId/edit': {
       id: '/lessons/$lessonId/edit'
       path: '/edit'
@@ -857,6 +896,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AppointmentsRouteChildren {
+  AppointmentsIdRoute: typeof AppointmentsIdRoute
+}
+
+const AppointmentsRouteChildren: AppointmentsRouteChildren = {
+  AppointmentsIdRoute: AppointmentsIdRoute,
+}
+
+const AppointmentsRouteWithChildren = AppointmentsRoute._addFileChildren(
+  AppointmentsRouteChildren,
+)
 
 interface ArenaBattlesRouteChildren {
   ArenaBattlesIdRoute: typeof ArenaBattlesIdRoute
@@ -949,12 +1000,13 @@ const LessonsLessonIdRouteWithChildren = LessonsLessonIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
-  AppointmentsRoute: AppointmentsRoute,
+  AppointmentsRoute: AppointmentsRouteWithChildren,
   ArenaRoute: ArenaRouteWithChildren,
   AuthRoute: AuthRoute,
   ChatRoute: ChatRoute,
   CookiesRoute: CookiesRoute,
   DashboardRoute: DashboardRoute,
+  DocumentsRoute: DocumentsRoute,
   ExploreRoute: ExploreRoute,
   FeedRoute: FeedRoute,
   FeedbackRoute: FeedbackRoute,
@@ -978,3 +1030,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
