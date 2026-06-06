@@ -21,6 +21,7 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MessagesRouteImport } from './routes/messages'
 import { Route as LegalRouteImport } from './routes/legal'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as FindTeachersRouteImport } from './routes/find-teachers'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as ExploreRouteImport } from './routes/explore'
@@ -108,6 +109,11 @@ const LegalRoute = LegalRouteImport.update({
 const LeaderboardRoute = LeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FindTeachersRoute = FindTeachersRouteImport.update({
+  id: '/find-teachers',
+  path: '/find-teachers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FeedbackRoute = FeedbackRouteImport.update({
@@ -262,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
   '/feedback': typeof FeedbackRoute
+  '/find-teachers': typeof FindTeachersRoute
   '/leaderboard': typeof LeaderboardRoute
   '/legal': typeof LegalRoute
   '/messages': typeof MessagesRouteWithChildren
@@ -303,6 +310,7 @@ export interface FileRoutesByTo {
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
   '/feedback': typeof FeedbackRoute
+  '/find-teachers': typeof FindTeachersRoute
   '/leaderboard': typeof LeaderboardRoute
   '/legal': typeof LegalRoute
   '/messages': typeof MessagesRouteWithChildren
@@ -346,6 +354,7 @@ export interface FileRoutesById {
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
   '/feedback': typeof FeedbackRoute
+  '/find-teachers': typeof FindTeachersRoute
   '/leaderboard': typeof LeaderboardRoute
   '/legal': typeof LegalRoute
   '/messages': typeof MessagesRouteWithChildren
@@ -390,6 +399,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/feed'
     | '/feedback'
+    | '/find-teachers'
     | '/leaderboard'
     | '/legal'
     | '/messages'
@@ -431,6 +441,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/feed'
     | '/feedback'
+    | '/find-teachers'
     | '/leaderboard'
     | '/legal'
     | '/messages'
@@ -473,6 +484,7 @@ export interface FileRouteTypes {
     | '/explore'
     | '/feed'
     | '/feedback'
+    | '/find-teachers'
     | '/leaderboard'
     | '/legal'
     | '/messages'
@@ -516,6 +528,7 @@ export interface RootRouteChildren {
   ExploreRoute: typeof ExploreRoute
   FeedRoute: typeof FeedRoute
   FeedbackRoute: typeof FeedbackRoute
+  FindTeachersRoute: typeof FindTeachersRoute
   LeaderboardRoute: typeof LeaderboardRoute
   LegalRoute: typeof LegalRoute
   MessagesRoute: typeof MessagesRouteWithChildren
@@ -617,6 +630,13 @@ declare module '@tanstack/react-router' {
       path: '/leaderboard'
       fullPath: '/leaderboard'
       preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/find-teachers': {
+      id: '/find-teachers'
+      path: '/find-teachers'
+      fullPath: '/find-teachers'
+      preLoaderRoute: typeof FindTeachersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feedback': {
@@ -917,6 +937,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExploreRoute: ExploreRoute,
   FeedRoute: FeedRoute,
   FeedbackRoute: FeedbackRoute,
+  FindTeachersRoute: FindTeachersRoute,
   LeaderboardRoute: LeaderboardRoute,
   LegalRoute: LegalRoute,
   MessagesRoute: MessagesRouteWithChildren,
