@@ -103,10 +103,20 @@ export function AppShell() {
             );
           })}
           {profile?.account_type === "teacher" && (
-            <Link to="/teacher" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-              location.pathname.startsWith("/teacher") ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60")}>
-              <GraduationCap className="h-4 w-4" /> Teacher
-            </Link>
+            <>
+              <Link to="/teacher" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                location.pathname === "/teacher" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60")}>
+                <GraduationCap className="h-4 w-4" /> Teacher
+              </Link>
+              <Link to="/teacher/earnings" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                location.pathname === "/teacher/earnings" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60")}>
+                <DollarSign className="h-4 w-4" /> Earnings
+              </Link>
+              <Link to="/teacher/availability" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                location.pathname === "/teacher/availability" ? "bg-sidebar-accent text-sidebar-accent-foreground" : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60")}>
+                <Clock className="h-4 w-4" /> Availability
+              </Link>
+            </>
           )}
           {profile?.account_type === "student" && (
             <Link to="/student" className={cn("flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
