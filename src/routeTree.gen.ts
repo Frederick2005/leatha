@@ -30,6 +30,7 @@ import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ArenaRouteImport } from './routes/arena'
+import { Route as AppointmentsRouteImport } from './routes/appointments'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ArenaIndexRouteImport } from './routes/arena.index'
@@ -156,6 +157,11 @@ const ArenaRoute = ArenaRouteImport.update({
   path: '/arena',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppointmentsRoute = AppointmentsRouteImport.update({
+  id: '/appointments',
+  path: '/appointments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -260,6 +266,7 @@ const ArenaBattlesIdRoute = ArenaBattlesIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/appointments': typeof AppointmentsRoute
   '/arena': typeof ArenaRouteWithChildren
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
@@ -303,6 +310,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/appointments': typeof AppointmentsRoute
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/cookies': typeof CookiesRoute
@@ -346,6 +354,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/appointments': typeof AppointmentsRoute
   '/arena': typeof ArenaRouteWithChildren
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
@@ -391,6 +400,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/appointments'
     | '/arena'
     | '/auth'
     | '/chat'
@@ -434,6 +444,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/appointments'
     | '/auth'
     | '/chat'
     | '/cookies'
@@ -476,6 +487,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/appointments'
     | '/arena'
     | '/auth'
     | '/chat'
@@ -520,6 +532,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AppointmentsRoute: typeof AppointmentsRoute
   ArenaRoute: typeof ArenaRouteWithChildren
   AuthRoute: typeof AuthRoute
   ChatRoute: typeof ChatRoute
@@ -693,6 +706,13 @@ declare module '@tanstack/react-router' {
       path: '/arena'
       fullPath: '/arena'
       preLoaderRoute: typeof ArenaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/appointments': {
+      id: '/appointments'
+      path: '/appointments'
+      fullPath: '/appointments'
+      preLoaderRoute: typeof AppointmentsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -929,6 +949,7 @@ const LessonsLessonIdRouteWithChildren = LessonsLessonIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AppointmentsRoute: AppointmentsRoute,
   ArenaRoute: ArenaRouteWithChildren,
   AuthRoute: AuthRoute,
   ChatRoute: ChatRoute,
