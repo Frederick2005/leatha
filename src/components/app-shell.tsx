@@ -1,8 +1,7 @@
 import { Link, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import {
-  GitFork, Home, BookOpen, MessageSquare, MessagesSquare, Trophy, Sparkles, Swords, Lightbulb,
-  Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X, MessageSquareWarning,
-  GraduationCap, Backpack,
+  Home, BookOpen, MessagesSquare, Sparkles, Shield, User as UserIcon, LogIn, LogOut, Plus, Search, Moon, Sun, Palette, Menu, X, MessageSquareWarning,
+  GraduationCap, Backpack, Users, CalendarDays, FileText, DollarSign, Clock,
 } from "lucide-react";
 import { LeathaLogo } from "@/components/leatha-logo";
 import { useEffect, useState } from "react";
@@ -21,13 +20,12 @@ import { Toaster } from "@/components/ui/sonner";
 
 const navItems = [
   { to: "/dashboard" as const, label: "Dashboard", icon: Home, auth: true },
+  { to: "/find-teachers" as const, label: "Find Teachers", icon: Users, auth: true },
+  { to: "/appointments" as const, label: "Appointments", icon: CalendarDays, auth: true },
+  { to: "/messages" as const, label: "Messages", icon: MessagesSquare, auth: true },
+  { to: "/documents" as const, label: "Documents", icon: FileText, auth: true },
   { to: "/feed" as const, label: "Feed", icon: Sparkles, auth: true },
   { to: "/explore" as const, label: "Explore", icon: BookOpen, auth: true },
-  { to: "/arena" as const, label: "Arena", icon: Swords, auth: true, highlight: true },
-  { to: "/suggestions" as const, label: "Suggestions", icon: Lightbulb, auth: true },
-  { to: "/chat" as const, label: "Chat", icon: MessageSquare, auth: true },
-  { to: "/messages" as const, label: "Messages", icon: MessagesSquare, auth: true },
-  { to: "/leaderboard" as const, label: "Leaderboard", icon: Trophy, auth: true },
 ];
 
 export function AppShell() {
