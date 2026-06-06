@@ -104,6 +104,51 @@ export type Database = {
         }
         Relationships: []
       }
+      appointments: {
+        Row: {
+          created_at: string
+          currency: string
+          ends_at: string
+          id: string
+          notes: string | null
+          price_cents: number
+          starts_at: string
+          status: string
+          student_id: string
+          subject: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          ends_at: string
+          id?: string
+          notes?: string | null
+          price_cents?: number
+          starts_at: string
+          status?: string
+          student_id: string
+          subject: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          ends_at?: string
+          id?: string
+          notes?: string | null
+          price_cents?: number
+          starts_at?: string
+          status?: string
+          student_id?: string
+          subject?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       arena_attempts: {
         Row: {
           challenge_id: string
@@ -1106,6 +1151,45 @@ export type Database = {
         }
         Relationships: []
       }
+      documents: {
+        Row: {
+          created_at: string
+          file_path: string
+          file_size_bytes: number
+          file_type: string | null
+          file_url: string
+          id: string
+          owner_id: string
+          subject: string | null
+          title: string
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          file_path: string
+          file_size_bytes?: number
+          file_type?: string | null
+          file_url: string
+          id?: string
+          owner_id: string
+          subject?: string | null
+          title: string
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          file_path?: string
+          file_size_bytes?: number
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          owner_id?: string
+          subject?: string | null
+          title?: string
+          visibility?: string
+        }
+        Relationships: []
+      }
       endorsements: {
         Row: {
           body: string
@@ -1479,6 +1563,59 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_intents: {
+        Row: {
+          amount_cents: number
+          appointment_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          payee_id: string
+          payer_id: string
+          phone_number: string
+          provider: string
+          reference: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount_cents: number
+          appointment_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          payee_id: string
+          payer_id: string
+          phone_number: string
+          provider: string
+          reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          appointment_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          payee_id?: string
+          payer_id?: string
+          phone_number?: string
+          provider?: string
+          reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_intents_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           account_type: string
@@ -1746,6 +1883,119 @@ export type Database = {
             columns: ["suggestion_id"]
             isOneToOne: false
             referencedRelation: "lesson_suggestions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_availability: {
+        Row: {
+          created_at: string
+          end_time: string
+          id: string
+          start_time: string
+          teacher_id: string
+          weekday: number
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          id?: string
+          start_time: string
+          teacher_id: string
+          weekday: number
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          id?: string
+          start_time?: string
+          teacher_id?: string
+          weekday?: number
+        }
+        Relationships: []
+      }
+      teacher_profiles: {
+        Row: {
+          accepts_bookings: boolean
+          bio_long: string | null
+          created_at: string
+          currency: string
+          hourly_rate_cents: number
+          rating_avg: number
+          rating_count: number
+          students_count: number
+          subjects: string[]
+          total_earnings_cents: number
+          updated_at: string
+          user_id: string
+          years_experience: number
+        }
+        Insert: {
+          accepts_bookings?: boolean
+          bio_long?: string | null
+          created_at?: string
+          currency?: string
+          hourly_rate_cents?: number
+          rating_avg?: number
+          rating_count?: number
+          students_count?: number
+          subjects?: string[]
+          total_earnings_cents?: number
+          updated_at?: string
+          user_id: string
+          years_experience?: number
+        }
+        Update: {
+          accepts_bookings?: boolean
+          bio_long?: string | null
+          created_at?: string
+          currency?: string
+          hourly_rate_cents?: number
+          rating_avg?: number
+          rating_count?: number
+          students_count?: number
+          subjects?: string[]
+          total_earnings_cents?: number
+          updated_at?: string
+          user_id?: string
+          years_experience?: number
+        }
+        Relationships: []
+      }
+      teacher_reviews: {
+        Row: {
+          appointment_id: string | null
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          student_id: string
+          teacher_id: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          student_id: string
+          teacher_id: string
+        }
+        Update: {
+          appointment_id?: string | null
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          student_id?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_reviews_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
             referencedColumns: ["id"]
           },
         ]
