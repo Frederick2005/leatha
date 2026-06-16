@@ -19,7 +19,7 @@ import {
 import { Toaster } from "@/components/ui/sonner";
 
 const navItems = [
-  { to: "/dashboard" as const, label: "Dashboard", icon: Home, auth: true },
+  { to: "/dashboard-route" as const, label: "Dashboard", icon: Home, auth: true },
   { to: "/find-teachers" as const, label: "Find Teachers", icon: Users, auth: true },
   { to: "/appointments" as const, label: "Appointments", icon: CalendarDays, auth: true },
   { to: "/messages" as const, label: "Messages", icon: MessagesSquare, auth: true },

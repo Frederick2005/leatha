@@ -10,9 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
-import { Route as TeacherRouteImport } from './routes/teacher'
+import { Route as TeacherRouteRouteImport } from './routes/teacher-route'
 import { Route as SuggestionsRouteImport } from './routes/suggestions'
-import { Route as StudentRouteImport } from './routes/student'
+import { Route as StudentRouteRouteImport } from './routes/student-route'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SchoolsRouteImport } from './routes/schools'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -28,7 +28,7 @@ import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as DocumentsRouteImport } from './routes/documents'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard-route'
 import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -61,9 +61,9 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TeacherRoute = TeacherRouteImport.update({
-  id: '/teacher',
-  path: '/teacher',
+const TeacherRouteRoute = TeacherRouteRouteImport.update({
+  id: '/teacher-route',
+  path: '/teacher-route',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SuggestionsRoute = SuggestionsRouteImport.update({
@@ -71,9 +71,9 @@ const SuggestionsRoute = SuggestionsRouteImport.update({
   path: '/suggestions',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StudentRoute = StudentRouteImport.update({
-  id: '/student',
-  path: '/student',
+const StudentRouteRoute = StudentRouteRouteImport.update({
+  id: '/student-route',
+  path: '/student-route',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRoute = SettingsRouteImport.update({
@@ -151,9 +151,9 @@ const DocumentsRoute = DocumentsRouteImport.update({
   path: '/documents',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
+  id: '/dashboard-route',
+  path: '/dashboard-route',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CookiesRoute = CookiesRouteImport.update({
@@ -295,7 +295,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/cookies': typeof CookiesRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard-route': typeof DashboardRouteRoute
   '/documents': typeof DocumentsRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
@@ -311,9 +311,9 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
-  '/student': typeof StudentRoute
+  '/student-route': typeof StudentRouteRoute
   '/suggestions': typeof SuggestionsRouteWithChildren
-  '/teacher': typeof TeacherRoute
+  '/teacher-route': typeof TeacherRouteRoute
   '/terms': typeof TermsRoute
   '/appointments/$id': typeof AppointmentsIdRoute
   '/arena/battles': typeof ArenaBattlesRouteWithChildren
@@ -342,7 +342,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/cookies': typeof CookiesRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard-route': typeof DashboardRouteRoute
   '/documents': typeof DocumentsRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
@@ -358,9 +358,9 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
-  '/student': typeof StudentRoute
+  '/student-route': typeof StudentRouteRoute
   '/suggestions': typeof SuggestionsRouteWithChildren
-  '/teacher': typeof TeacherRoute
+  '/teacher-route': typeof TeacherRouteRoute
   '/terms': typeof TermsRoute
   '/appointments/$id': typeof AppointmentsIdRoute
   '/arena/battles': typeof ArenaBattlesRouteWithChildren
@@ -391,7 +391,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/chat': typeof ChatRoute
   '/cookies': typeof CookiesRoute
-  '/dashboard': typeof DashboardRoute
+  '/dashboard-route': typeof DashboardRouteRoute
   '/documents': typeof DocumentsRoute
   '/explore': typeof ExploreRoute
   '/feed': typeof FeedRoute
@@ -407,9 +407,9 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/schools': typeof SchoolsRoute
   '/settings': typeof SettingsRoute
-  '/student': typeof StudentRoute
+  '/student-route': typeof StudentRouteRoute
   '/suggestions': typeof SuggestionsRouteWithChildren
-  '/teacher': typeof TeacherRoute
+  '/teacher-route': typeof TeacherRouteRoute
   '/terms': typeof TermsRoute
   '/appointments/$id': typeof AppointmentsIdRoute
   '/arena/battles': typeof ArenaBattlesRouteWithChildren
@@ -441,7 +441,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/chat'
     | '/cookies'
-    | '/dashboard'
+    | '/dashboard-route'
     | '/documents'
     | '/explore'
     | '/feed'
@@ -457,9 +457,9 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/schools'
     | '/settings'
-    | '/student'
+    | '/student-route'
     | '/suggestions'
-    | '/teacher'
+    | '/teacher-route'
     | '/terms'
     | '/appointments/$id'
     | '/arena/battles'
@@ -488,7 +488,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/chat'
     | '/cookies'
-    | '/dashboard'
+    | '/dashboard-route'
     | '/documents'
     | '/explore'
     | '/feed'
@@ -504,9 +504,9 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/schools'
     | '/settings'
-    | '/student'
+    | '/student-route'
     | '/suggestions'
-    | '/teacher'
+    | '/teacher-route'
     | '/terms'
     | '/appointments/$id'
     | '/arena/battles'
@@ -536,7 +536,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/chat'
     | '/cookies'
-    | '/dashboard'
+    | '/dashboard-route'
     | '/documents'
     | '/explore'
     | '/feed'
@@ -552,9 +552,9 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/schools'
     | '/settings'
-    | '/student'
+    | '/student-route'
     | '/suggestions'
-    | '/teacher'
+    | '/teacher-route'
     | '/terms'
     | '/appointments/$id'
     | '/arena/battles'
@@ -585,7 +585,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ChatRoute: typeof ChatRoute
   CookiesRoute: typeof CookiesRoute
-  DashboardRoute: typeof DashboardRoute
+  DashboardRouteRoute: typeof DashboardRouteRoute
   DocumentsRoute: typeof DocumentsRoute
   ExploreRoute: typeof ExploreRoute
   FeedRoute: typeof FeedRoute
@@ -601,9 +601,9 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SchoolsRoute: typeof SchoolsRoute
   SettingsRoute: typeof SettingsRoute
-  StudentRoute: typeof StudentRoute
+  StudentRouteRoute: typeof StudentRouteRoute
   SuggestionsRoute: typeof SuggestionsRouteWithChildren
-  TeacherRoute: typeof TeacherRoute
+  TeacherRouteRoute: typeof TeacherRouteRoute
   TermsRoute: typeof TermsRoute
   LessonsLessonIdRoute: typeof LessonsLessonIdRouteWithChildren
   LessonsNewRoute: typeof LessonsNewRoute
@@ -619,11 +619,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/teacher': {
-      id: '/teacher'
-      path: '/teacher'
-      fullPath: '/teacher'
-      preLoaderRoute: typeof TeacherRouteImport
+    '/teacher-route': {
+      id: '/teacher-route'
+      path: '/teacher-route'
+      fullPath: '/teacher-route'
+      preLoaderRoute: typeof TeacherRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/suggestions': {
@@ -633,11 +633,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SuggestionsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/student': {
-      id: '/student'
-      path: '/student'
-      fullPath: '/student'
-      preLoaderRoute: typeof StudentRouteImport
+    '/student-route': {
+      id: '/student-route'
+      path: '/student-route'
+      fullPath: '/student-route'
+      preLoaderRoute: typeof StudentRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -745,11 +745,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DocumentsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/dashboard-route': {
+      id: '/dashboard-route'
+      path: '/dashboard-route'
+      fullPath: '/dashboard-route'
+      preLoaderRoute: typeof DashboardRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cookies': {
@@ -1045,7 +1045,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ChatRoute: ChatRoute,
   CookiesRoute: CookiesRoute,
-  DashboardRoute: DashboardRoute,
+  DashboardRouteRoute: DashboardRouteRoute,
   DocumentsRoute: DocumentsRoute,
   ExploreRoute: ExploreRoute,
   FeedRoute: FeedRoute,
@@ -1061,9 +1061,9 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SchoolsRoute: SchoolsRoute,
   SettingsRoute: SettingsRoute,
-  StudentRoute: StudentRoute,
+  StudentRouteRoute: StudentRouteRoute,
   SuggestionsRoute: SuggestionsRouteWithChildren,
-  TeacherRoute: TeacherRoute,
+  TeacherRouteRoute: TeacherRouteRoute,
   TermsRoute: TermsRoute,
   LessonsLessonIdRoute: LessonsLessonIdRouteWithChildren,
   LessonsNewRoute: LessonsNewRoute,
