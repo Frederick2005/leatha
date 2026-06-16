@@ -56,7 +56,7 @@ function Onboarding() {
   useEffect(() => {
     const p = profile as unknown as { has_completed_onboarding?: boolean; account_type?: string; school?: string | null } | null;
     if (p?.has_completed_onboarding && p.account_type && p.school) {
-      navigate({ to: "/dashboard", replace: true });
+      navigate({ to: "/dashboard-route", replace: true });
     }
   }, [profile, navigate]);
 
@@ -296,7 +296,7 @@ function Onboarding() {
                     {accountType === "teacher" ? "Your teaching journey starts now." : "Your learning journey starts now."}
                   </p>
                   <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-                    <Button size="lg" onClick={() => navigate({ to: "/dashboard", replace: true })}>
+                    <Button size="lg" onClick={() => navigate({ to: "/dashboard-route", replace: true })}>
                       Go to Dashboard <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
                     {accountType === "teacher" && (
@@ -304,7 +304,7 @@ function Onboarding() {
                         if (!user) return;
                         await supabase.from("teacher_verifications").insert({ user_id: user.id, message: "Initial request from onboarding" });
                         toast.success("Verification request submitted");
-                        navigate({ to: "/dashboard", replace: true });
+                        navigate({ to: "/dashboard-route", replace: true });
                       }}>
                         Apply for Verification <Sparkles className="ml-2 h-4 w-4" />
                       </Button>

@@ -42,7 +42,7 @@ function LandingPage() {
   // Logged-in users see the dashboard, not the marketing landing.
   useEffect(() => {
     if (!loading && user) {
-      navigate({ to: "/dashboard", replace: true });
+      navigate({ to: "/dashboard-route", replace: true });
     }
   }, [user, loading, navigate]);
 

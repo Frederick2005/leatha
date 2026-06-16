@@ -335,7 +335,7 @@ function NewLessonPage() {
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={() => navigate({ to: "/dashboard" })}>
+          <Button type="button" variant="outline" onClick={() => navigate({ to: "/dashboard-route" })}>
             Cancel
           </Button>
           <Button type="submit" disabled={busy}>
