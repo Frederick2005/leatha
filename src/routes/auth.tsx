@@ -44,7 +44,7 @@ function AuthPage() {
   const dest =
     search.redirect && search.redirect.startsWith("/") && !search.redirect.startsWith("/auth")
       ? search.redirect
-      : "/dashboard";
+      : "/dashboard-route";
   const [tab, setTab] = useState<"login" | "signup">("login");
   const [busy, setBusy] = useState(false);
 
@@ -123,7 +123,7 @@ function AuthPage() {
       email: suEmail,
       password: suPwd,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
+        emailRedirectTo: `${window.location.origin}/dashboard-route`,
         data: {
           username: suUsername,
           display_name: suDisplayName || suUsername,
@@ -161,7 +161,7 @@ if (inviteRef) {
     setBusy(true);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+      options: { redirectTo: `${window.location.origin}/dashboard-route` },
     });
     if (error) {
       setBusy(false);

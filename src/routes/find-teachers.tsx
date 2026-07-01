@@ -1,113 +1,238 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { Search, Star, MessageSquare, Calendar } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RequireAuth } from "@/components/require-auth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { UserAvatar } from "@/components/user-avatar";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { BookingModal, type TeacherWithProfile } from "@/components/booking-modal";
+import { Search, Star, SlidersHorizontal } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/find-teachers")({
   head: () => ({ meta: [{ title: "Find Teachers — Leatha" }] }),
-  component: () => (<RequireAuth><FindTeachersPage /></RequireAuth>),
+  component: () => (
+    <RequireAuth>
+      <FindTeachersPage />
+    </RequireAuth>
+  ),
 });
 
-interface TeacherRow {
-  user_id: string;
-  subjects: string[];
-  hourly_rate_cents: number;
-  rating_avg: number;
-  rating_count: number;
-  students_count: number;
-  currency: string;
-  profile: { username: string; display_name: string | null; avatar_url: string | null; bio: string | null; school: string | null } | null;
-}
+const EXPERIENCE_RANK: Record<string, number> = {
+  "Just starting": 0,
+  "1-5 years": 1,
+  "6-10 years": 2,
+  "10+ years": 3,
+};
+
+type SortKey = "rating" | "price_low" | "price_high" | "experience";
 
 function FindTeachersPage() {
-  const [teachers, setTeachers] = useState<TeacherRow[]>([]);
+  const [teachers, setTeachers] = useState<TeacherWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [q, setQ] = useState("");
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
+  const [sortBy, setSortBy] = useState<SortKey>("rating");
+  const [bookingTeacher, setBookingTeacher] = useState<TeacherWithProfile | null>(null);
 
   useEffect(() => {
     void (async () => {
-      const { data } = await (supabase as any)
+      const { data: profiles } = await supabase
         .from("teacher_profiles")
-        .select("user_id,subjects,hourly_rate_cents,rating_avg,rating_count,students_count,currency,profile:profiles!teacher_profiles_user_id_fkey(username,display_name,avatar_url,bio,school)")
-        .eq("accepts_bookings", true)
-        .order("rating_avg", { ascending: false })
-        .limit(50);
-      setTeachers((data ?? []) as TeacherRow[]);
+        .select(
+          "user_id, subjects, hourly_rate, years_experience, rating_avg, rating_count, is_available",
+        )
+        .eq("is_available", true);
+
+      if (!profiles || profiles.length === 0) {
+        setTeachers([]);
+        setLoading(false);
+        return;
+      }
+
+      const ids = profiles.map((p) => p.user_id);
+      const { data: profs } = await supabase
+        .from("profiles")
+        .select("id, display_name, username, avatar_url, school")
+        .in("id", ids);
+
+      const byId = Object.fromEntries((profs ?? []).map((p) => [p.id, p]));
+      setTeachers(
+        profiles.map((p) => ({ ...p, profile: byId[p.user_id] })) as TeacherWithProfile[],
+      );
       setLoading(false);
     })();
   }, []);
 
-  const filtered = teachers.filter((t) => {
-    if (!q) return true;
-    const blob = `${t.profile?.username} ${t.profile?.display_name} ${t.subjects.join(" ")} ${t.profile?.school}`.toLowerCase();
-    return blob.includes(q.toLowerCase());
-  });
+  const categories = useMemo(() => {
+    const counts: Record<string, number> = {};
+    teachers.forEach((t) => t.subjects.forEach((s) => (counts[s] = (counts[s] ?? 0) + 1)));
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [teachers]);
+
+  const filtered = useMemo(() => {
+    let list = teachers;
+
+    if (category !== "all") {
+      list = list.filter((t) => t.subjects.includes(category));
+    }
+
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter(
+        (t) =>
+          t.profile?.display_name?.toLowerCase().includes(q) ||
+          t.profile?.username.toLowerCase().includes(q) ||
+          t.subjects.some((s) => s.toLowerCase().includes(q)),
+      );
+    }
+
+    const sorted = [...list];
+    if (sortBy === "rating") sorted.sort((a, b) => b.rating_avg - a.rating_avg);
+    if (sortBy === "price_low") sorted.sort((a, b) => a.hourly_rate - b.hourly_rate);
+    if (sortBy === "price_high") sorted.sort((a, b) => b.hourly_rate - a.hourly_rate);
+    if (sortBy === "experience")
+      sorted.sort(
+        (a, b) => (EXPERIENCE_RANK[b.years_experience] ?? 0) - (EXPERIENCE_RANK[a.years_experience] ?? 0),
+      );
+    return sorted;
+  }, [teachers, category, search, sortBy]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <div className="flex-1 p-4 sm:p-6 max-w-6xl mx-auto w-full space-y-5">
       <div>
-        <h1 className="text-2xl font-display font-semibold">Find Teachers</h1>
-        <p className="text-sm text-muted-foreground">Browse verified teachers and book sessions.</p>
-      </div>
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name, subject, school…" className="pl-9" />
+        <h1 className="text-xl font-semibold">Find Teachers</h1>
+        <p className="text-sm text-muted-foreground">Browse verified teachers and book a session.</p>
       </div>
 
+      {/* Search + sort */}
+      <div className="flex gap-2 flex-wrap">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name or subject"
+            className="pl-9"
+          />
+        </div>
+        <div className="relative">
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortKey)}
+            className="h-10 rounded-md border border-border bg-background pl-9 pr-3 text-sm appearance-none"
+          >
+            <option value="rating">Highest rated</option>
+            <option value="price_low">Price: low to high</option>
+            <option value="price_high">Price: high to low</option>
+            <option value="experience">Most experienced</option>
+          </select>
+          <SlidersHorizontal className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        </div>
+      </div>
+
+      {/* Category chips */}
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+        <button
+          onClick={() => setCategory("all")}
+          className={cn(
+            "shrink-0 text-xs px-3 py-1.5 rounded-full border transition-colors",
+            category === "all"
+              ? "bg-primary text-primary-foreground border-primary"
+              : "border-border text-muted-foreground hover:border-primary/40",
+          )}
+        >
+          All ({teachers.length})
+        </button>
+        {categories.map(([name, count]) => (
+          <button
+            key={name}
+            onClick={() => setCategory(name)}
+            className={cn(
+              "shrink-0 text-xs px-3 py-1.5 rounded-full border transition-colors",
+              category === name
+                ? "bg-primary text-primary-foreground border-primary"
+                : "border-border text-muted-foreground hover:border-primary/40",
+            )}
+          >
+            {name} ({count})
+          </button>
+        ))}
+      </div>
+
+      {/* Results */}
       {loading ? (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[0,1,2,3,4,5].map(i => <div key={i} className="h-48 rounded-2xl border border-border bg-card animate-pulse" />)}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {[0, 1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-40 rounded-2xl border border-border bg-card animate-pulse" />
+          ))}
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl border border-dashed p-12 text-center text-muted-foreground">
-          No teachers yet. Be the first to set up a teacher profile in Settings.
+        <div className="rounded-2xl border border-dashed border-border p-10 text-center">
+          <p className="text-sm text-muted-foreground">
+            No teachers match your filters yet. Try a different subject or check back soon.
+          </p>
         </div>
       ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((t) => (
-            <div key={t.user_id} className="rounded-2xl border border-border bg-card p-5 hover:border-primary/40 transition-colors">
-              <div className="flex items-start gap-3">
-                <UserAvatar name={t.profile?.display_name ?? t.profile?.username} url={t.profile?.avatar_url ?? null} size="lg" />
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold truncate">{t.profile?.display_name ?? t.profile?.username}</div>
-                  <div className="text-xs text-muted-foreground font-mono">@{t.profile?.username}</div>
-                  {t.profile?.school && <div className="text-xs text-muted-foreground mt-1 truncate">{t.profile.school}</div>}
+            <div key={t.user_id} className="rounded-2xl border border-border bg-card p-4 flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <UserAvatar
+                  name={t.profile?.display_name ?? t.profile?.username ?? "T"}
+                  url={t.profile?.avatar_url}
+                  size="md"
+                />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold truncate">
+                    {t.profile?.display_name ?? t.profile?.username}
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {t.profile?.school ?? "Independent tutor"}
+                  </p>
                 </div>
               </div>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                {t.subjects.slice(0, 4).map((s) => (
-                  <span key={s} className="text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5">{s}</span>
+
+              <div className="flex flex-wrap gap-1">
+                {t.subjects.slice(0, 3).map((s) => (
+                  <span key={s} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                    {s}
+                  </span>
                 ))}
+                {t.subjects.length > 3 && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                    +{t.subjects.length - 3} more
+                  </span>
+                )}
               </div>
-              <div className="mt-4 flex items-center justify-between text-sm">
-                <div className="flex items-center gap-1">
-                  <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
-                  <span className="font-semibold">{t.rating_avg.toFixed(1)}</span>
-                  <span className="text-muted-foreground">({t.rating_count})</span>
-                </div>
-                <div className="font-mono text-sm">
-                  {t.currency} {(t.hourly_rate_cents / 100).toFixed(0)}<span className="text-muted-foreground">/hr</span>
-                </div>
+
+              <div className="flex items-center justify-between text-xs">
+                <span className="flex items-center gap-1 text-amber-500">
+                  <Star className="h-3.5 w-3.5 fill-amber-500" />
+                  {t.rating_avg?.toFixed(1) ?? "New"} {t.rating_count > 0 && `(${t.rating_count})`}
+                </span>
+                <span className="text-muted-foreground">{t.years_experience}</span>
               </div>
-              <div className="mt-4 flex gap-2">
-                <Button asChild size="sm" className="flex-1">
-                  <Link to="/appointments" search={{ teacher: t.user_id } as any}>
-                    <Calendar className="h-3.5 w-3.5 mr-1.5" /> Book
-                  </Link>
-                </Button>
-                <Button asChild size="sm" variant="outline">
-                  <Link to="/messages/$username" params={{ username: t.profile?.username ?? "" }}>
-                    <MessageSquare className="h-3.5 w-3.5" />
-                  </Link>
+
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-sm font-bold">
+                  {t.hourly_rate > 0 ? `UGX ${t.hourly_rate.toLocaleString()}/hr` : "Rate not set"}
+                </span>
+                <Button size="sm" onClick={() => setBookingTeacher(t)} disabled={t.hourly_rate === 0}>
+                  Book
                 </Button>
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {bookingTeacher && (
+        <BookingModal
+          teacher={bookingTeacher}
+          open={!!bookingTeacher}
+          onClose={() => setBookingTeacher(null)}
+        />
       )}
     </div>
   );
