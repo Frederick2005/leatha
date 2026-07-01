@@ -19,14 +19,14 @@ export const Route = createFileRoute("/teacher/availability")({
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-type Slot = { id?: string; day_of_week: number; start_time: string; end_time: string };
+type Slot = { id?: string; weekday: number; start_time: string; end_time: string };
 
 function AvailabilityPage() {
   const { user, profile } = useAuth();
   const [slots, setSlots] = useState<Slot[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [draft, setDraft] = useState<Slot>({ day_of_week: 1, start_time: "09:00", end_time: "17:00" });
+  const [draft, setDraft] = useState<Slot>({ weekday: 1, start_time: "09:00", end_time: "17:00" });
 
   useEffect(() => {
     if (!user) return;
@@ -35,7 +35,7 @@ function AvailabilityPage() {
         .from("teacher_availability")
         .select("*")
         .eq("teacher_id", user.id)
-        .order("day_of_week").order("start_time");
+        .order("weekday").order("start_time");
       setSlots((data ?? []) as Slot[]);
       setLoading(false);
     })();
@@ -51,7 +51,7 @@ function AvailabilityPage() {
       .select().single();
     setBusy(false);
     if (error) { toast.error(error.message); return; }
-    setSlots((s) => [...s, data as Slot].sort((a, b) => a.day_of_week - b.day_of_week || a.start_time.localeCompare(b.start_time)));
+    setSlots((s) => [...s, data as Slot].sort((a, b) => a.weekday - b.weekday || a.start_time.localeCompare(b.start_time)));
     toast.success("Slot added");
   };
 
@@ -66,7 +66,7 @@ function AvailabilityPage() {
     return <div className="max-w-2xl mx-auto px-4 py-10 text-sm text-muted-foreground">This page is only available to teacher accounts.</div>;
   }
 
-  const byDay = DAYS.map((_, i) => slots.filter((s) => s.day_of_week === i));
+  const byDay = DAYS.map((_, i) => slots.filter((s) => s.weekday === i));
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
@@ -79,7 +79,7 @@ function AvailabilityPage() {
         <div className="grid grid-cols-1 sm:grid-cols-[1fr,auto,auto,auto] gap-3 items-end">
           <div className="space-y-1.5">
             <Label>Day</Label>
-            <Select value={String(draft.day_of_week)} onValueChange={(v) => setDraft((d) => ({ ...d, day_of_week: Number(v) }))}>
+            <Select value={String(draft.weekday)} onValueChange={(v) => setDraft((d) => ({ ...d, weekday: Number(v) }))}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>{DAYS.map((d, i) => <SelectItem key={i} value={String(i)}>{d}</SelectItem>)}</SelectContent>
             </Select>
