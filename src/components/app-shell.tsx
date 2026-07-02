@@ -29,6 +29,10 @@ const baseNav = [
   { to: "/documents" as const, label: "Documents", icon: FileText, auth: true },
   { to: "/feed" as const, label: "Feed", icon: Sparkles, auth: true },
   { to: "/explore" as const, label: "Explore", icon: BookOpen, auth: true },
+  { to: "/arena" as const, label: "Arena", icon: Swords, auth: true },
+  { to: "/leaderboard" as const, label: "Leaderboard", icon: Trophy, auth: true },
+  { to: "/suggestions" as const, label: "Suggestions", icon: Lightbulb, auth: true },
+  { to: "/schools" as const, label: "Schools", icon: School, auth: true },
 ];
 
 const COLLAPSED_KEY = "leatha:sidebar:collapsed";
