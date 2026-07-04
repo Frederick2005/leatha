@@ -1,5 +1,4 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const Input = z.object({
@@ -15,6 +14,27 @@ function b64url(input: ArrayBuffer | string): string {
   let s = "";
   for (const b of bytes) s += String.fromCharCode(b);
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function getRuntimeEnvValue(...keys: string[]) {
+  const candidates = keys.filter(Boolean);
+  for (const key of candidates) {
+    const value = process.env?.[key];
+    if (value) return value;
+  }
+  if (typeof import.meta !== "undefined") {
+    const env = (import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env;
+    for (const key of candidates) {
+      const value = env?.[key];
+      if (value) return value;
+    }
+    for (const key of candidates) {
+      const viteKey = key.startsWith("VITE_") ? key : `VITE_${key}`;
+      const value = env?.[viteKey];
+      if (value) return value;
+    }
+  }
+  return undefined;
 }
 
 async function signLivekitToken(apiKey: string, apiSecret: string, identity: string, name: string, room: string, isHost: boolean) {
@@ -81,16 +101,15 @@ function getPermissions(roomType: string, isHost: boolean) {
 }
 
 export const getLivekitToken = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => Input.parse(data))
-  .handler(async ({ data, context }) => {
-    const apiKey = process.env.LIVEKIT_API_KEY;
-    const apiSecret = process.env.LIVEKIT_API_SECRET;
-    const url = process.env.LIVEKIT_URL;
+  .handler(async ({ data }) => {
+    const apiKey = getRuntimeEnvValue("LIVEKIT_API_KEY", "VITE_LIVEKIT_API_KEY");
+    const apiSecret = getRuntimeEnvValue("LIVEKIT_API_SECRET", "VITE_LIVEKIT_API_SECRET");
+    const url = getRuntimeEnvValue("LIVEKIT_URL", "VITE_LIVEKIT_URL");
     if (!apiKey || !apiSecret || !url) {
       throw new Error("LiveKit not configured. Missing LIVEKIT_API_KEY, LIVEKIT_API_SECRET, or LIVEKIT_URL environment variables.");
     }
-    const identity = `${context.userId}:${data.username}`;
+    const identity = `${data.username}:${data.displayName}`;
     const token = await signLivekitToken(apiKey, apiSecret, identity, data.displayName, data.roomName, data.isHost);
     return { token, url };
   });

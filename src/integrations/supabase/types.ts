@@ -1121,6 +1121,33 @@ export type Database = {
           },
         ]
       }
+      custom_options: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          id: string
+          usage_count: number
+          value: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          usage_count?: number
+          value: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          usage_count?: number
+          value?: string
+        }
+        Relationships: []
+      }
       direct_messages: {
         Row: {
           attachments: Json
@@ -1638,6 +1665,7 @@ export type Database = {
           intro_video_url: string | null
           is_verified: boolean
           last_active_at: string
+          learning_goals: string | null
           learning_style: string | null
           lesson_count: number
           level: number
@@ -1678,6 +1706,7 @@ export type Database = {
           intro_video_url?: string | null
           is_verified?: boolean
           last_active_at?: string
+          learning_goals?: string | null
           learning_style?: string | null
           lesson_count?: number
           level?: number
@@ -1718,6 +1747,7 @@ export type Database = {
           intro_video_url?: string | null
           is_verified?: boolean
           last_active_at?: string
+          learning_goals?: string | null
           learning_style?: string | null
           lesson_count?: number
           level?: number
@@ -1887,6 +1917,39 @@ export type Database = {
           },
         ]
       }
+      support_tickets: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          status: string
+          subject: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          status?: string
+          subject: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       teacher_availability: {
         Row: {
           created_at: string
@@ -1925,6 +1988,7 @@ export type Database = {
           rating_count: number
           students_count: number
           subjects: string[]
+          timezone: string | null
           total_earnings_cents: number
           updated_at: string
           user_id: string
@@ -1940,6 +2004,7 @@ export type Database = {
           rating_count?: number
           students_count?: number
           subjects?: string[]
+          timezone?: string | null
           total_earnings_cents?: number
           updated_at?: string
           user_id: string
@@ -1955,6 +2020,7 @@ export type Database = {
           rating_count?: number
           students_count?: number
           subjects?: string[]
+          timezone?: string | null
           total_earnings_cents?: number
           updated_at?: string
           user_id?: string

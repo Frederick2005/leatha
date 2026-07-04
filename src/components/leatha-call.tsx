@@ -1,9 +1,7 @@
 import { LiveKitRoom, VideoConference, RoomAudioRenderer } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/providers/auth-provider";
-import { getLivekitToken } from "@/lib/livekit.functions";
 import { Button } from "@/components/ui/button";
 import { PhoneOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -20,7 +18,6 @@ interface LeathaCallProps {
 
 export function LeathaCall({ roomName, roomType, isHost, title, onLeave }: LeathaCallProps) {
   const { profile } = useAuth();
-  const fetchToken = useServerFn(getLivekitToken);
   const [token, setToken] = useState<string | null>(null);
   const [serverUrl, setServerUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -33,18 +30,28 @@ export function LeathaCall({ roomName, roomType, isHost, title, onLeave }: Leath
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchToken({
-          data: {
+        const response = await fetch("/api/get-token", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
             roomName,
             roomType,
             isHost,
             username: profile.username,
             displayName: profile.display_name ?? profile.username,
-          },
+            participantIdentity: profile.username,
+            participantName: profile.display_name ?? profile.username,
+          }),
         });
+        const data = await response.json().catch(() => ({}));
         if (cancelled) return;
-        setToken(data.token);
-        setServerUrl(data.url);
+        if (!response.ok || !data.participant_token || !data.server_url) {
+          throw new Error(data?.error ?? "Failed to join call");
+        }
+        setToken(data.participant_token);
+        setServerUrl(data.server_url);
       } catch (err) {
         if (cancelled) return;
         const msg = err instanceof Error ? err.message : "Failed to join call";
@@ -55,7 +62,7 @@ export function LeathaCall({ roomName, roomType, isHost, title, onLeave }: Leath
       }
     })();
     return () => { cancelled = true; };
-  }, [roomName, roomType, isHost, profile, fetchToken]);
+  }, [roomName, roomType, isHost, profile]);
 
   if (loading) {
     return (
