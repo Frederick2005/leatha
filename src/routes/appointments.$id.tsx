@@ -146,7 +146,7 @@ function PayDialog({ appointment, onPaid }: { appointment: any; onPaid: () => vo
               <SelectContent>
                 <SelectItem value="mtn">MTN Mobile Money</SelectItem>
                 <SelectItem value="airtel">Airtel Money</SelectItem>
-                <SelectItem value="paxtel">PaxTel</SelectItem>
+                <SelectItem value="pesapal">Pesapal</SelectItem>
               </SelectContent>
             </Select>
           </div>

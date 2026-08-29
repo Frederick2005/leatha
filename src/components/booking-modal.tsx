@@ -14,8 +14,8 @@ import { toast } from "sonner";
 export interface TeacherWithProfile {
   user_id: string;
   subjects: string[];
-  hourly_rate: number; // plain UGX, e.g. 20000
-  years_experience: string;
+  hourly_rate: number; // plain UGX, e.g. 20000 (converted from hourly_rate_cents)
+  years_experience: number;
   rating_avg: number;
   rating_count: number;
   profile?: { display_name: string | null; username: string; avatar_url: string | null; school: string | null };
@@ -146,24 +146,47 @@ export function BookingModal({
     const endsAt = new Date(startsAt);
     endsAt.setHours(endsAt.getHours() + 1);
 
-    const { error } = await supabase.from("appointments").insert({
-      teacher_id: teacher.user_id,
-      student_id: user.id,
-      subject,
-      starts_at: startsAt.toISOString(),
-      ends_at: endsAt.toISOString(),
+    const priceCents = teacher.hourly_rate * 100;
+
+    const { data: appointment, error } = await supabase
+      .from("appointments")
+      .insert({
+        teacher_id: teacher.user_id,
+        student_id: user.id,
+        subject,
+        starts_at: startsAt.toISOString(),
+        ends_at: endsAt.toISOString(),
+        status: "pending",
+        price_cents: priceCents,
+        currency: "UGX",
+        notes: notes.trim() || null,
+      })
+      .select("id")
+      .single();
+
+    if (error || !appointment) {
+      setSubmitting(false);
+      toast.error(error?.message ?? "Couldn't create the booking");
+      return;
+    }
+
+    // Record the payment attempt the same way the appointment detail page does,
+    // so both entry points feed the same payment_intents audit trail.
+    const { error: paymentError } = await supabase.from("payment_intents").insert({
+      appointment_id: appointment.id,
+      payer_id: user.id,
+      payee_id: teacher.user_id,
+      provider: paymentMethod,
+      phone_number: phone.trim(),
+      amount_cents: priceCents,
+      currency: "UGX",
       status: "pending",
-      price_cents: teacher.hourly_rate * 100,
-      notes: notes.trim() || null,
-      payment_method: paymentMethod,
-      payment_phone: phone.trim(),
-      payment_status: "pending",
     });
 
-    if (error) {
-      setSubmitting(false);
-      toast.error(error.message);
-      return;
+    if (paymentError) {
+      // The booking itself succeeded - don't block on this, but let the user know
+      // they'll need to retry payment from the appointment page.
+      toast.error("Booking created, but the payment request failed: " + paymentError.message);
     }
 
     await supabase.from("notifications").insert({

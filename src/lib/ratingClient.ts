@@ -1,9 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+import { supabase } from '@/integrations/supabase/client';
 
 export async function submitRatingEvent(params: {
   creator_id: string;
@@ -25,9 +20,9 @@ export async function getCreatorRating(creatorId: string) {
     .from('creator_rating_state')
     .select('dqi_x, lis_total, active_lis, updated_at, engine_state')
     .eq('creator_id', creatorId)
-    .single();
+    .maybeSingle();
   if (error) throw error;
-  // Also compute confidence from engine_state if needed
+  if (!data) return null;
   return {
     dqi: data.dqi_x,
     lis: data.lis_total,

@@ -1121,6 +1121,33 @@ export type Database = {
           },
         ]
       }
+      creator_rating_state: {
+        Row: {
+          active_lis: number
+          creator_id: string
+          dqi_x: number
+          engine_state: Json
+          lis_total: number
+          updated_at: string
+        }
+        Insert: {
+          active_lis?: number
+          creator_id: string
+          dqi_x?: number
+          engine_state?: Json
+          lis_total?: number
+          updated_at?: string
+        }
+        Update: {
+          active_lis?: number
+          creator_id?: string
+          dqi_x?: number
+          engine_state?: Json
+          lis_total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       custom_options: {
         Row: {
           category: string
@@ -1306,6 +1333,68 @@ export type Database = {
           follower_id?: string
         }
         Relationships: []
+      }
+      invite_links: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          is_active: boolean
+          label: string | null
+          max_uses: number | null
+          use_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          is_active?: boolean
+          label?: string | null
+          max_uses?: number | null
+          use_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          is_active?: boolean
+          label?: string | null
+          max_uses?: number | null
+          use_count?: number
+        }
+        Relationships: []
+      }
+      invite_uses: {
+        Row: {
+          created_at: string
+          id: string
+          invite_code: string
+          used_by: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invite_code: string
+          used_by: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invite_code?: string
+          used_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invite_uses_invite_code_fkey"
+            columns: ["invite_code"]
+            isOneToOne: false
+            referencedRelation: "invite_links"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       lesson_contributors: {
         Row: {
@@ -1766,6 +1855,39 @@ export type Database = {
           weekly_challenge_target?: number
           weekly_lesson_target?: number
           xp?: number
+        }
+        Relationships: []
+      }
+      rating_events: {
+        Row: {
+          created_at: string
+          creator_id: string
+          dqi_after: number | null
+          event_type: string
+          id: string
+          quality_value: number
+          trust_tau: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          dqi_after?: number | null
+          event_type: string
+          id?: string
+          quality_value: number
+          trust_tau?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          dqi_after?: number | null
+          event_type?: string
+          id?: string
+          quality_value?: number
+          trust_tau?: number | null
+          user_id?: string
         }
         Relationships: []
       }
