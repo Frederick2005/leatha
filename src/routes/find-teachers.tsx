@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { BookingModal, type TeacherWithProfile } from "@/components/booking-modal";
 import { Search, Star, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/find-teachers")({
   head: () => ({ meta: [{ title: "Find Teachers — Leatha" }] }),
@@ -17,13 +18,6 @@ export const Route = createFileRoute("/find-teachers")({
     </RequireAuth>
   ),
 });
-
-const EXPERIENCE_RANK: Record<string, number> = {
-  "Just starting": 0,
-  "1-5 years": 1,
-  "6-10 years": 2,
-  "10+ years": 3,
-};
 
 type SortKey = "rating" | "price_low" | "price_high" | "experience";
 
@@ -37,12 +31,19 @@ function FindTeachersPage() {
 
   useEffect(() => {
     void (async () => {
-      const { data: profiles } = await supabase
+      const { data: profiles, error } = await supabase
         .from("teacher_profiles")
         .select(
-          "user_id, subjects, hourly_rate, years_experience, rating_avg, rating_count, is_available",
+          "user_id, subjects, hourly_rate_cents, years_experience, rating_avg, rating_count, accepts_bookings",
         )
-        .eq("is_available", true);
+        .eq("accepts_bookings", true);
+
+      if (error) {
+        toast.error("Couldn't load teachers: " + error.message);
+        setTeachers([]);
+        setLoading(false);
+        return;
+      }
 
       if (!profiles || profiles.length === 0) {
         setTeachers([]);
@@ -58,7 +59,11 @@ function FindTeachersPage() {
 
       const byId = Object.fromEntries((profs ?? []).map((p) => [p.id, p]));
       setTeachers(
-        profiles.map((p) => ({ ...p, profile: byId[p.user_id] })) as TeacherWithProfile[],
+        profiles.map((p) => ({
+          ...p,
+          hourly_rate: p.hourly_rate_cents / 100,
+          profile: byId[p.user_id],
+        })) as TeacherWithProfile[],
       );
       setLoading(false);
     })();
@@ -92,9 +97,7 @@ function FindTeachersPage() {
     if (sortBy === "price_low") sorted.sort((a, b) => a.hourly_rate - b.hourly_rate);
     if (sortBy === "price_high") sorted.sort((a, b) => b.hourly_rate - a.hourly_rate);
     if (sortBy === "experience")
-      sorted.sort(
-        (a, b) => (EXPERIENCE_RANK[b.years_experience] ?? 0) - (EXPERIENCE_RANK[a.years_experience] ?? 0),
-      );
+      sorted.sort((a, b) => Number(b.years_experience) - Number(a.years_experience));
     return sorted;
   }, [teachers, category, search, sortBy]);
 
@@ -211,7 +214,9 @@ function FindTeachersPage() {
                   <Star className="h-3.5 w-3.5 fill-amber-500" />
                   {t.rating_avg?.toFixed(1) ?? "New"} {t.rating_count > 0 && `(${t.rating_count})`}
                 </span>
-                <span className="text-muted-foreground">{t.years_experience}</span>
+                <span className="text-muted-foreground">
+                  {Number(t.years_experience) > 0 ? `${t.years_experience} yrs exp` : "New teacher"}
+                </span>
               </div>
 
               <div className="flex items-center justify-between mt-1">
