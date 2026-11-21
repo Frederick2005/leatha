@@ -2,48 +2,51 @@ import { LiveKitRoom, VideoConference, RoomAudioRenderer } from "@livekit/compon
 import "@livekit/components-styles";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/providers/auth-provider";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { PhoneOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-export type RoomType = "tutoring" | "classroom" | "battle" | "assembly" | "group" | "audio" | "video";
+export type RoomType = "audio" | "video";
 
 interface LeathaCallProps {
   roomName: string;
   roomType: RoomType;
-  isHost: boolean;
+  otherUserId: string;
   title: string;
   onLeave: () => void;
 }
 
-export function LeathaCall({ roomName, roomType, isHost, title, onLeave }: LeathaCallProps) {
-  const { profile } = useAuth();
+export function LeathaCall({ roomName, roomType, otherUserId, title, onLeave }: LeathaCallProps) {
+  const { user } = useAuth();
+  const userId = user?.id;
   const [token, setToken] = useState<string | null>(null);
   const [serverUrl, setServerUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!profile) return;
+    if (!userId) {
+      setLoading(false);
+      setError("Please sign in again to start a call.");
+      return;
+    }
     let cancelled = false;
     (async () => {
       try {
         setLoading(true);
         setError(null);
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session?.access_token) throw new Error("Please sign in again to start a call.");
         const response = await fetch("/api/get-token", {
           method: "POST",
           headers: {
             "content-type": "application/json",
+            authorization: `Bearer ${session.access_token}`,
           },
-          body: JSON.stringify({
-            roomName,
-            roomType,
-            isHost,
-            username: profile.username,
-            displayName: profile.display_name ?? profile.username,
-            participantIdentity: profile.username,
-            participantName: profile.display_name ?? profile.username,
-          }),
+          body: JSON.stringify({ roomName, roomType, otherUserId }),
         });
         const data = await response.json().catch(() => ({}));
         if (cancelled) return;
@@ -61,8 +64,10 @@ export function LeathaCall({ roomName, roomType, isHost, title, onLeave }: Leath
         if (!cancelled) setLoading(false);
       }
     })();
-    return () => { cancelled = true; };
-  }, [roomName, roomType, isHost, profile]);
+    return () => {
+      cancelled = true;
+    };
+  }, [roomName, roomType, otherUserId, userId]);
 
   if (loading) {
     return (
@@ -80,8 +85,12 @@ export function LeathaCall({ roomName, roomType, isHost, title, onLeave }: Leath
       <div className="fixed inset-0 z-50 grid place-items-center bg-background/95 p-6">
         <div className="text-center space-y-4 max-w-md">
           <p className="text-destructive font-medium">{error ?? "Could not connect to call"}</p>
-          <p className="text-xs text-muted-foreground">Ensure LiveKit credentials are configured in project secrets.</p>
-          <Button onClick={onLeave} variant="outline">Go back</Button>
+          <p className="text-xs text-muted-foreground">
+            Ensure LiveKit credentials are configured in project secrets.
+          </p>
+          <Button onClick={onLeave} variant="outline">
+            Go back
+          </Button>
         </div>
       </div>
     );
@@ -92,7 +101,7 @@ export function LeathaCall({ roomName, roomType, isHost, title, onLeave }: Leath
       <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-card">
         <div className="min-w-0">
           <h2 className="font-display font-semibold truncate">{title}</h2>
-          <p className="text-xs text-muted-foreground capitalize">{roomType} · {isHost ? "Host" : "Participant"}</p>
+          <p className="text-xs text-muted-foreground capitalize">{roomType} · Private call</p>
         </div>
         <Button variant="destructive" size="sm" onClick={onLeave} className="gap-2">
           <PhoneOff className="h-4 w-4" /> End call
@@ -104,9 +113,11 @@ export function LeathaCall({ roomName, roomType, isHost, title, onLeave }: Leath
           serverUrl={serverUrl}
           connect
           audio
-          video={roomType === "video" || roomType === "tutoring" || roomType === "group" || (roomType === "classroom" && isHost) || (roomType === "assembly" && isHost)}
+          video={roomType === "video"}
           onDisconnected={onLeave}
-          onError={(err: Error) => { toast.error("Call error: " + err.message); }}
+          onError={(err: Error) => {
+            toast.error("Call error: " + err.message);
+          }}
           data-lk-theme="default"
           style={{ height: "100%", background: "hsl(var(--background))" }}
         >

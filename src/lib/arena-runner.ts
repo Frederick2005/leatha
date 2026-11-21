@@ -9,8 +9,18 @@
  *   - The string form of the returned value is compared to `expected` (trimmed).
  */
 
-export interface TestCase { input: string; expected: string }
-export interface TestResult { passed: boolean; input: string; expected: string; got: string; error?: string; runtime_ms: number }
+export interface TestCase {
+  input: string;
+  expected: string;
+}
+export interface TestResult {
+  passed: boolean;
+  input: string;
+  expected: string;
+  got: string;
+  error?: string;
+  runtime_ms: number;
+}
 
 const WORKER_SOURCE = `
 self.onmessage = async (e) => {
@@ -43,7 +53,11 @@ self.onmessage = async (e) => {
 };
 `;
 
-export async function runJsTests(code: string, tests: TestCase[], timeoutMs = 3000): Promise<{ results: TestResult[]; fatal?: string }> {
+export async function runJsTests(
+  code: string,
+  tests: TestCase[],
+  timeoutMs = 3000,
+): Promise<{ results: TestResult[]; fatal?: string }> {
   if (typeof Worker === "undefined") {
     return { results: [], fatal: "Code runner unavailable in this environment." };
   }

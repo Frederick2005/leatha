@@ -21,7 +21,10 @@ function JoinPage() {
 
   // Validate the invite code
   useEffect(() => {
-    if (!ref) { setValid(false); return; }
+    if (!ref) {
+      setValid(false);
+      return;
+    }
     supabase
       .from("invite_links")
       .select("code")
@@ -31,13 +34,13 @@ function JoinPage() {
   }, [ref]);
 
   // Record use when logged-in user lands with a valid code
- // Only store ref for new signups
-useEffect(() => {
-  if (!ref || valid !== true) return;
-  if (!user) {
-    sessionStorage.setItem("invite_ref", ref);
-  }
-}, [user, ref, valid]);
+  // Only store ref for new signups
+  useEffect(() => {
+    if (!ref || valid !== true) return;
+    if (!user) {
+      sessionStorage.setItem("invite_ref", ref);
+    }
+  }, [user, ref, valid]);
 
   const handleJoin = () => {
     // Store ref in sessionStorage so auth page can pick it up after signup
@@ -77,8 +80,8 @@ useEffect(() => {
         </div>
         <h1 className="text-3xl font-bold">You're invited to Leatha</h1>
         <p className="text-muted-foreground mt-3 text-sm">
-          Fork knowledge. Build skills together. Join a community of students and teachers
-          learning in the open.
+          Fork knowledge. Build skills together. Join a community of students and teachers learning
+          in the open.
         </p>
         <Button className="mt-8 w-full" size="lg" onClick={handleJoin}>
           Accept invite & sign up

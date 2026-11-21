@@ -3,19 +3,15 @@ import leathaLogoImage from "@/assets/leatha-logo.jpg";
 
 /**
  * Leatha brand mark — displays the Leatha logo from the assets folder.
- * 
+ *
  * Usage: <LeathaLogo size={32} />
  */
-export function LeathaLogo({ size = 32, ...props }: ImgHTMLAttributes<HTMLImageElement> & { size?: number }) {
+export function LeathaLogo({
+  size = 32,
+  ...props
+}: ImgHTMLAttributes<HTMLImageElement> & { size?: number }) {
   return (
-    <img
-      src={leathaLogoImage}
-      alt="Leatha"
-      width={size}
-      height={size}
-      role="img"
-      {...props}
-    />
+    <img src={leathaLogoImage} alt="Leatha" width={size} height={size} role="img" {...props} />
   );
 }
 

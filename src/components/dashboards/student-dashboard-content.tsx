@@ -42,9 +42,16 @@ interface TopTeacher {
   subjects: string[];
   rating_avg: number;
   rating_count: number;
-  hourly_rate: number;
   profile?: { display_name: string | null; username: string; avatar_url: string | null };
 }
+
+type ProfileSummary = {
+  id: string;
+  display_name: string | null;
+  username: string;
+  avatar_url: string | null;
+  is_verified?: boolean | null;
+};
 
 export function StudentDashboardContent() {
   const { user, profile } = useAuth();
@@ -82,24 +89,27 @@ export function StudentDashboardContent() {
             .limit(3),
           supabase
             .from("teacher_profiles")
-            .select("user_id, subjects, rating_avg, rating_count, hourly_rate")
+            .select("user_id, subjects, rating_avg, rating_count")
             .order("rating_avg", { ascending: false })
-            .limit(3),
+            .limit(20),
         ]);
 
       if (cancelled) return;
 
       const teacherIds = [...new Set((appts ?? []).map((a) => a.teacher_id))];
-      let profilesById: Record<string, any> = {};
+      const profilesById = new Map<string, ProfileSummary>();
       if (teacherIds.length) {
         const { data: profs } = await supabase
           .from("profiles")
           .select("id, display_name, username, avatar_url")
           .in("id", teacherIds);
-        profilesById = Object.fromEntries((profs ?? []).map((p) => [p.id, p]));
+        for (const p of profs ?? []) profilesById.set(p.id, p);
       }
       setAppointments(
-        (appts ?? []).map((a) => ({ ...a, teacher: profilesById[a.teacher_id] })) as Appointment[],
+        (appts ?? []).map((a) => ({
+          ...a,
+          teacher: profilesById.get(a.teacher_id),
+        })) as Appointment[],
       );
 
       setCompletedCount((completed ?? []).length);
@@ -107,16 +117,21 @@ export function StudentDashboardContent() {
       setDocs((docRows ?? []) as DocRow[]);
 
       const topIds = (teachers ?? []).map((t) => t.user_id);
-      let topProfiles: Record<string, any> = {};
+      const topProfiles = new Map<string, ProfileSummary>();
       if (topIds.length) {
         const { data: profs } = await supabase
           .from("profiles")
-          .select("id, display_name, username, avatar_url")
+          .select("id, display_name, username, avatar_url, is_verified")
           .in("id", topIds);
-        topProfiles = Object.fromEntries((profs ?? []).map((p) => [p.id, p]));
+        for (const p of profs ?? []) {
+          if (p.is_verified) topProfiles.set(p.id, p);
+        }
       }
       setTopTeachers(
-        (teachers ?? []).map((t) => ({ ...t, profile: topProfiles[t.user_id] })) as TopTeacher[],
+        (teachers ?? [])
+          .filter((t) => topProfiles.get(t.user_id))
+          .slice(0, 3)
+          .map((t) => ({ ...t, profile: topProfiles.get(t.user_id) })) as TopTeacher[],
       );
 
       const { data: events } = await supabase
@@ -129,7 +144,7 @@ export function StudentDashboardContent() {
       if (events && events.length) {
         const days = new Set(events.map((e) => format(new Date(e.created_at), "yyyy-MM-dd")));
         let s = 0;
-        let d = new Date();
+        const d = new Date();
         while (days.has(format(d, "yyyy-MM-dd"))) {
           s++;
           d.setDate(d.getDate() - 1);
@@ -201,7 +216,11 @@ export function StudentDashboardContent() {
           <div className="rounded-2xl border border-border bg-card p-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold">Upcoming Appointments</h2>
-              <Link to="/appointments" className="text-xs text-primary hover:underline">
+              <Link
+                to="/appointments"
+                search={{ teacher: undefined }}
+                className="text-xs text-primary hover:underline"
+              >
                 View all
               </Link>
             </div>
@@ -299,6 +318,7 @@ export function StudentDashboardContent() {
               </Link>
               <Link
                 to="/appointments"
+                search={{ teacher: undefined }}
                 className="rounded-xl border border-border p-3 hover:bg-accent transition-colors"
               >
                 <div className="h-8 w-8 rounded-lg bg-green-500/10 flex items-center justify-center mb-2">

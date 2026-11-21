@@ -3,7 +3,11 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,7 +20,12 @@ import { Button } from "@/components/ui/button";
  *   2) persisted to `custom_options` so it shows up for everyone next time.
  */
 export function DynamicSelect({
-  category, value, onChange, options: seed = [], placeholder = "Select…", disabled,
+  category,
+  value,
+  onChange,
+  options: seed = [],
+  placeholder = "Select…",
+  disabled,
 }: {
   category: string;
   value: string;
@@ -34,17 +43,19 @@ export function DynamicSelect({
   useEffect(() => {
     let alive = true;
     void (async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("custom_options")
         .select("value")
         .eq("category", category)
         .order("usage_count", { ascending: false })
         .limit(200);
       if (!alive) return;
-      const merged = Array.from(new Set([...seed, ...((data ?? []).map((r: any) => r.value as string))]));
+      const merged = Array.from(new Set([...seed, ...(data ?? []).map((r) => r.value)]));
       setOptions(merged);
     })();
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category]);
 
@@ -53,12 +64,14 @@ export function DynamicSelect({
     if (!v) return;
     setBusy(true);
     if (user) {
-      // Try insert; if it already exists, bump usage count.
-      const { error } = await (supabase as any).from("custom_options").insert({
-        category, value: v, created_by: user.id,
+      // Atomically persist a new option or increment the existing option's
+      // usage count. The RPC prevents clients from editing arbitrary rows.
+      const { error } = await supabase.rpc("record_custom_option", {
+        p_category: category,
+        p_value: v,
       });
-      if (error && !/duplicate|unique/i.test(error.message)) {
-        toast.error(error.message);
+      if (error) {
+        toast.error(`Option selected, but could not save it for future use: ${error.message}`);
       }
     }
     setOptions((prev) => (prev.includes(v) ? prev : [...prev, v]));
@@ -73,16 +86,23 @@ export function DynamicSelect({
       <Select
         value={pickingOther ? "__other__" : value}
         onValueChange={(v) => {
-          if (v === "__other__") { setPickingOther(true); return; }
+          if (v === "__other__") {
+            setPickingOther(true);
+            return;
+          }
           setPickingOther(false);
           onChange(v);
         }}
         disabled={disabled}
       >
-        <SelectTrigger><SelectValue placeholder={placeholder} /></SelectTrigger>
+        <SelectTrigger>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
         <SelectContent>
           {options.map((o) => (
-            <SelectItem key={o} value={o}>{o}</SelectItem>
+            <SelectItem key={o} value={o}>
+              {o}
+            </SelectItem>
           ))}
           <SelectItem value="__other__">Other…</SelectItem>
         </SelectContent>
@@ -93,11 +113,27 @@ export function DynamicSelect({
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Type new value"
-            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void commitOther(); } }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                void commitOther();
+              }
+            }}
             autoFocus
           />
-          <Button type="button" onClick={commitOther} disabled={busy || !draft.trim()}>Add</Button>
-          <Button type="button" variant="ghost" onClick={() => { setPickingOther(false); setDraft(""); }}>Cancel</Button>
+          <Button type="button" onClick={commitOther} disabled={busy || !draft.trim()}>
+            Add
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => {
+              setPickingOther(false);
+              setDraft("");
+            }}
+          >
+            Cancel
+          </Button>
         </div>
       )}
     </div>

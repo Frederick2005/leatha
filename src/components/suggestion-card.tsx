@@ -18,7 +18,12 @@ export interface SuggestionRow {
   claimed_by: string | null;
   lesson_id: string | null;
   created_at: string;
-  suggester?: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null;
+  suggester?: {
+    id: string;
+    username: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  } | null;
   claimer?: { username: string } | null;
   hasUpvoted?: boolean;
   onUpvote?: () => void;
@@ -46,7 +51,10 @@ export function SuggestionCard({ s }: { s: SuggestionRow }) {
             size="sm"
             variant={s.hasUpvoted ? "default" : "outline"}
             className="h-10 w-10 p-0"
-            onClick={(e) => { e.preventDefault(); s.onUpvote?.(); }}
+            onClick={(e) => {
+              e.preventDefault();
+              s.onUpvote?.();
+            }}
             aria-label="Upvote"
           >
             <ArrowUp className="h-4 w-4" />
@@ -56,7 +64,9 @@ export function SuggestionCard({ s }: { s: SuggestionRow }) {
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <Badge variant="secondary">{s.subject}</Badge>
-            <Badge variant={STATUS_VARIANT[s.status] ?? "outline"}>{STATUS_LABEL[s.status] ?? s.status}</Badge>
+            <Badge variant={STATUS_VARIANT[s.status] ?? "outline"}>
+              {STATUS_LABEL[s.status] ?? s.status}
+            </Badge>
           </div>
           <Link to="/suggestions/$id" params={{ id: s.id }} className="block">
             <h3 className="font-semibold text-lg leading-snug hover:text-primary">{s.title}</h3>
@@ -69,15 +79,27 @@ export function SuggestionCard({ s }: { s: SuggestionRow }) {
             </p>
           )}
           {s.status === "completed" && s.lesson_id && (
-            <Link to="/lessons/$lessonId" params={{ lessonId: s.lesson_id }} className="text-xs text-primary mt-2 inline-flex items-center gap-1">
+            <Link
+              to="/lessons/$lessonId"
+              params={{ lessonId: s.lesson_id }}
+              className="text-xs text-primary mt-2 inline-flex items-center gap-1"
+            >
               <CheckCircle2 className="h-3.5 w-3.5" /> Lesson published — view it
             </Link>
           )}
 
           <div className="flex items-center gap-3 text-xs text-muted-foreground mt-3 font-mono flex-wrap">
             {s.suggester && (
-              <Link to="/u/$username" params={{ username: s.suggester.username }} className="inline-flex items-center gap-1.5 hover:text-primary">
-                <UserAvatar size="sm" name={s.suggester.display_name ?? s.suggester.username} url={s.suggester.avatar_url} />
+              <Link
+                to="/u/$username"
+                params={{ username: s.suggester.username }}
+                className="inline-flex items-center gap-1.5 hover:text-primary"
+              >
+                <UserAvatar
+                  size="sm"
+                  name={s.suggester.display_name ?? s.suggester.username}
+                  url={s.suggester.avatar_url}
+                />
                 @{s.suggester.username}
               </Link>
             )}

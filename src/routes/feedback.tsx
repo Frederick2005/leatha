@@ -51,12 +51,10 @@ function FeedbackPage() {
       return;
     }
     setBusy(true);
-    const bodyText = user
-      ? message.trim()
-      : `${message.trim()}${contact.trim() ? `\n\nContact: ${contact.trim()}` : ""}`;
     const { error } = await supabase.from("feedback").insert({
       subject: subject.trim(),
-      message: bodyText,
+      message: message.trim(),
+      contact: contact.trim() || null,
       user_id: user?.id ?? null,
       category,
       rating,

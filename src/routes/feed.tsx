@@ -1,6 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { GitFork, Heart, MessageCircle, Sparkles, TrendingUp, Users, Lightbulb } from "lucide-react";
+import {
+  GitFork,
+  Heart,
+  MessageCircle,
+  Sparkles,
+  TrendingUp,
+  Users,
+  Lightbulb,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { UserAvatar } from "@/components/user-avatar";
@@ -112,7 +120,9 @@ function FeedPage() {
         )}
         {profile?.account_type === "student" && (
           <Button asChild>
-            <Link to="/suggestions/new"><Lightbulb className="h-4 w-4 mr-2" /> Suggest</Link>
+            <Link to="/suggestions/new">
+              <Lightbulb className="h-4 w-4 mr-2" /> Suggest
+            </Link>
           </Button>
         )}
       </div>

@@ -39,7 +39,7 @@ function SettingsPage() {
       setDisplayName(profile.display_name ?? "");
       setBio(profile.bio ?? "");
       setAvatarUrl(profile.avatar_url ?? "");
-      setLearningGoals(((profile as any).learning_goals as string) ?? "");
+      setLearningGoals(profile.learning_goals ?? "");
     }
   }, [profile]);
 
@@ -50,12 +50,15 @@ function SettingsPage() {
     try {
       const url = await uploadAvatar(user.id, file);
       setAvatarUrl(url);
-      const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: url })
+        .eq("id", user.id);
       if (error) throw error;
       await refreshProfile();
       toast.success("Photo updated");
-    } catch (err: any) {
-      toast.error(err.message ?? "Upload failed");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -66,12 +69,15 @@ function SettingsPage() {
     e.preventDefault();
     if (!user) return;
     setBusy(true);
-    const { error } = await supabase.from("profiles").update({
-      display_name: displayName.trim() || null,
-      bio: bio.trim() || null,
-      avatar_url: avatarUrl.trim() || null,
-      learning_goals: learningGoals.trim() || null,
-    } as any).eq("id", user.id);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        display_name: displayName.trim() || null,
+        bio: bio.trim() || null,
+        avatar_url: avatarUrl.trim() || null,
+        learning_goals: learningGoals.trim() || null,
+      })
+      .eq("id", user.id);
     setBusy(false);
     if (error) {
       toast.error(error.message);
@@ -95,20 +101,35 @@ function SettingsPage() {
             size="xl"
           />
           <div className="flex-1 space-y-2">
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={onFile} />
-            <Button type="button" variant="secondary" onClick={() => fileRef.current?.click()} disabled={uploading}>
-              {uploading ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Upload className="h-4 w-4 mr-1" />}
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={onFile}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4 mr-1" />
+              )}
               {uploading ? "Uploading…" : "Change photo"}
             </Button>
             <div className="space-y-1.5">
               <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">
-              Or paste an image URL
-            </Label>
+                Or paste an image URL
+              </Label>
               <Input
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="https://…"
-            />
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+                placeholder="https://…"
+              />
             </div>
           </div>
         </div>
@@ -141,8 +162,16 @@ function SettingsPage() {
         </div>
         {isStudent && (
           <div className="space-y-1.5">
-            <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">Learning goals</Label>
-            <Textarea value={learningGoals} onChange={(e) => setLearningGoals(e.target.value)} maxLength={500} className="min-h-20" placeholder="What are you hoping to master?" />
+            <Label className="text-xs uppercase font-mono tracking-wider text-muted-foreground">
+              Learning goals
+            </Label>
+            <Textarea
+              value={learningGoals}
+              onChange={(e) => setLearningGoals(e.target.value)}
+              maxLength={500}
+              className="min-h-20"
+              placeholder="What are you hoping to master?"
+            />
           </div>
         )}
         <div className="flex justify-end">

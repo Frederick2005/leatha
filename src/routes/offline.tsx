@@ -15,8 +15,7 @@ function OfflinePage() {
         </div>
         <h1 className="text-2xl font-bold">You're offline</h1>
         <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
-          No internet connection detected. You can still
-          access content you've previously viewed.
+          No internet connection detected. You can still access content you've previously viewed.
         </p>
 
         {/* What's available offline */}
@@ -39,9 +38,7 @@ function OfflinePage() {
         </div>
 
         <div className="flex flex-col gap-3 mt-6">
-          <Button onClick={() => window.history.back()}>
-            Go back
-          </Button>
+          <Button onClick={() => window.history.back()}>Go back</Button>
           <Button variant="outline" asChild>
             <Link to="/feed">Try feed</Link>
           </Button>

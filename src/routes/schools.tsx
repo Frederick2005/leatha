@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { RequireAuth } from "@/components/require-auth";
@@ -31,13 +31,14 @@ interface Membership {
 
 function SchoolsPage() {
   const { user, profile, refreshProfile } = useAuth();
+  const userId = user?.id;
   const [memberships, setMemberships] = useState<Membership[]>([]);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const load = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("teacher_schools").select("*").eq("teacher_id", user.id);
+  const load = useCallback(async () => {
+    if (!userId) return;
+    const { data } = await supabase.from("teacher_schools").select("*").eq("teacher_id", userId);
     const rows = (data ?? []) as Membership[];
     if (rows.length) {
       const ids = Array.from(new Set(rows.map((r) => r.school_id)));
@@ -51,10 +52,10 @@ function SchoolsPage() {
       });
     }
     setMemberships(rows);
-  };
+  }, [userId]);
   useEffect(() => {
     void load();
-  }, [user]);
+  }, [load]);
 
   const join = async () => {
     if (!user || !code.trim()) return;

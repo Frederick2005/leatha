@@ -1,82 +1,66 @@
-const CACHE_VERSION = 'leatha-v2';
+const CACHE_VERSION = "leatha-v2";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 
 // Critical assets to cache immediately
-const STATIC_ASSETS = [
-  '/',
-  '/feed',
-  '/explore',
-  '/leaderboard',
-  '/offline',
-  '/manifest.json',
-];
+const STATIC_ASSETS = ["/", "/feed", "/explore", "/leaderboard", "/offline", "/manifest.json"];
 
 // ─── Install ───────────────────────────────────────
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE)
+    caches
+      .open(STATIC_CACHE)
       .then((cache) => cache.addAll(STATIC_ASSETS))
-      .then(() => self.skipWaiting())
+      .then(() => self.skipWaiting()),
   );
 });
 
 // ─── Activate ──────────────────────────────────────
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(
-        keys
-          .filter((key) => !key.startsWith(CACHE_VERSION))
-          .map((key) => caches.delete(key))
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.filter((key) => !key.startsWith(CACHE_VERSION)).map((key) => caches.delete(key)),
+        ),
       )
-    ).then(() => self.clients.claim())
+      .then(() => self.clients.claim()),
   );
 });
 
 // ─── Fetch ─────────────────────────────────────────
-self.addEventListener('fetch', (event) => {
+self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
   // Only handle GET requests
-  if (request.method !== 'GET') return;
+  if (request.method !== "GET") return;
 
-  // ── Supabase API — Network first, fall back to cache
-  if (url.hostname.includes('supabase.co') && url.pathname.includes('/rest/')) {
-    event.respondWith(networkFirstStrategy(request, DYNAMIC_CACHE, 60));
-    return;
-  }
-
-  // ── Supabase Storage (images/files) — Cache first
-  if (url.hostname.includes('supabase.co') && url.pathname.includes('/storage/')) {
-    event.respondWith(cacheFirstStrategy(request, IMAGE_CACHE));
-    return;
-  }
-
-  // ── Skip Supabase auth calls — always network
-  if (url.hostname.includes('supabase.co')) return;
+  // ── Never cache Supabase traffic. This includes authenticated REST
+  // responses and potentially private Storage objects.
+  if (url.hostname.includes("supabase.co")) return;
 
   // ── Static assets (JS, CSS, fonts) — Cache first
   if (
-    request.destination === 'script' ||
-    request.destination === 'style' ||
-    request.destination === 'font' ||
-    url.pathname.includes('/assets/')
+    request.destination === "script" ||
+    request.destination === "style" ||
+    request.destination === "font" ||
+    url.pathname.includes("/assets/")
   ) {
     event.respondWith(cacheFirstStrategy(request, STATIC_CACHE));
     return;
   }
 
   // ── Images — Cache first
-  if (request.destination === 'image') {
+  if (request.destination === "image") {
     event.respondWith(cacheFirstStrategy(request, IMAGE_CACHE));
     return;
   }
 
   // ── Navigation (page loads) — Network first, fall back to cache
-  if (request.mode === 'navigate') {
+  if (request.mode === "navigate") {
     event.respondWith(navigationStrategy(request));
     return;
   }
@@ -96,10 +80,10 @@ async function networkFirstStrategy(request, cacheName, maxAgeSeconds = 300) {
   } catch {
     const cached = await cache.match(request);
     if (cached) return cached;
-    return new Response(
-      JSON.stringify({ error: 'offline', message: 'No cached data available' }),
-      { status: 503, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: "offline", message: "No cached data available" }), {
+      status: 503,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
 
@@ -123,7 +107,7 @@ async function cacheFirstStrategy(request, cacheName) {
     }
     return networkResponse;
   } catch {
-    return new Response('Asset not available offline', { status: 503 });
+    return new Response("Asset not available offline", { status: 503 });
   }
 }
 
@@ -141,8 +125,8 @@ async function navigationStrategy(request) {
     const cached = await cache.match(request);
     if (cached) return cached;
     // Fall back to offline page
-    const offlinePage = await caches.match('/offline');
-    return offlinePage || new Response('You are offline', { status: 503 });
+    const offlinePage = await caches.match("/offline");
+    return offlinePage || new Response("You are offline", { status: 503 });
   }
 }
 
@@ -157,8 +141,8 @@ async function trimCache(cacheName, maxItems) {
 }
 
 // Trim caches periodically
-self.addEventListener('message', (event) => {
-  if (event.data === 'TRIM_CACHES') {
+self.addEventListener("message", (event) => {
+  if (event.data === "TRIM_CACHES") {
     trimCache(DYNAMIC_CACHE, 50);
     trimCache(IMAGE_CACHE, 100);
   }

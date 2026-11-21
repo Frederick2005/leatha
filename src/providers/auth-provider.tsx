@@ -15,6 +15,7 @@ export interface ProfileRow {
   username: string;
   display_name: string | null;
   bio: string | null;
+  learning_goals: string | null;
   avatar_url: string | null;
   theme: string;
   dark_mode: boolean;
@@ -43,6 +44,9 @@ interface AuthContextValue {
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 }
+
+const MAX_SESSION_MS = 8 * 60 * 60 * 1000; // 8 hours
+const LAST_ACTIVITY_KEY = "sc_last_activity";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -76,8 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [session, loadProfileAndRoles]);
 
   // ---- 8-hour inactivity auto-logout ----
-  const MAX_SESSION_MS = 8 * 60 * 60 * 1000; // 8 hours
-  const LAST_ACTIVITY_KEY = "sc_last_activity";
 
   useEffect(() => {
     // CRITICAL: subscribe BEFORE getSession to avoid races

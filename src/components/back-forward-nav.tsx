@@ -14,7 +14,10 @@ export function BackForwardNav({ className }: { className?: string }) {
   useEffect(() => {
     const update = () => {
       const historyState = window.history.state as { idx?: number } | null;
-      const idx = typeof historyState?.idx === "number" ? historyState.idx : Math.max(0, window.history.length - 1);
+      const idx =
+        typeof historyState?.idx === "number"
+          ? historyState.idx
+          : Math.max(0, window.history.length - 1);
       const len = typeof window.history.length === "number" ? window.history.length : 1;
       setState({ canBack: idx > 0, canForward: idx < len - 1 });
     };
@@ -31,14 +34,18 @@ export function BackForwardNav({ className }: { className?: string }) {
     };
   }, [router]);
 
-  const btn = "h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed";
+  const btn =
+    "h-8 w-8 grid place-items-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed";
 
   const handleBack = () => {
     if (!state.canBack) return;
     router.history.back();
     window.setTimeout(() => {
       const historyState = window.history.state as { idx?: number } | null;
-      const idx = typeof historyState?.idx === "number" ? historyState.idx : Math.max(0, window.history.length - 1);
+      const idx =
+        typeof historyState?.idx === "number"
+          ? historyState.idx
+          : Math.max(0, window.history.length - 1);
       const len = typeof window.history.length === "number" ? window.history.length : 1;
       setState({ canBack: idx > 0, canForward: idx < len - 1 });
     }, 0);
@@ -49,7 +56,10 @@ export function BackForwardNav({ className }: { className?: string }) {
     router.history.forward();
     window.setTimeout(() => {
       const historyState = window.history.state as { idx?: number } | null;
-      const idx = typeof historyState?.idx === "number" ? historyState.idx : Math.max(0, window.history.length - 1);
+      const idx =
+        typeof historyState?.idx === "number"
+          ? historyState.idx
+          : Math.max(0, window.history.length - 1);
       const len = typeof window.history.length === "number" ? window.history.length : 1;
       setState({ canBack: idx > 0, canForward: idx < len - 1 });
     }, 0);

@@ -164,7 +164,7 @@ function NewLessonPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-6">
       <Link
-        to="/dashboard"
+        to="/dashboard-route"
         className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1 mb-3"
       >
         <ArrowLeft className="h-3 w-3" /> Cancel
@@ -335,7 +335,11 @@ function NewLessonPage() {
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" onClick={() => navigate({ to: "/dashboard-route" })}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate({ to: "/dashboard-route" })}
+          >
             Cancel
           </Button>
           <Button type="submit" disabled={busy}>

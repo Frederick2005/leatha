@@ -6,18 +6,18 @@
 
 export interface RatingConfig {
   // DQI (Kalman)
-  Q: number;          // process noise per day (0.01 recommended)
-  R: number;          // measurement noise variance (2.0 recommended)
-  initialX: number;   // initial quality estimate (7.0)
-  initialP: number;   // initial uncertainty (25.0)
+  Q: number; // process noise per day (0.01 recommended)
+  R: number; // measurement noise variance (2.0 recommended)
+  initialX: number; // initial quality estimate (7.0)
+  initialP: number; // initial uncertainty (25.0)
   // LIS weights (sum not required to be 1, but meaningful ratios)
   lisWeights: Record<string, number>;
   // Trust
   initialTrust: number;
-  trustDriftRate: number;   // daily drift toward 70 (0.01)
+  trustDriftRate: number; // daily drift toward 70 (0.01)
   velocityWindowMs: number; // 5*60*1000
   velocityThreshold: number; // 30 events per window
-  trustMin: number;          // 30 (below this events rejected)
+  trustMin: number; // 30 (below this events rejected)
 }
 
 export const defaultConfig: RatingConfig = {
@@ -26,12 +26,12 @@ export const defaultConfig: RatingConfig = {
   initialX: 7.0,
   initialP: 25.0,
   lisWeights: {
-    forks_received: 0.30,
-    rating: 0.20,
+    forks_received: 0.3,
+    rating: 0.2,
     quiz_improvement: 0.15,
-    fork_given: 0.10,
-    answer: 0.10,
-    mentorship: 0.10,
+    fork_given: 0.1,
+    answer: 0.1,
+    mentorship: 0.1,
     content_publish: 0.05,
     login: 0.05,
     arena: 0.05,
@@ -45,8 +45,8 @@ export const defaultConfig: RatingConfig = {
 
 // ---------- Kalman Filter for DQI ----------
 export class KalmanFilter {
-  public x: number;  // state estimate
-  public P: number;  // error covariance
+  public x: number; // state estimate
+  public P: number; // error covariance
   private lastTime: number;
 
   constructor(x: number, P: number, lastTime: number = Date.now()) {
@@ -55,10 +55,19 @@ export class KalmanFilter {
     this.lastTime = lastTime;
   }
 
+  getLastTime(): number {
+    return this.lastTime;
+  }
+
   // Call this when a new measurement arrives
   // dtDays: time since last update in days (optional, auto-calculated)
   // trustTau: multiplier (0.1-1.0) that reduces effective R
-  update(measurement: number, trustTau: number, config: Pick<RatingConfig, 'Q' | 'R'>, now: number = Date.now()): void {
+  update(
+    measurement: number,
+    trustTau: number,
+    config: Pick<RatingConfig, "Q" | "R">,
+    now: number = Date.now(),
+  ): void {
     const dt = Math.max(0.001, (now - this.lastTime) / (1000 * 3600 * 24));
     // Time update (predict)
     this.P += config.Q * dt;
@@ -66,7 +75,7 @@ export class KalmanFilter {
     const effectiveR = config.R / Math.max(0.1, trustTau);
     const K = this.P / (this.P + effectiveR);
     this.x += K * (measurement - this.x);
-    this.P *= (1 - K);
+    this.P *= 1 - K;
     this.lastTime = now;
     // Clamp state to [0,10] for stability
     this.x = Math.min(10, Math.max(0, this.x));
@@ -74,14 +83,14 @@ export class KalmanFilter {
 
   getConfidence(): number {
     // Confidence = 1 - (2*sqrt(P))/10, capped [0.1, 0.95]
-    let conf = 1 - (2 * Math.sqrt(this.P)) / 10;
+    const conf = 1 - (2 * Math.sqrt(this.P)) / 10;
     return Math.min(0.95, Math.max(0.1, conf));
   }
 }
 
 // ---------- LIS Calculator ----------
 export class LISCalculator {
-  private counts: Map<string, number> = new Map();       // trust-weighted sum
+  private counts: Map<string, number> = new Map(); // trust-weighted sum
   private activeCounts: Map<string, number> = new Map(); // last 365 days
 
   // Add a factor event with trustTau weight
@@ -124,9 +133,9 @@ export class TrustManager {
   private lastUpdate: number;
   private eventTimestamps: number[] = []; // for velocity check
 
-  constructor(initialTrust: number = defaultConfig.initialTrust) {
+  constructor(initialTrust: number = defaultConfig.initialTrust, lastUpdate: number = Date.now()) {
     this.trust = initialTrust;
-    this.lastUpdate = Date.now();
+    this.lastUpdate = lastUpdate;
   }
 
   // Update trust based on delta (positive or negative)
@@ -149,13 +158,17 @@ export class TrustManager {
   // Check velocity (excessive events in window)
   checkVelocity(config: RatingConfig): boolean {
     const now = Date.now();
-    this.eventTimestamps = this.eventTimestamps.filter(ts => now - ts < config.velocityWindowMs);
+    this.eventTimestamps = this.eventTimestamps.filter((ts) => now - ts < config.velocityWindowMs);
     this.eventTimestamps.push(now);
     return this.eventTimestamps.length <= config.velocityThreshold;
   }
 
   getTrustScore(): number {
     return this.trust;
+  }
+
+  getLastUpdate(): number {
+    return this.lastUpdate;
   }
 
   getTrustTau(): number {
@@ -168,6 +181,23 @@ export class TrustManager {
   }
 }
 
+// ---------- Persisted Rating Engine State ----------
+export interface RatingEngineState {
+  kalman: {
+    x: number;
+    P: number;
+    lastTime: number;
+  };
+  lis: {
+    counts: ReturnType<LISCalculator["getCounts"]>;
+    activeCounts: ReturnType<LISCalculator["getActiveCounts"]>;
+  };
+  trust: {
+    score: number;
+    lastUpdate: number;
+  };
+}
+
 // ---------- Main Rating Engine ----------
 export class RatingEngine {
   private kalman: KalmanFilter;
@@ -175,13 +205,17 @@ export class RatingEngine {
   private trustMgr: TrustManager;
   private config: RatingConfig;
 
-  constructor(config: RatingConfig = defaultConfig, savedState?: any) {
+  constructor(config: RatingConfig = defaultConfig, savedState?: RatingEngineState) {
     this.config = config;
     if (savedState) {
-      this.kalman = new KalmanFilter(savedState.kalman.x, savedState.kalman.P, savedState.kalman.lastTime);
+      this.kalman = new KalmanFilter(
+        savedState.kalman.x,
+        savedState.kalman.P,
+        savedState.kalman.lastTime,
+      );
       this.lisCalc = new LISCalculator();
       this.lisCalc.setCounts(savedState.lis.counts, savedState.lis.activeCounts);
-      this.trustMgr = new TrustManager(savedState.trust.score);
+      this.trustMgr = new TrustManager(savedState.trust.score, savedState.trust.lastUpdate);
     } else {
       this.kalman = new KalmanFilter(config.initialX, config.initialP);
       this.lisCalc = new LISCalculator();
@@ -193,10 +227,10 @@ export class RatingEngine {
   // Returns { dqi, lis, activeLis, trustTau, allowed }
   processEvent(
     eventType: string,
-    qualityValue: number,   // 0-10
+    qualityValue: number, // 0-10
     timestamp: number = Date.now(),
     // optional: trust adjustment (if fraud detected upstream)
-    trustDelta: number = 0
+    trustDelta: number = 0,
   ): { allowed: boolean; dqi?: number; lis?: number; activeLis?: number; trustTau?: number } {
     // 1. Trust drift and velocity
     this.trustMgr.drift(this.config);
@@ -237,7 +271,13 @@ export class RatingEngine {
   }
 
   // Get current scores without processing event
-  getCurrent(): { dqi: number; confidence: number; lis: number; activeLis: number; trustScore: number } {
+  getCurrent(): {
+    dqi: number;
+    confidence: number;
+    lis: number;
+    activeLis: number;
+    trustScore: number;
+  } {
     return {
       dqi: this.kalman.x,
       confidence: this.kalman.getConfidence(),
@@ -248,12 +288,12 @@ export class RatingEngine {
   }
 
   // Export state for persistence
-  exportState(): any {
+  exportState(): RatingEngineState {
     return {
       kalman: {
         x: this.kalman.x,
         P: this.kalman.P,
-        lastTime: this.kalman.lastTime,
+        lastTime: this.kalman.getLastTime(),
       },
       lis: {
         counts: this.lisCalc.getCounts(),
@@ -261,23 +301,23 @@ export class RatingEngine {
       },
       trust: {
         score: this.trustMgr.getTrustScore(),
-        lastUpdate: this.trustMgr.lastUpdate,
+        lastUpdate: this.trustMgr.getLastUpdate(),
       },
     };
   }
 
   private eventTypeToFactor(eventType: string): string {
     const map: Record<string, string> = {
-      fork_received: 'forks_received',
-      rating: 'rating',
-      quiz_improvement: 'quiz_improvement',
-      fork_given: 'fork_given',
-      answer: 'answer',
-      mentorship: 'mentorship',
-      content_publish: 'content_publish',
-      login: 'login',
-      arena_challenge: 'arena'
+      fork_received: "forks_received",
+      rating: "rating",
+      quiz_improvement: "quiz_improvement",
+      fork_given: "fork_given",
+      answer: "answer",
+      mentorship: "mentorship",
+      content_publish: "content_publish",
+      login: "login",
+      arena_challenge: "arena",
     };
-    return map[eventType] || 'forks_received';
+    return map[eventType] || "forks_received";
   }
 }

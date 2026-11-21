@@ -30,7 +30,7 @@ function DashboardRouter() {
     );
   }
 
-  const isPrivileged = isSuperAdmin || isAdmin || profile.account_type === "administrator";
+  const isPrivileged = isSuperAdmin || isAdmin;
 
   // ── Admin / Super admin: preview both dashboard types ──
   if (isPrivileged) {

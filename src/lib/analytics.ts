@@ -1,13 +1,28 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export type AnalyticsEvent =
-  | "login" | "signup" | "session_start"
-  | "lesson_view" | "lesson_complete" | "lesson_scroll" | "lesson_fork" | "lesson_like" | "lesson_created"
-  | "challenge_attempt" | "challenge_view" | "lesson_forked"
-  | "suggestion_view" | "suggestion_upvote" | "suggestion_submit"
-  | "feed_click" | "feed_scroll_depth"
+  | "login"
+  | "signup"
+  | "session_start"
+  | "lesson_view"
+  | "lesson_complete"
+  | "lesson_scroll"
+  | "lesson_fork"
+  | "lesson_like"
+  | "lesson_created"
+  | "challenge_attempt"
+  | "challenge_view"
+  | "lesson_forked"
+  | "suggestion_view"
+  | "suggestion_upvote"
+  | "suggestion_submit"
+  | "feed_click"
+  | "feed_scroll_depth"
   | "search"
-  | "message_sent" | "voice_message_sent" | "comment_created" | "lesson_liked";
+  | "message_sent"
+  | "voice_message_sent"
+  | "comment_created"
+  | "lesson_liked";
 
 function getSessionId(): string {
   if (typeof window === "undefined") return "ssr";
@@ -24,12 +39,11 @@ function getDeviceType(): "mobile" | "desktop" {
   return /mobile|android|iphone|ipad/i.test(navigator.userAgent) ? "mobile" : "desktop";
 }
 
-export async function trackEvent(
-  event: AnalyticsEvent,
-  data: Record<string, unknown> = {},
-) {
+export async function trackEvent(event: AnalyticsEvent, data: Record<string, unknown> = {}) {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (!user) return;
     await supabase.from("analytics_events").insert({
       user_id: user.id,

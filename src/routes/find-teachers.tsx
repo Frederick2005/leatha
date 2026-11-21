@@ -34,7 +34,7 @@ function FindTeachersPage() {
       const { data: profiles, error } = await supabase
         .from("teacher_profiles")
         .select(
-          "user_id, subjects, hourly_rate_cents, years_experience, rating_avg, rating_count, accepts_bookings",
+          "user_id, subjects, hourly_rate_cents, currency, years_experience, rating_avg, rating_count, accepts_bookings",
         )
         .eq("accepts_bookings", true);
 
@@ -52,18 +52,28 @@ function FindTeachersPage() {
       }
 
       const ids = profiles.map((p) => p.user_id);
-      const { data: profs } = await supabase
+      const { data: profs, error: profilesError } = await supabase
         .from("profiles")
-        .select("id, display_name, username, avatar_url, school")
+        .select("id, display_name, username, avatar_url, school, is_verified")
         .in("id", ids);
+      if (profilesError) {
+        toast.error(`Couldn't load teacher profiles: ${profilesError.message}`);
+        setTeachers([]);
+        setLoading(false);
+        return;
+      }
 
-      const byId = Object.fromEntries((profs ?? []).map((p) => [p.id, p]));
+      const verifiedProfiles = (profs ?? []).filter((p) => p.is_verified);
+      const byId = Object.fromEntries(verifiedProfiles.map((p) => [p.id, p]));
       setTeachers(
-        profiles.map((p) => ({
-          ...p,
-          hourly_rate: p.hourly_rate_cents / 100,
-          profile: byId[p.user_id],
-        })) as TeacherWithProfile[],
+        profiles
+          .filter((p) => byId[p.user_id])
+          .map((p) => ({
+            ...p,
+            hourly_rate: p.hourly_rate_cents / 100,
+            currency: p.currency,
+            profile: byId[p.user_id],
+          })) as TeacherWithProfile[],
       );
       setLoading(false);
     })();
@@ -105,7 +115,9 @@ function FindTeachersPage() {
     <div className="flex-1 p-4 sm:p-6 max-w-6xl mx-auto w-full space-y-5">
       <div>
         <h1 className="text-xl font-semibold">Find Teachers</h1>
-        <p className="text-sm text-muted-foreground">Browse verified teachers and book a session.</p>
+        <p className="text-sm text-muted-foreground">
+          Browse verified teachers and book a session.
+        </p>
       </div>
 
       {/* Search + sort */}
@@ -179,7 +191,10 @@ function FindTeachersPage() {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {filtered.map((t) => (
-            <div key={t.user_id} className="rounded-2xl border border-border bg-card p-4 flex flex-col gap-3">
+            <div
+              key={t.user_id}
+              className="rounded-2xl border border-border bg-card p-4 flex flex-col gap-3"
+            >
               <div className="flex items-center gap-3">
                 <UserAvatar
                   name={t.profile?.display_name ?? t.profile?.username ?? "T"}
@@ -198,7 +213,10 @@ function FindTeachersPage() {
 
               <div className="flex flex-wrap gap-1">
                 {t.subjects.slice(0, 3).map((s) => (
-                  <span key={s} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                  <span
+                    key={s}
+                    className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground"
+                  >
                     {s}
                   </span>
                 ))}
@@ -221,9 +239,15 @@ function FindTeachersPage() {
 
               <div className="flex items-center justify-between mt-1">
                 <span className="text-sm font-bold">
-                  {t.hourly_rate > 0 ? `UGX ${t.hourly_rate.toLocaleString()}/hr` : "Rate not set"}
+                  {t.hourly_rate > 0
+                    ? `${t.currency} ${t.hourly_rate.toLocaleString(undefined, { maximumFractionDigits: 2 })}/hr`
+                    : "Rate not set"}
                 </span>
-                <Button size="sm" onClick={() => setBookingTeacher(t)} disabled={t.hourly_rate === 0}>
+                <Button
+                  size="sm"
+                  onClick={() => setBookingTeacher(t)}
+                  disabled={t.hourly_rate === 0}
+                >
                   Book
                 </Button>
               </div>

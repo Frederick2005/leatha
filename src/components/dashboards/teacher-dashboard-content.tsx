@@ -44,13 +44,21 @@ interface Review {
   student?: { display_name: string | null; username: string; avatar_url: string | null };
 }
 
+type ProfileSummary = {
+  id: string;
+  display_name: string | null;
+  username: string;
+  avatar_url: string | null;
+  is_verified?: boolean | null;
+};
+
 export function TeacherDashboardContent() {
   const { user, profile } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [todaysCount, setTodaysCount] = useState(0);
   const [tProfile, setTProfile] = useState<{
     students_count: number;
-    total_earnings: number;
+    total_earnings_cents: number;
     rating_avg: number;
     rating_count: number;
   } | null>(null);
@@ -73,7 +81,7 @@ export function TeacherDashboardContent() {
             .limit(5),
           supabase
             .from("teacher_profiles")
-            .select("students_count, total_earnings, rating_avg, rating_count")
+            .select("students_count, total_earnings_cents, rating_avg, rating_count")
             .eq("user_id", user.id)
             .maybeSingle(),
           supabase
@@ -98,23 +106,28 @@ export function TeacherDashboardContent() {
           ...(revRows ?? []).map((r) => r.student_id),
         ]),
       ];
-      let profilesById: Record<string, any> = {};
+      const profilesById = new Map<string, ProfileSummary>();
       if (studentIds.length) {
         const { data: profs } = await supabase
           .from("profiles")
           .select("id, display_name, username, avatar_url")
           .in("id", studentIds);
-        profilesById = Object.fromEntries((profs ?? []).map((p) => [p.id, p]));
+        for (const p of profs ?? []) profilesById.set(p.id, p);
       }
 
       setAppointments(
-        (appts ?? []).map((a) => ({ ...a, student: profilesById[a.student_id] })) as Appointment[],
+        (appts ?? []).map((a) => ({
+          ...a,
+          student: profilesById.get(a.student_id),
+        })) as Appointment[],
       );
       setTodaysCount((appts ?? []).filter((a) => isToday(new Date(a.starts_at))).length);
-      setTProfile(tp ?? { students_count: 0, total_earnings: 0, rating_avg: 0, rating_count: 0 });
+      setTProfile(
+        tp ?? { students_count: 0, total_earnings_cents: 0, rating_avg: 0, rating_count: 0 },
+      );
       setDocs((docRows ?? []) as DocRow[]);
       setReviews(
-        (revRows ?? []).map((r) => ({ ...r, student: profilesById[r.student_id] })) as Review[],
+        (revRows ?? []).map((r) => ({ ...r, student: profilesById.get(r.student_id) })) as Review[],
       );
     })();
 
@@ -163,7 +176,7 @@ export function TeacherDashboardContent() {
         <StatCard
           icon={<Coins className="h-5 w-5 text-purple-500" />}
           label="Total Earnings"
-          value={`UGX ${((tProfile?.total_earnings ?? 0) / 100).toLocaleString()}`}
+          value={`UGX ${((tProfile?.total_earnings_cents ?? 0) / 100).toLocaleString()}`}
           sub="All time"
           color="bg-purple-500/10"
         />
@@ -179,9 +192,13 @@ export function TeacherDashboardContent() {
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="space-y-4">
           <div className="rounded-2xl border border-border bg-card p-4">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center mb-3">
               <h2 className="text-sm font-semibold">Upcoming Appointments</h2>
-              <Link to="/appointments" className="text-xs text-primary hover:underline">
+              <Link
+                to="/appointments"
+                search={{ teacher: undefined }}
+                className="text-xs text-primary hover:underline"
+              >
                 View all
               </Link>
             </div>
@@ -286,6 +303,7 @@ export function TeacherDashboardContent() {
               </Link>
               <Link
                 to="/appointments"
+                search={{ teacher: undefined }}
                 className="rounded-xl border border-border p-3 hover:bg-accent transition-colors"
               >
                 <div className="h-8 w-8 rounded-lg bg-purple-500/10 flex items-center justify-center mb-2">
@@ -310,9 +328,6 @@ export function TeacherDashboardContent() {
           <div className="rounded-2xl border border-border bg-card p-4">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold">Recent Reviews</h2>
-              <Link to="/teacher/reviews" className="text-xs text-primary hover:underline">
-                View all
-              </Link>
             </div>
             {reviews.length === 0 ? (
               <p className="text-sm text-muted-foreground py-6 text-center">No reviews yet.</p>

@@ -1,16 +1,25 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Swords, Trophy, Flame, Layers, GraduationCap, BarChart3, User, Sparkles } from "lucide-react";
+import {
+  Swords,
+  Trophy,
+  Flame,
+  Layers,
+  GraduationCap,
+  BarChart3,
+  User,
+  Sparkles,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs: { to: string; label: string; icon: typeof Sparkles; exact?: boolean }[] = [
-  { to: "/arena",             label: "Home",        icon: Sparkles,     exact: true },
-  { to: "/arena/challenges",  label: "Challenges",  icon: Layers },
-  { to: "/arena/daily",       label: "Daily",       icon: Flame },
-  { to: "/arena/battles",     label: "Battles",     icon: Swords },
-  { to: "/arena/leaderboard", label: "Leaders",     icon: Trophy },
-  { to: "/arena/studio",      label: "Studio",      icon: GraduationCap },
-  { to: "/arena/schools",     label: "Schools",     icon: BarChart3 },
-  { to: "/arena/profile",     label: "Profile",     icon: User },
+  { to: "/arena", label: "Home", icon: Sparkles, exact: true },
+  { to: "/arena/challenges", label: "Challenges", icon: Layers },
+  { to: "/arena/daily", label: "Daily", icon: Flame },
+  { to: "/arena/battles", label: "Battles", icon: Swords },
+  { to: "/arena/leaderboard", label: "Leaders", icon: Trophy },
+  { to: "/arena/studio", label: "Studio", icon: GraduationCap },
+  { to: "/arena/schools", label: "Schools", icon: BarChart3 },
+  { to: "/arena/profile", label: "Profile", icon: User },
 ];
 
 export function ArenaNav() {

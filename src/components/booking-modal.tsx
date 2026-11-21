@@ -14,11 +14,17 @@ import { toast } from "sonner";
 export interface TeacherWithProfile {
   user_id: string;
   subjects: string[];
-  hourly_rate: number; // plain UGX, e.g. 20000 (converted from hourly_rate_cents)
+  hourly_rate: number; // major currency units, converted from hourly_rate_cents
+  currency: string;
   years_experience: number;
   rating_avg: number;
   rating_count: number;
-  profile?: { display_name: string | null; username: string; avatar_url: string | null; school: string | null };
+  profile?: {
+    display_name: string | null;
+    username: string;
+    avatar_url: string | null;
+    school: string | null;
+  };
 }
 
 interface AvailabilityRow {
@@ -28,7 +34,11 @@ interface AvailabilityRow {
 }
 
 const PAYMENT_METHODS = [
-  { id: "mtn", label: "MTN Mobile Money", color: "bg-yellow-500/15 text-yellow-500 border-yellow-500/30" },
+  {
+    id: "mtn",
+    label: "MTN Mobile Money",
+    color: "bg-yellow-500/15 text-yellow-500 border-yellow-500/30",
+  },
   { id: "airtel", label: "Airtel Money", color: "bg-red-500/15 text-red-500 border-red-500/30" },
   { id: "pesapal", label: "Pesapal", color: "bg-blue-500/15 text-blue-500 border-blue-500/30" },
 ] as const;
@@ -36,12 +46,18 @@ const PAYMENT_METHODS = [
 type Step = "subject" | "slot" | "payment" | "success";
 
 function generateSlots(startTime: string, endTime: string): string[] {
+  const [startHour, startMinute] = startTime.split(":").map(Number);
+  const [endHour, endMinute] = endTime.split(":").map(Number);
+  const start = startHour * 60 + startMinute;
+  const end = endHour * 60 + endMinute;
   const slots: string[] = [];
-  let [h] = startTime.split(":").map(Number);
-  const [endH] = endTime.split(":").map(Number);
-  while (h < endH) {
-    slots.push(`${String(h).padStart(2, "0")}:00`);
-    h += 1;
+
+  // Booking sessions are one hour. Only offer slots that fit completely
+  // inside the teacher's availability window, preserving its minute offset.
+  for (let minute = start; minute + 60 <= end; minute += 60) {
+    const hour = Math.floor(minute / 60);
+    const mins = minute % 60;
+    slots.push(`${String(hour).padStart(2, "0")}:${String(mins).padStart(2, "0")}`);
   }
   return slots;
 }
@@ -57,7 +73,7 @@ export function BookingModal({
   onClose: () => void;
   onBooked?: () => void;
 }) {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep] = useState<Step>(teacher.subjects.length > 1 ? "subject" : "slot");
@@ -66,7 +82,9 @@ export function BookingModal({
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<(typeof PAYMENT_METHODS)[number]["id"] | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<(typeof PAYMENT_METHODS)[number]["id"] | null>(
+    null,
+  );
   const [phone, setPhone] = useState("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -95,37 +113,53 @@ export function BookingModal({
 
     void (async () => {
       const weekday = selectedDate.getDay();
-      const [{ data: avail }, { data: booked }] = await Promise.all([
-        supabase
-          .from("teacher_availability")
-          .select("weekday, start_time, end_time")
-          .eq("teacher_id", teacher.user_id)
-          .eq("weekday", weekday),
-        supabase
-          .from("appointments")
-          .select("starts_at")
-          .eq("teacher_id", teacher.user_id)
-          .in("status", ["pending", "confirmed"])
-          .gte("starts_at", startOfDay(selectedDate).toISOString())
-          .lte("starts_at", endOfDay(selectedDate).toISOString()),
-      ]);
+      const [{ data: avail, error: availabilityError }, { data: booked, error: bookingsError }] =
+        await Promise.all([
+          supabase
+            .from("teacher_availability")
+            .select("weekday, start_time, end_time")
+            .eq("teacher_id", teacher.user_id)
+            .eq("weekday", weekday),
+          supabase
+            .from("appointments")
+            .select("starts_at, ends_at")
+            .eq("teacher_id", teacher.user_id)
+            .in("status", ["pending", "confirmed"])
+            .lt("starts_at", endOfDay(selectedDate).toISOString())
+            .gt("ends_at", startOfDay(selectedDate).toISOString()),
+        ]);
 
       if (cancelled) return;
-
-      const takenTimes = new Set(
-        (booked ?? []).map((b) => format(new Date(b.starts_at), "HH:mm")),
-      );
+      if (availabilityError || bookingsError) {
+        toast.error(
+          `Couldn't load booking slots: ${(availabilityError ?? bookingsError)?.message}`,
+        );
+        setAvailableSlots([]);
+        setSlotsLoading(false);
+        return;
+      }
 
       const slots = ((avail ?? []) as AvailabilityRow[]).flatMap((a) =>
         generateSlots(a.start_time, a.end_time),
       );
-      const isPastToday = isSameDay(selectedDate, new Date());
-      const nowHour = new Date().getHours();
+      const now = new Date();
+      const isPastToday = isSameDay(selectedDate, now);
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
       setAvailableSlots(
         [...new Set(slots)]
-          .filter((s) => !takenTimes.has(s))
-          .filter((s) => !isPastToday || Number(s.split(":")[0]) > nowHour)
+          .filter((slot) => {
+            const [hour, minute] = slot.split(":").map(Number);
+            const slotStart = new Date(selectedDate);
+            slotStart.setHours(hour, minute, 0, 0);
+            const slotEnd = new Date(slotStart.getTime() + 60 * 60 * 1000);
+            const slotMinutes = hour * 60 + minute;
+            const overlapsBooking = (booked ?? []).some(
+              (booking) =>
+                new Date(booking.starts_at) < slotEnd && new Date(booking.ends_at) > slotStart,
+            );
+            return !overlapsBooking && (!isPastToday || slotMinutes > nowMinutes);
+          })
           .sort(),
       );
       setSlotsLoading(false);
@@ -146,7 +180,7 @@ export function BookingModal({
     const endsAt = new Date(startsAt);
     endsAt.setHours(endsAt.getHours() + 1);
 
-    const priceCents = teacher.hourly_rate * 100;
+    const priceCents = Math.round(teacher.hourly_rate * 100);
 
     const { data: appointment, error } = await supabase
       .from("appointments")
@@ -158,7 +192,7 @@ export function BookingModal({
         ends_at: endsAt.toISOString(),
         status: "pending",
         price_cents: priceCents,
-        currency: "UGX",
+        currency: teacher.currency,
         notes: notes.trim() || null,
       })
       .select("id")
@@ -179,24 +213,17 @@ export function BookingModal({
       provider: paymentMethod,
       phone_number: phone.trim(),
       amount_cents: priceCents,
-      currency: "UGX",
+      currency: teacher.currency,
       status: "pending",
     });
 
     if (paymentError) {
       // The booking itself succeeded - don't block on this, but let the user know
       // they'll need to retry payment from the appointment page.
-      toast.error("Booking created, but the payment request failed: " + paymentError.message);
+      toast.error(
+        "Booking created, but payment details could not be saved: " + paymentError.message,
+      );
     }
-
-    await supabase.from("notifications").insert({
-      user_id: teacher.user_id,
-      type: "new_appointment",
-      title: "New booking request",
-      message: `${profile?.display_name ?? "A student"} requested a ${subject} session on ${format(startsAt, "MMM d, h:mm a")}`,
-      link: "/appointments",
-      actor_id: user.id,
-    });
 
     setSubmitting(false);
     setStep("success");
@@ -273,8 +300,8 @@ export function BookingModal({
             ) : availableSlots.length === 0 ? (
               <div className="rounded-xl border border-dashed border-border p-5 text-center space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  No open slots on {format(selectedDate, "MMM d")}. Try another date, or message
-                  the teacher directly to arrange a time.
+                  No open slots on {format(selectedDate, "MMM d")}. Try another date, or message the
+                  teacher directly to arrange a time.
                 </p>
                 <Button
                   variant="outline"
@@ -282,7 +309,10 @@ export function BookingModal({
                   className="gap-2"
                   onClick={() => {
                     onClose();
-                    navigate({ to: "/messages/$username", params: { username: teacher.profile?.username ?? "" } });
+                    navigate({
+                      to: "/messages/$username",
+                      params: { username: teacher.profile?.username ?? "" },
+                    });
                   }}
                 >
                   <MessageSquare className="h-3.5 w-3.5" />
@@ -322,15 +352,17 @@ export function BookingModal({
               <p className="text-muted-foreground">
                 {format(selectedDate, "MMM d, yyyy")} at {selectedSlot} · 1 hour
               </p>
-              <p className="text-lg font-bold mt-1">UGX {teacher.hourly_rate.toLocaleString()}</p>
+              <p className="text-lg font-bold mt-1">
+                {teacher.currency}{" "}
+                {teacher.hourly_rate.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+              </p>
             </div>
 
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 flex gap-2.5">
               <Smartphone className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
               <p className="text-xs text-amber-200/90 leading-relaxed">
-                Mobile money payments are confirmed manually for now. Submitting this booking
-                sends your request to the teacher — arrange the actual payment with them directly
-                using the number below.
+                Your phone number is saved with the booking for contact. No automatic mobile-money
+                prompt is sent yet; contact the teacher to arrange payment manually.
               </p>
             </div>
 
@@ -343,7 +375,9 @@ export function BookingModal({
                     onClick={() => setPaymentMethod(m.id)}
                     className={cn(
                       "text-xs py-2.5 px-1.5 rounded-lg border text-center transition-colors",
-                      paymentMethod === m.id ? m.color : "border-border text-muted-foreground hover:border-primary/40",
+                      paymentMethod === m.id
+                        ? m.color
+                        : "border-border text-muted-foreground hover:border-primary/40",
                     )}
                   >
                     {m.label}

@@ -58,6 +58,7 @@ import { Route as ArenaDailyRouteImport } from './routes/arena.daily'
 import { Route as ArenaChallengesRouteImport } from './routes/arena.challenges'
 import { Route as ArenaBattlesRouteImport } from './routes/arena.battles'
 import { Route as AppointmentsIdRouteImport } from './routes/appointments.$id'
+import { Route as ApiGetTokenRouteImport } from './routes/api/get-token'
 import { Route as LessonsLessonIdEditRouteImport } from './routes/lessons.$lessonId.edit'
 import { Route as LessonsLessonIdDiffRouteImport } from './routes/lessons.$lessonId.diff'
 import { Route as ArenaChallengesSlugRouteImport } from './routes/arena.challenges.$slug'
@@ -308,6 +309,11 @@ const AppointmentsIdRoute = AppointmentsIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AppointmentsRoute,
 } as any)
+const ApiGetTokenRoute = ApiGetTokenRouteImport.update({
+  id: '/api/get-token',
+  path: '/api/get-token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LessonsLessonIdEditRoute = LessonsLessonIdEditRouteImport.update({
   id: '/edit',
   path: '/edit',
@@ -360,6 +366,7 @@ export interface FileRoutesByFullPath {
   '/teacher': typeof TeacherRouteWithChildren
   '/teacher-route': typeof TeacherRouteRoute
   '/terms': typeof TermsRoute
+  '/api/get-token': typeof ApiGetTokenRoute
   '/appointments/$id': typeof AppointmentsIdRoute
   '/arena/battles': typeof ArenaBattlesRouteWithChildren
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
@@ -414,6 +421,7 @@ export interface FileRoutesByTo {
   '/teacher': typeof TeacherRouteWithChildren
   '/teacher-route': typeof TeacherRouteRoute
   '/terms': typeof TermsRoute
+  '/api/get-token': typeof ApiGetTokenRoute
   '/appointments/$id': typeof AppointmentsIdRoute
   '/arena/battles': typeof ArenaBattlesRouteWithChildren
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
@@ -470,6 +478,7 @@ export interface FileRoutesById {
   '/teacher': typeof TeacherRouteWithChildren
   '/teacher-route': typeof TeacherRouteRoute
   '/terms': typeof TermsRoute
+  '/api/get-token': typeof ApiGetTokenRoute
   '/appointments/$id': typeof AppointmentsIdRoute
   '/arena/battles': typeof ArenaBattlesRouteWithChildren
   '/arena/challenges': typeof ArenaChallengesRouteWithChildren
@@ -527,6 +536,7 @@ export interface FileRouteTypes {
     | '/teacher'
     | '/teacher-route'
     | '/terms'
+    | '/api/get-token'
     | '/appointments/$id'
     | '/arena/battles'
     | '/arena/challenges'
@@ -581,6 +591,7 @@ export interface FileRouteTypes {
     | '/teacher'
     | '/teacher-route'
     | '/terms'
+    | '/api/get-token'
     | '/appointments/$id'
     | '/arena/battles'
     | '/arena/challenges'
@@ -636,6 +647,7 @@ export interface FileRouteTypes {
     | '/teacher'
     | '/teacher-route'
     | '/terms'
+    | '/api/get-token'
     | '/appointments/$id'
     | '/arena/battles'
     | '/arena/challenges'
@@ -692,6 +704,7 @@ export interface RootRouteChildren {
   TeacherRoute: typeof TeacherRouteWithChildren
   TeacherRouteRoute: typeof TeacherRouteRoute
   TermsRoute: typeof TermsRoute
+  ApiGetTokenRoute: typeof ApiGetTokenRoute
   LessonsLessonIdRoute: typeof LessonsLessonIdRouteWithChildren
   LessonsNewRoute: typeof LessonsNewRoute
   ProfileUserIdRoute: typeof ProfileUserIdRoute
@@ -1043,6 +1056,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppointmentsIdRouteImport
       parentRoute: typeof AppointmentsRoute
     }
+    '/api/get-token': {
+      id: '/api/get-token'
+      path: '/api/get-token'
+      fullPath: '/api/get-token'
+      preLoaderRoute: typeof ApiGetTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/lessons/$lessonId/edit': {
       id: '/lessons/$lessonId/edit'
       path: '/edit'
@@ -1220,6 +1240,7 @@ const rootRouteChildren: RootRouteChildren = {
   TeacherRoute: TeacherRouteWithChildren,
   TeacherRouteRoute: TeacherRouteRoute,
   TermsRoute: TermsRoute,
+  ApiGetTokenRoute: ApiGetTokenRoute,
   LessonsLessonIdRoute: LessonsLessonIdRouteWithChildren,
   LessonsNewRoute: LessonsNewRoute,
   ProfileUserIdRoute: ProfileUserIdRoute,

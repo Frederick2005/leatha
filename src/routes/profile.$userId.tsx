@@ -17,8 +17,13 @@ function PublicProfileRedirect() {
 
   useEffect(() => {
     void (async () => {
-      const { data } = await supabase.from("profiles").select("username").eq("id", userId).maybeSingle();
-      if (data?.username) navigate({ to: "/u/$username", params: { username: data.username }, replace: true });
+      const { data } = await supabase
+        .from("profiles")
+        .select("username")
+        .eq("id", userId)
+        .maybeSingle();
+      if (data?.username)
+        navigate({ to: "/u/$username", params: { username: data.username }, replace: true });
       else setStatus("missing");
     })();
   }, [userId, navigate]);
