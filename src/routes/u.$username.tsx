@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
+import { CreatorRatingCard } from "@/components/creator-rating-card";
 import { UserAvatar } from "@/components/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -474,6 +475,8 @@ function ProfilePage() {
           </div>
         </div>
       </div>
+
+      <CreatorRatingCard creatorId={profile.id} />
 
       <div className="px-4 mt-6">
         <Tabs defaultValue={isTeacher ? "lessons" : "activity"}>
