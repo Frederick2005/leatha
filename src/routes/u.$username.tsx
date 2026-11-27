@@ -117,15 +117,24 @@ function ProfilePage() {
   >([]);
 
   const reload = async () => {
-    const { data: p } = await supabase
+    try {
+      await loadProfile();
+    } catch (err) {
+      console.error("Profile load failed", err);
+      toast.error("Could not load this profile. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadProfile = async () => {
+    const { data: p, error: profileError } = await supabase
       .from("profiles")
       .select("*")
       .eq("username", username)
       .maybeSingle();
-    if (!p) {
-      setLoading(false);
-      return;
-    }
+    if (profileError) throw profileError;
+    if (!p) return;
     setProfile(p as ProfileFull);
 
     const [{ data: ls }, follow, attempts, end, ch] = await Promise.all([
@@ -149,7 +158,7 @@ function ProfilePage() {
         : Promise.resolve({ data: null }),
       supabase
         .from("arena_attempts")
-        .select("status, arena_challenges(subject)")
+        .select("status, arena_challenges(tags)")
         .eq("user_id", p.id),
       supabase
         .from("endorsements")
@@ -210,7 +219,6 @@ function ProfilePage() {
 
     setEndorsements((end.data ?? []) as never);
     setCreatedChallenges(((ch as { data: unknown }).data ?? []) as never);
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -615,13 +623,17 @@ function ProfilePage() {
                         size="sm"
                       />
                       <div className="min-w-0">
-                        <Link
-                          to="/u/$username"
-                          params={{ username: e.teacher?.username ?? "" }}
-                          className="font-medium text-sm hover:underline"
-                        >
-                          {e.teacher?.display_name ?? e.teacher?.username}
-                        </Link>
+                        {e.teacher?.username ? (
+                          <Link
+                            to="/u/$username"
+                            params={{ username: e.teacher.username }}
+                            className="font-medium text-sm hover:underline"
+                          >
+                            {e.teacher.display_name ?? e.teacher.username}
+                          </Link>
+                        ) : (
+                          <span className="font-medium text-sm">Teacher</span>
+                        )}
                         <div className="text-[10px] font-mono text-muted-foreground">
                           {format(new Date(e.created_at), "MMM d, yyyy")}
                         </div>
