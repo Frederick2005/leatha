@@ -5,7 +5,6 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { LessonFeedCard } from "@/components/lesson-feed-card";
-import { RequireAuth } from "@/components/require-auth";
 import { UserAvatar } from "@/components/user-avatar";
 
 const searchSchema = z.object({
@@ -16,9 +15,7 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/explore")({
   validateSearch: (search) => searchSchema.parse(search),
   component: () => (
-    <RequireAuth>
-      <ExplorePage />
-    </RequireAuth>
+    <ExplorePage />
   ),
 });
 

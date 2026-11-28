@@ -107,16 +107,10 @@ export function AppShell() {
     const needsOnboarding =
       !p.has_completed_onboarding || !p.username || !p.account_type || !p.school;
     if (!needsOnboarding) return;
-    const skip = [
-      "/onboarding",
-      "/auth",
-      "/reset-password",
-      "/terms",
-      "/privacy",
-      "/cookies",
-      "/legal",
-    ];
-    if (skip.some((s) => location.pathname.startsWith(s))) return;
+    // Only role-based areas need a finished profile (account type decides what you can
+    // see there). Everything else stays open so unfinished onboarding never locks users out.
+    const roleAreas = ["/teacher", "/student", "/dashboard", "/admin"];
+    if (!roleAreas.some((s) => location.pathname.startsWith(s))) return;
     navigate({ to: "/onboarding", replace: true });
   }, [loading, user, profile, location.pathname, navigate]);
 

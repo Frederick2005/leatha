@@ -24,6 +24,7 @@ export function LeathaCall({ roomName, roomType, otherUserId, title, onLeave }: 
   const [serverUrl, setServerUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     if (!userId) {
@@ -67,7 +68,7 @@ export function LeathaCall({ roomName, roomType, otherUserId, title, onLeave }: 
     return () => {
       cancelled = true;
     };
-  }, [roomName, roomType, otherUserId, userId]);
+  }, [roomName, roomType, otherUserId, userId, attempt]);
 
   if (loading) {
     return (
@@ -85,12 +86,12 @@ export function LeathaCall({ roomName, roomType, otherUserId, title, onLeave }: 
       <div className="fixed inset-0 z-50 grid place-items-center bg-background/95 p-6">
         <div className="text-center space-y-4 max-w-md">
           <p className="text-destructive font-medium">{error ?? "Could not connect to call"}</p>
-          <p className="text-xs text-muted-foreground">
-            Ensure LiveKit credentials are configured in project secrets.
-          </p>
-          <Button onClick={onLeave} variant="outline">
-            Go back
-          </Button>
+          <div className="flex justify-center gap-2">
+            <Button onClick={() => setAttempt((n) => n + 1)}>Try again</Button>
+            <Button onClick={onLeave} variant="outline">
+              Go back
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -116,7 +117,12 @@ export function LeathaCall({ roomName, roomType, otherUserId, title, onLeave }: 
           video={roomType === "video"}
           onDisconnected={onLeave}
           onError={(err: Error) => {
-            toast.error("Call error: " + err.message);
+            const invalidKey = /invalid api key/i.test(err.message);
+            const msg = invalidKey
+              ? "Call server rejected the LiveKit API key. The key, secret and URL must be from the same LiveKit project."
+              : "Call error: " + err.message;
+            setError(msg);
+            toast.error(msg);
           }}
           data-lk-theme="default"
           style={{ height: "100%", background: "hsl(var(--background))" }}

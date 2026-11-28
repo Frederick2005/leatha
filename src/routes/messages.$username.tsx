@@ -411,20 +411,34 @@ function ThreadPage() {
           </div>
         </Link>
         <Button
+          type="button"
           variant="ghost"
           size="icon"
+          className="h-10 w-10 shrink-0"
           onClick={() => setCallMode("audio")}
-          disabled={interactionBlocked}
+          disabled={interactionBlocked || callMode !== null}
           aria-label="Voice call"
+          title={
+            interactionBlocked
+              ? "Calling is unavailable for this conversation"
+              : "Start a voice call"
+          }
         >
           <Phone className="h-4 w-4" />
         </Button>
         <Button
+          type="button"
           variant="ghost"
           size="icon"
+          className="h-10 w-10 shrink-0"
           onClick={() => setCallMode("video")}
-          disabled={interactionBlocked}
+          disabled={interactionBlocked || callMode !== null}
           aria-label="Video call"
+          title={
+            interactionBlocked
+              ? "Calling is unavailable for this conversation"
+              : "Start a video call"
+          }
         >
           <Video className="h-4 w-4" />
         </Button>

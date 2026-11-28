@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
-import { RequireAuth } from "@/components/require-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -11,9 +10,7 @@ import { Building2, Check, X, Clock, BadgeCheck } from "lucide-react";
 export const Route = createFileRoute("/schools")({
   head: () => ({ meta: [{ title: "Schools — Leatha" }] }),
   component: () => (
-    <RequireAuth>
-      <SchoolsPage />
-    </RequireAuth>
+    <SchoolsPage />
   ),
 });
 

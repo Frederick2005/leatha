@@ -1,12 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Flame, Shield, Star, Trophy, Zap, Award } from "lucide-react";
+import { RequireAuth } from "@/components/require-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { Progress } from "@/components/ui/progress";
 import { rankFor } from "@/lib/arena";
 
-export const Route = createFileRoute("/arena/profile")({ component: ArenaProfilePage });
+export const Route = createFileRoute("/arena/profile")({
+  component: () => (
+    <RequireAuth>
+      <ArenaProfilePage />
+    </RequireAuth>
+  ),
+});
 
 interface AP {
   xp: number;

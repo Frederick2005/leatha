@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { GraduationCap, Plus, Save, Trash2 } from "lucide-react";
+import { RequireAuth } from "@/components/require-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { slugify } from "@/lib/arena";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/arena/studio")({ component: StudioPage });
+export const Route = createFileRoute("/arena/studio")({
+  component: () => (
+    <RequireAuth>
+      <StudioPage />
+    </RequireAuth>
+  ),
+});
 
 interface Q {
   prompt: string;

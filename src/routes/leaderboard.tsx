@@ -3,13 +3,10 @@ import { useEffect, useState } from "react";
 import { Trophy, Crown, Medal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { UserAvatar } from "@/components/user-avatar";
-import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/leaderboard")({
   component: () => (
-    <RequireAuth>
-      <LeaderboardPage />
-    </RequireAuth>
+    <LeaderboardPage />
   ),
 });
 
