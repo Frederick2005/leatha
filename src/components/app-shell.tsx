@@ -62,12 +62,12 @@ const baseNav = [
   { to: "/appointments" as const, label: "Appointments", icon: CalendarDays, auth: true },
   { to: "/messages" as const, label: "Messages", icon: MessagesSquare, auth: true },
   { to: "/documents" as const, label: "Documents", icon: FileText, auth: true },
-  { to: "/feed" as const, label: "Feed", icon: Sparkles, auth: true },
-  { to: "/explore" as const, label: "Explore", icon: BookOpen, auth: true },
-  { to: "/arena" as const, label: "Arena", icon: Swords, auth: true },
-  { to: "/leaderboard" as const, label: "Leaderboard", icon: Trophy, auth: true },
-  { to: "/suggestions" as const, label: "Suggestions", icon: Lightbulb, auth: true },
-  { to: "/schools" as const, label: "Schools", icon: School, auth: true },
+  { to: "/feed" as const, label: "Feed", icon: Sparkles, auth: false },
+  { to: "/explore" as const, label: "Explore", icon: BookOpen, auth: false },
+  { to: "/arena" as const, label: "Arena", icon: Swords, auth: false },
+  { to: "/leaderboard" as const, label: "Leaderboard", icon: Trophy, auth: false },
+  { to: "/suggestions" as const, label: "Suggestions", icon: Lightbulb, auth: false },
+  { to: "/schools" as const, label: "Schools", icon: School, auth: false },
 ];
 
 const COLLAPSED_KEY = "leatha:sidebar:collapsed";
@@ -220,7 +220,7 @@ export function AppShell() {
               </>
             )}
             {isModOrAdmin && <NavRow to="/admin" label="Moderation" icon={Shield} />}
-            {user && <NavRow to="/help" label="Help & Support" icon={LifeBuoy} />}
+            <NavRow to="/help" label="Help & Support" icon={LifeBuoy} />
           </nav>
 
           <div
