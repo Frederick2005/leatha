@@ -4,7 +4,6 @@ import { Plus, Lightbulb } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
-import { RequireAuth } from "@/components/require-auth";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -19,9 +18,7 @@ import { trackEvent } from "@/lib/analytics";
 
 export const Route = createFileRoute("/suggestions")({
   component: () => (
-    <RequireAuth>
-      <SuggestionsFeed />
-    </RequireAuth>
+    <SuggestionsFeed />
   ),
 });
 

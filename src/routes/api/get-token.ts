@@ -1,17 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { AccessToken } from "livekit-server-sdk";
+import { AccessToken, RoomServiceClient } from "livekit-server-sdk";
 import { TrackSource } from "@livekit/protocol";
 import { createClient } from "@supabase/supabase-js";
 
 function envValue(...keys: string[]) {
   for (const key of keys) {
-    const value = process.env?.[key];
+    const value = process.env?.[key]?.trim();
     if (value) return value;
   }
   const viteEnv = import.meta.env as Record<string, string | undefined>;
   for (const key of keys) {
-    const value = viteEnv[key];
+    const value = viteEnv[key]?.trim();
     if (value) return value;
   }
   return undefined;
@@ -104,6 +104,28 @@ export const Route = createFileRoute("/api/get-token")({
               { error: "Calling is not configured on this server" },
               { status: 503 },
             );
+          }
+
+          // Verify the key/secret really belong to the LiveKit project at LIVEKIT_URL before
+          // handing out a token. Otherwise the browser only sees LiveKit's vague
+          // "could not establish signal connection: invalid API key".
+          try {
+            const httpUrl = serverUrl.replace(/^wss:/, "https:").replace(/^ws:/, "http:");
+            await new RoomServiceClient(httpUrl, apiKey, apiSecret).listRooms([roomName]);
+          } catch (verifyError) {
+            const msg = verifyError instanceof Error ? verifyError.message : String(verifyError);
+            if (/unauthenticated|invalid api key|invalid token|permission|401|403/i.test(msg)) {
+              console.error("LiveKit rejected the configured API key/secret", msg);
+              return Response.json(
+                {
+                  error:
+                    "Calling is misconfigured: LiveKit rejected the API key/secret. Make sure LIVEKIT_API_KEY, LIVEKIT_API_SECRET and LIVEKIT_URL all come from the same LiveKit project.",
+                },
+                { status: 503 },
+              );
+            }
+            // network/other errors: don't block the call, let the client try.
+            console.warn("LiveKit credential check skipped", msg);
           }
 
           const { data: profile } = await supabase

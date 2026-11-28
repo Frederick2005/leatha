@@ -1,13 +1,20 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Clock, Crown, Play, Swords, Trophy, Users } from "lucide-react";
+import { RequireAuth } from "@/components/require-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/arena/battles/$id")({ component: BattleRoom });
+export const Route = createFileRoute("/arena/battles/$id")({
+  component: () => (
+    <RequireAuth>
+      <BattleRoom />
+    </RequireAuth>
+  ),
+});
 
 interface Battle {
   id: string;

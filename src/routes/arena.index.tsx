@@ -41,10 +41,11 @@ function ArenaHome() {
   const [feed, setFeed] = useState<{ id: string; user: string; title: string; ts: string }[]>([]);
 
   useEffect(() => {
-    if (!user) return;
     void (async () => {
       const [{ data: ap }, { data: ch }, { data: solves }] = await Promise.all([
-        supabase.from("arena_profiles").select("*").eq("user_id", user.id).maybeSingle(),
+        user
+          ? supabase.from("arena_profiles").select("*").eq("user_id", user.id).maybeSingle()
+          : Promise.resolve({ data: null }),
         supabase
           .from("arena_challenges")
           .select(
@@ -61,7 +62,7 @@ function ArenaHome() {
           .limit(8),
       ]);
       if (ap) setProfile(ap as ArenaProfile);
-      else {
+      else if (user) {
         await supabase.from("arena_profiles").insert({ user_id: user.id });
         setProfile({
           xp: 0,

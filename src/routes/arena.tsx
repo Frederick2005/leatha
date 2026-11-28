@@ -1,14 +1,12 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { ArenaNav } from "@/components/arena/arena-nav";
-import { RequireAuth } from "@/components/require-auth";
 
+// Arena browsing is public; individual actions (submitting, battling) check for a user themselves.
 export const Route = createFileRoute("/arena")({
   component: () => (
-    <RequireAuth>
-      <div className="min-h-[calc(100vh-3.5rem)]">
-        <ArenaNav />
-        <Outlet />
-      </div>
-    </RequireAuth>
+    <div className="min-h-[calc(100vh-3.5rem)]">
+      <ArenaNav />
+      <Outlet />
+    </div>
   ),
 });

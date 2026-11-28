@@ -39,13 +39,10 @@ import {
   DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { RequireAuth } from "@/components/require-auth";
 
 export const Route = createFileRoute("/lessons/$lessonId")({
   component: () => (
-    <RequireAuth>
-      <LessonPage />
-    </RequireAuth>
+    <LessonPage />
   ),
 });
 

@@ -12,7 +12,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/providers/auth-provider";
 import { UserAvatar } from "@/components/user-avatar";
-import { RequireAuth } from "@/components/require-auth";
 import { timeAgo } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -42,9 +41,7 @@ interface FeedLesson {
 
 function FeedRoute() {
   return (
-    <RequireAuth>
-      <FeedPage />
-    </RequireAuth>
+    <FeedPage />
   );
 }
 
